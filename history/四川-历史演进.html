@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="四川 · 从古蜀到蒙元 — 互动历史演进图鉴：方位地图、朝代年表、大事详考（离线单文件）">
+<title>四川 · 从古蜀到蒙元</title>
+<style>
+  * { box-sizing: border-box; margin: 0; }
+  :root {
+    --ink: #241d14; --ink-2: #4a3b26; --ink-3: #6d5f43; --ink-4: #9a8a6a;
+    --paper: #f7f1e3; --paper-2: #fffdf7; --paper-3: #efe4cd;
+    --line: #dcccaa; --line-2: #c9b68d;
+    --cinnabar: #c0392b; --cinnabar-2: #e2604a;
+    --jade: #1f7a63; --gold: #b08a3e;
+    --river: #4f92b0; --wall: #8a7a5c;
+    --shadow-s: 0 1px 2px rgba(60,44,20,.06), 0 2px 8px rgba(60,44,20,.07);
+    --shadow-m: 0 6px 18px rgba(60,44,20,.11), 0 1px 3px rgba(60,44,20,.07);
+    --ease: cubic-bezier(.22,.61,.36,1);
+    --serif: "Source Han Serif SC", "Noto Serif SC", "Songti SC", "STSong", "SimSun", serif;
+  }
+  html, body { height: 100%; }
+  body {
+    font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans SC", sans-serif;
+    color: var(--ink); display: flex; flex-direction: column; height: 100dvh; overflow: hidden;
+    background:
+      radial-gradient(1200px 700px at 10% -12%, #fffcf4 0%, transparent 62%),
+      radial-gradient(900px 620px at 102% 112%, #efe0c0 0%, transparent 58%),
+      var(--paper);
+    -webkit-font-smoothing: antialiased;
+  }
+  button { font-family: inherit; }
+  button:focus-visible, .state:focus-visible, summary:focus-visible { outline: 2.5px solid #2b6cb0; outline-offset: 3px; border-radius: 6px; }
+  [hidden] { display: none !important; }
+
+  header {
+    position: relative; display: flex; align-items: center; gap: 26px; padding: 0 26px;
+    height: 64px; flex-shrink: 0; z-index: 5;
+    background: linear-gradient(180deg, #fffdf7, #f4ebd7);
+    border-bottom: 1px solid var(--line);
+    box-shadow: inset 0 1px 0 #fff, 0 10px 24px -18px rgba(60,44,20,.55);
+  }
+  header::after {
+    content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold) 30%, var(--gold) 70%, transparent);
+    opacity: .45;
+  }
+  .brand {
+    font-family: var(--serif); font-size: 21px; letter-spacing: .18em; color: var(--ink);
+    display: flex; align-items: center; gap: 11px; white-space: nowrap;
+  }
+  .brand::before {
+    content: ""; width: 10px; height: 10px; border-radius: 1.5px; background: var(--cinnabar);
+    transform: rotate(45deg); box-shadow: 0 0 0 3px rgba(192,57,43,.14);
+    animation: sealIn .8s var(--ease) both;
+  }
+  @keyframes sealIn { from { transform: rotate(45deg) scale(0); } }
+  nav { position: relative; display: flex; gap: 3px; padding: 4px; border-radius: 999px; background: #ece0c6; box-shadow: inset 0 1px 3px rgba(60,44,20,.15); }
+  nav .pill {
+    position: absolute; top: 4px; left: 0; height: calc(100% - 8px); border-radius: 999px;
+    background: linear-gradient(180deg, #3e3221, #241d14);
+    box-shadow: 0 2px 10px rgba(36,29,20,.38);
+    transition: transform .42s var(--ease), width .42s var(--ease);
+  }
+  nav button {
+    position: relative; z-index: 1; font-size: 13.5px; letter-spacing: .08em; padding: 7px 19px;
+    border: 0; background: none; color: var(--ink-3); cursor: pointer; border-radius: 999px;
+    transition: color .3s var(--ease);
+  }
+  nav button[aria-selected="true"] { color: #fdf6e6; }
+  .hint { margin-left: auto; font-size: 12px; color: var(--ink-4); letter-spacing: .08em; }
+  .nav-home { margin-left: 12px; font-size: 12.5px; color: var(--ink-3); text-decoration: none; letter-spacing: .1em; white-space: nowrap; border: 1px solid var(--line-2); border-radius: 999px; padding: 4px 12px; transition: background .25s, color .25s, border-color .25s; }
+  .nav-home:hover { background: #3e3221; color: #fdf6e6; border-color: transparent; }
+
+  main { flex: 1; min-height: 0; display: flex; }
+  [role="tabpanel"] { animation: viewIn .5s var(--ease) both; }
+  @keyframes viewIn { from { opacity: 0; transform: translateY(10px); } }
+
+  /* ===== 地图 ===== */
+  #view-map { flex: 1; display: flex; min-width: 0; }
+  .map-wrap {
+    flex: 1; position: relative; min-width: 0; overflow: auto;
+    background: radial-gradient(1100px 640px at 34% 18%, #fffdf6 0%, transparent 64%), linear-gradient(180deg, #f8f2e4, #f0e7d2);
+  }
+  .map-wrap svg { width: 100%; height: 100%; display: block; }
+  .title-block { position: absolute; top: 20px; left: 28px; pointer-events: none; animation: titleIn 1s var(--ease) .35s both; }
+  @keyframes titleIn { from { opacity: 0; transform: translateX(-14px); } }
+  .title-block h2 { font-family: var(--serif); font-size: 30px; letter-spacing: .3em; color: var(--ink); text-shadow: 0 1px 0 #fff; }
+  .title-block p { font-size: 13px; color: var(--ink-3); margin-top: 8px; letter-spacing: .14em; }
+  .title-block .title-rule { width: 46px; height: 2px; background: var(--cinnabar); margin-top: 11px; border-radius: 2px; }
+
+  .geo-label { fill: #8c7d5a; paint-order: stroke; stroke: #f7f1e3; stroke-width: 5px; letter-spacing: .1em; }
+  .state { cursor: pointer; }
+  .state .hit { fill: transparent; }
+  .state .dot {
+    fill: #fffdf6; stroke: #7a6547; stroke-width: 2.2;
+    transform-box: fill-box; transform-origin: center;
+    transition: transform .3s var(--ease), fill .3s var(--ease), stroke .3s var(--ease);
+    filter: drop-shadow(0 1px 2px rgba(60,44,20,.28));
+  }
+  .state .ring, .state .halo {
+    fill: none; stroke: var(--cinnabar); stroke-width: 1.6;
+    transform-box: fill-box; transform-origin: center; opacity: 0;
+    transition: opacity .3s var(--ease), transform .3s var(--ease);
+  }
+  .state .ring { transform: scale(.82); }
+  .state:hover .dot, .state:focus-visible .dot { transform: scale(1.3); fill: #ffe4ab; stroke: #6b5836; }
+  .state:hover .ring, .state:focus-visible .ring { opacity: .55; transform: scale(1); }
+  .state.selected .dot { fill: var(--cinnabar); stroke: #7d2419; transform: scale(1.36); }
+  .state.selected .ring { opacity: 1; transform: scale(1.14); }
+  .state.selected .halo { animation: pulse 2.6s ease-out infinite; }
+  @keyframes pulse { 0% { transform: scale(1); opacity: .75; } 70%,100% { transform: scale(1.85); opacity: 0; } }
+  .state text {
+    font-family: var(--serif); font-size: 15px; font-weight: 700; fill: var(--ink-2);
+    paint-order: stroke; stroke: #f7f1e3; stroke-width: 4px; text-anchor: middle;
+    transition: fill .3s var(--ease);
+  }
+  .state.selected text { fill: #8c2f14; }
+  .marker text { font-size: 12px; fill: var(--ink-3); paint-order: stroke; stroke: #f7f1e3; stroke-width: 3px; text-anchor: middle; letter-spacing: .04em; }
+
+  aside {
+    width: 372px; flex-shrink: 0; border-left: 1px solid var(--line); overflow-y: auto;
+    padding: 26px 24px 40px;
+    background: linear-gradient(180deg, #fffdf7, #f8f1e2);
+    box-shadow: -14px 0 30px -24px rgba(60,44,20,.5);
+  }
+  aside h3 { font-family: var(--serif); font-size: 26px; color: var(--ink); letter-spacing: .1em; }
+  .today {
+    display: inline-block; margin: 11px 0 16px; padding: 4px 12px; border-radius: 999px;
+    background: linear-gradient(180deg, #f3e8cd, #ece0c2); border: 1px solid var(--line);
+    font-size: 12.5px; color: var(--ink-3);
+  }
+  aside ul { list-style: none; padding: 0; }
+  aside li { font-size: 14.5px; line-height: 1.75; margin-bottom: 11px; padding-left: 17px; position: relative; color: var(--ink-2); }
+  aside li::before {
+    content: ""; position: absolute; left: 0; top: 10px; width: 6px; height: 6px;
+    border-radius: 50%; background: var(--cinnabar-2); box-shadow: 0 0 0 3px rgba(226,96,74,.14);
+  }
+  .fate {
+    margin-top: 18px; padding: 13px 15px; border-radius: 3px 8px 8px 3px;
+    background: linear-gradient(100deg, #f4e8ce, #fbf4e4);
+    border-left: 4px solid var(--gold); font-size: 13.5px; line-height: 1.75; color: var(--ink-3); box-shadow: var(--shadow-s);
+  }
+  .fate b { color: var(--ink); }
+  .xlink {
+    display: inline-flex; align-items: center; gap: 6px; margin-top: 16px; font-size: 13.5px;
+    color: var(--cinnabar); background: none; border: 0; padding: 0; cursor: pointer;
+    border-bottom: 1px dashed rgba(192,57,43,.5); transition: gap .25s var(--ease), color .25s;
+  }
+  .xlink:hover { gap: 11px; color: #7d2419; }
+  .default-tip { color: var(--ink-3); font-size: 14.5px; line-height: 2; margin: 10px 0 6px; text-align: center; }
+  .legend {
+    margin-top: 26px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 10px;
+    font-size: 13.5px; color: var(--ink-3); background: rgba(255,253,247,.75); box-shadow: var(--shadow-s);
+  }
+  .legend div { display: flex; align-items: center; gap: 11px; margin: 8px 0; }
+  .legend i { width: 44px; height: 10px; flex-shrink: 0; display: block; position: relative; }
+  .panel-foot { margin-top: 20px; font-size: 12px; color: var(--ink-4); line-height: 1.8; border-top: 1px solid var(--line); padding-top: 14px; }
+
+  .stagger > * { animation: itemIn .5s var(--ease) both; }
+  .stagger > *:nth-child(1) { animation-delay: .02s; }
+  .stagger > *:nth-child(2) { animation-delay: .07s; }
+  .stagger > *:nth-child(3) { animation-delay: .12s; }
+  .stagger > *:nth-child(4) { animation-delay: .17s; }
+  @keyframes itemIn { from { opacity: 0; transform: translateX(9px); } }
+
+  /* ===== 时间轴 ===== */
+  #view-time, #view-detail { flex: 1; overflow-y: auto; padding: 34px 26px 60px; }
+  .time-inner, .detail-inner { max-width: 900px; margin: 0 auto; }
+  .time-inner h2, .detail-inner h2 { font-family: var(--serif); font-size: 30px; letter-spacing: .18em; color: var(--ink); }
+  .lead { font-size: 14px; color: var(--ink-3); margin: 10px 0 20px; line-height: 1.85; max-width: 64ch; }
+  .toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 22px; font-size: 13px; color: var(--ink-4); }
+  .chip {
+    font-size: 13px; padding: 5px 14px; border-radius: 999px; border: 1px solid var(--line);
+    background: linear-gradient(180deg, #fffdf7, #f4ebd8); color: var(--ink-3); cursor: pointer;
+    transition: transform .22s var(--ease), box-shadow .22s var(--ease), background .22s, color .22s, border-color .22s;
+  }
+  .chip:hover { transform: translateY(-1px); box-shadow: var(--shadow-s); }
+  .chip[aria-pressed="true"] { background: linear-gradient(180deg, #3e3221, #241d14); color: #fdf6e6; border-color: transparent; box-shadow: 0 3px 12px rgba(36,29,20,.3); }
+  .tool { margin-left: auto; font-size: 13px; padding: 5px 15px; border-radius: 999px; border: 1px dashed var(--line-2); background: none; color: var(--ink-3); cursor: pointer; transition: background .22s, color .22s; }
+  .tool:hover { background: rgba(255,253,247,.9); color: var(--ink); }
+
+  .timeline { list-style: none; padding: 0 0 0 26px; position: relative; }
+  .timeline::before {
+    content: ""; position: absolute; left: 6px; top: 6px; bottom: 26px; width: 2px;
+    background: linear-gradient(180deg, rgba(201,182,141,0), var(--line-2) 8%, var(--line-2) 92%, rgba(201,182,141,0));
+    transform-origin: top; animation: growLine 1.1s var(--ease) .1s both;
+  }
+  @keyframes growLine { from { transform: scaleY(0); } }
+
+  .card {
+    position: relative; margin: 0 0 12px; border-radius: 10px; border: 1px solid var(--line);
+    background: linear-gradient(180deg, #fffdf8, #faf4e7); box-shadow: var(--shadow-s);
+    transition: transform .3s var(--ease), box-shadow .3s var(--ease), opacity .35s var(--ease), border-color .3s;
+    animation: cardIn .6s var(--ease) both; animation-delay: calc(var(--i) * 55ms);
+  }
+  @keyframes cardIn { from { opacity: 0; transform: translateY(16px) scale(.985); } }
+  .card::before {
+    content: ""; position: absolute; left: -26px; top: 21px; width: 11px; height: 11px; border-radius: 50%;
+    background: #fffdf6; border: 2.5px solid var(--cinnabar-2); box-shadow: 0 0 0 4px var(--paper);
+    transition: transform .3s var(--ease), background .3s, border-color .3s;
+  }
+  .card:hover { transform: translateY(-2px); box-shadow: var(--shadow-m); border-color: var(--line-2); }
+  .card:hover::before { transform: scale(1.25); border-color: var(--cinnabar); }
+  .card:has(> details[open]) { box-shadow: var(--shadow-m); border-color: var(--line-2); background: linear-gradient(180deg, #fffefa, #fbf6ea); }
+  .card:has(> details[open])::before { background: var(--cinnabar); border-color: var(--cinnabar); }
+  .card.dim { opacity: .26; filter: saturate(.35); }
+  .card summary { list-style: none; cursor: pointer; padding: 13px 17px; display: flex; flex-wrap: wrap; align-items: baseline; gap: 5px 12px; }
+  .card summary::-webkit-details-marker { display: none; }
+  .card summary::after { content: "＋"; margin-left: auto; color: var(--ink-4); font-size: 15px; transition: transform .35s var(--ease), color .25s; }
+  .card:has(> details[open]) summary::after { content: "－"; color: var(--cinnabar); }
+  .card .name { font-family: var(--serif); font-size: 19px; font-weight: 700; color: var(--ink); letter-spacing: .06em; }
+  .card .years { font-size: 12.5px; color: var(--ink-3); }
+  .card .lang { font-size: 11.5px; padding: 2px 9px; border-radius: 999px; background: #efe4cd; color: var(--ink-3); border: 1px solid rgba(201,182,141,.7); }
+  .card .body { padding: 0 17px 15px; animation: bodyIn .45s var(--ease) both; }
+  @keyframes bodyIn { from { opacity: 0; transform: translateY(-6px); } }
+  .card ul { list-style: none; padding: 0; }
+  .card li { font-size: 14.5px; line-height: 1.8; padding-left: 17px; position: relative; margin-bottom: 5px; color: var(--ink-2); }
+  .card li::before { content: ""; position: absolute; left: 1px; top: 11px; width: 5px; height: 5px; border-radius: 50%; background: var(--gold); }
+  .card .out {
+    margin-top: 11px; padding: 10px 14px; border-radius: 3px 8px 8px 3px;
+    background: linear-gradient(100deg, #f4e8ce, #fbf4e4); border-left: 4px solid var(--gold);
+    font-size: 13.5px; line-height: 1.8; color: var(--ink-3);
+  }
+  .card .out b { color: var(--ink); }
+
+  .rules { margin-top: 30px; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; }
+  .rule {
+    border-radius: 12px; padding: 17px 18px; border: 1px solid var(--line);
+    background: linear-gradient(160deg, #fffdf8, #f6eddb); box-shadow: var(--shadow-s);
+    transition: transform .3s var(--ease), box-shadow .3s var(--ease);
+    animation: cardIn .6s var(--ease) both; animation-delay: calc(430ms + var(--i) * 70ms);
+  }
+  .rule:hover { transform: translateY(-3px); box-shadow: var(--shadow-m); }
+  .rule h3 { font-family: var(--serif); font-size: 17px; color: var(--ink); margin-bottom: 11px; letter-spacing: .08em; padding-bottom: 9px; border-bottom: 1px solid var(--line); }
+  .rule ul { padding: 0; }
+  .rule li { font-size: 14px; line-height: 1.8; margin-bottom: 6px; list-style: none; padding-left: 15px; position: relative; color: var(--ink-2); }
+  .rule li::before { content: ""; position: absolute; left: 2px; top: 11px; width: 5px; height: 5px; background: var(--cinnabar-2); transform: rotate(45deg); }
+  .caveat { margin: 22px 0 0; font-size: 12px; color: var(--ink-4); line-height: 1.9; border-top: 1px solid var(--line); padding-top: 14px; }
+
+  /* ===== 详考 ===== */
+  .sec { margin-top: 34px; animation: cardIn .6s var(--ease) both; }
+  .sec > h3 {
+    font-family: var(--serif); font-size: 20px; color: var(--ink); letter-spacing: .1em;
+    padding-bottom: 10px; border-bottom: 2px solid var(--line-2); margin-bottom: 16px;
+    display: flex; align-items: baseline; gap: 12px;
+  }
+  .sec > h3 span { font-family: inherit; font-size: 12px; color: var(--ink-4); letter-spacing: .04em; font-weight: 400; }
+  .chrono { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(330px, 1fr)); gap: 0 30px; }
+  .chrono li {
+    display: grid; grid-template-columns: 86px 1fr; gap: 12px; font-size: 13.5px; line-height: 1.7;
+    padding: 6px 0; border-bottom: 1px dashed rgba(201,182,141,.5); color: var(--ink-2);
+  }
+  .chrono .y { font-family: var(--serif); font-weight: 700; color: var(--cinnabar); font-size: 13px; white-space: nowrap; }
+  .people { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 11px; }
+  .person {
+    padding: 12px 15px; border: 1px solid var(--line); border-radius: 9px;
+    background: linear-gradient(180deg, #fffdf8, #faf4e7); box-shadow: var(--shadow-s);
+    transition: transform .25s var(--ease), box-shadow .25s var(--ease);
+  }
+  .person:hover { transform: translateY(-2px); box-shadow: var(--shadow-m); }
+  .person b { font-family: var(--serif); font-size: 16px; color: var(--ink); }
+  .person .d { font-size: 11.5px; color: var(--ink-4); margin-left: 8px; }
+  .person p { font-size: 13.5px; line-height: 1.72; color: var(--ink-3); margin-top: 6px; }
+  table.plain { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  table.plain th { text-align: left; font-weight: 400; color: var(--ink-4); font-size: 12px; padding: 8px 12px; border-bottom: 1px solid var(--line-2); letter-spacing: .06em; }
+  table.plain td { padding: 9px 12px; border-bottom: 1px dashed rgba(201,182,141,.5); line-height: 1.75; vertical-align: top; color: var(--ink-3); }
+  table.plain td:first-child { font-family: var(--serif); font-weight: 700; color: var(--ink); white-space: nowrap; }
+  .two-col { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 0 34px; }
+
+  noscript { padding: 26px; display: block; }
+
+  .pan-hint { display: none; }
+  @media (max-width: 880px) {
+    .pan-hint { display: block; position: sticky; left: 50%; bottom: 10px; transform: translateX(-50%); width: max-content; height: 30px; margin-top: -34px; padding: 0 14px; border-radius: 999px; background: rgba(36,29,20,.75); color: #f7f1e3; font-size: 11.5px; letter-spacing: .08em; line-height: 30px; pointer-events: none; transition: opacity .4s; }
+    header { padding: 0 14px; gap: 12px; }
+    .brand { font-size: 17px; letter-spacing: .1em; }
+    .hint { display: none; }
+    #view-map { flex-direction: column; }
+    .map-wrap { flex: none; height: 54dvh; }
+    .map-wrap svg { min-width: 900px; }
+    .title-block { top: 14px; left: 18px; }
+    .title-block h2 { font-size: 22px; }
+    aside { width: 100%; border-left: 0; border-top: 1px solid var(--line); flex: 1; min-height: 0; padding: 18px 16px 30px; box-shadow: none; }
+    #view-time, #view-detail { padding: 22px 15px 46px; }
+    .timeline { padding-left: 22px; }
+    .card::before { left: -22px; }
+  }
+
+  .plink { color: var(--cinnabar); text-decoration: none; border-bottom: 1px dashed rgba(192,57,43,.5); }
+  @media print {
+    body { height: auto; overflow: visible; }
+    header, .hint, .pan-hint { display: none; }
+    main { overflow: visible; }
+    #view-map[hidden], #view-time[hidden], #view-detail[hidden], #view-steppe[hidden] { display: block !important; }
+    #view-map { display: block; overflow: visible; }
+    .map-wrap { height: auto; overflow: visible; }
+    .map-wrap svg { min-width: 0; width: 100%; height: auto; }
+    aside { width: auto; border: 0; overflow: visible; }
+    #view-time, #view-detail, .steppe-inner { overflow: visible; padding: 10mm 0; }
+    .card, .rule, .sec, .person { break-inside: avoid; box-shadow: none; }
+    .toolbar, .chip, .tool, .xlink { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition-duration: .01ms !important; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">四川 · 两千年</div>
+  <nav role="tablist" aria-label="切换视图">
+    <span class="pill" aria-hidden="true"></span>
+    <button role="tab" id="tab-map" aria-selected="true" aria-controls="view-map">四川地图</button>
+    <button role="tab" id="tab-time" aria-selected="false" aria-controls="view-time">历史演进</button>
+    <button role="tab" id="tab-detail" aria-selected="false" aria-controls="view-detail">详考</button>
+  </nav>
+  <a class="nav-home" href="历史总览.html">总览</a> <span class="hint">古蜀至蒙元 · 盆地 / 川西 / 川北 · 全部离线</span>
+</header>
+
+<main>
+  <section id="view-map" role="tabpanel" aria-labelledby="tab-map">
+    <div class="map-wrap">
+      <svg id="map" viewBox="120 70 860 760" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="group" aria-label="四川省历史地理示意图">
+        <defs>
+          <linearGradient id="basin" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#cfe0c2" stop-opacity=".45"/>
+            <stop offset="100%" stop-color="#dfe8d2" stop-opacity=".18"/>
+          </linearGradient>
+          <linearGradient id="plateau" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#c9b98f" stop-opacity=".45"/>
+            <stop offset="100%" stop-color="#d8cba5" stop-opacity=".12"/>
+          </linearGradient>
+          <linearGradient id="riverGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#8fc0d6"/>
+            <stop offset="100%" stop-color="#4f92b0"/>
+          </linearGradient>
+        </defs>
+
+        <!-- 川西高原（示意） -->
+        <path d="M150,120 Q130,300 140,460 Q150,620 190,760 L300,780 Q250,600 245,440 Q240,270 270,130 Z" fill="url(#plateau)"/>
+        <text x="180" y="400" class="geo-label" font-size="14" transform="rotate(90 180 400)">川西高原</text>
+
+        <!-- 盆地（示意） -->
+        <path d="M270,130 Q360,105 480,125 Q600,140 700,190 Q790,240 830,330 Q860,430 830,530 Q790,630 700,690 Q580,760 430,740 Q300,720 245,640 Q215,520 245,400 Q245,270 270,130 Z"
+          fill="url(#basin)"/>
+
+        <!-- 秦岭（北界外）/ 大巴山（北界）/ 大娄山（南界）/ 邛崃山（西界） -->
+        <path d="M330,95 Q430,72 540,88 Q640,105 720,140" fill="none" stroke="#8a9a72" stroke-width="4" opacity=".6" stroke-linecap="round"/>
+        <text x="520" y="72" class="geo-label" font-size="14">秦　岭</text>
+        <path d="M300,130 Q400,112 520,130 Q640,148 730,180" fill="none" stroke="#8a9a72" stroke-width="3.4" opacity=".65" stroke-linecap="round"/>
+        <text x="418" y="152" class="geo-label" font-size="14">大巴山</text>
+        <path d="M290,700 Q400,742 540,730 Q660,718 730,680" fill="none" stroke="#8a9a72" stroke-width="3.4" opacity=".6" stroke-linecap="round"/>
+        <text x="470" y="762" class="geo-label" font-size="14">大娄山</text>
+        <path d="M230,200 Q215,320 222,440 Q230,560 260,660" fill="none" stroke="#b09c6b" stroke-width="3" opacity=".55" stroke-linecap="round"/>
+        <text x="196" y="560" class="geo-label" font-size="13" transform="rotate(80 196 560)">邛崃山</text>
+
+        <!-- 河流：岷江 / 沱江 / 嘉陵江 / 长江（金沙江+川江） -->
+        <path d="M330,160 Q320,240 338,320 Q352,380 362,440 Q370,520 392,580 Q410,630 430,652" fill="none" stroke="url(#riverGrad)" stroke-width="3" stroke-linecap="round" opacity=".9"/>
+        <text x="304" y="330" class="geo-label" font-size="12">岷江</text>
+        <path d="M410,290 Q418,360 430,430 Q442,510 470,570 Q500,630 540,672" fill="none" stroke="url(#riverGrad)" stroke-width="2.6" stroke-linecap="round" opacity=".85"/>
+        <text x="446" y="430" class="geo-label" font-size="12">沱江</text>
+        <path d="M520,170 Q540,240 562,300 Q586,370 612,440 Q632,490 645,520" fill="none" stroke="url(#riverGrad)" stroke-width="3" stroke-linecap="round" opacity=".9"/>
+        <text x="574" y="300" class="geo-label" font-size="12">嘉陵江</text>
+        <path d="M200,680 Q280,700 370,686 Q430,672 470,662 Q560,660 660,560 Q740,500 800,520 Q845,532 880,560" fill="none" stroke="url(#riverGrad)" stroke-width="3.6" stroke-linecap="round"/>
+        <text x="760" y="472" class="geo-label" font-size="15">长　江</text>
+        <text x="240" y="652" class="geo-label" font-size="12">金沙江</text>
+
+        <!-- 峨眉山 -->
+        <path d="M312,510 L330,488 L348,510 Z" fill="#8a9a72" opacity=".8"/>
+        <text x="330" y="482" class="geo-label" font-size="12">峨眉山</text>
+
+        <!-- 关隘 -->
+        <g class="marker" id="gates"></g>
+        <!-- 城邑 -->
+        <g id="states"></g>
+
+        <!-- 指北针 -->
+        <g transform="translate(910,120)" opacity=".9">
+          <circle cx="0" cy="2" r="24" fill="#fffdf7" opacity=".7" stroke="#dcccaa" stroke-width="1"/>
+          <path d="M0,-22 L5.5,-7 L-5.5,-7 Z" fill="#c0392b"/>
+          <line x1="0" y1="20" x2="0" y2="-6" stroke="#8c7d5a" stroke-width="1.8"/>
+          <line x1="-6" y1="20" x2="6" y2="20" stroke="#8c7d5a" stroke-width="1.8"/>
+          <text x="0" y="40" font-size="13" fill="#6d5f43" text-anchor="middle">北</text>
+        </g>
+      </svg>
+
+      <div class="title-block">
+        <h2>四　川</h2>
+        <p>四川盆地 · 川西高原 · 水系与古道</p>
+        <span class="title-rule"></span>
+      </div>
+    </div>
+
+    <aside aria-live="polite">
+      <div id="panel-default"><p class="default-tip">点击（或 Tab + 回车）地图上的圆点<br>看这座城邑在同时期的角色</p></div>
+      <div id="panel-detail" hidden>
+        <div class="stagger">
+          <h3 id="d-name"></h3>
+          <div class="today" id="d-today"></div>
+          <ul id="d-points"></ul>
+          <div class="fate" id="d-fate"></div>
+        </div>
+        <button class="xlink" id="d-link" hidden></button>
+      </div>
+      <div class="legend" aria-label="图例">
+        <div><i style="background:linear-gradient(90deg,transparent,#b9cf9f,transparent);border-radius:2px"></i>四川盆地（川西平原 / 川中丘陵 / 川东平行岭谷）</div>
+        <div><i style="background:linear-gradient(90deg,transparent,#c9b98f,transparent);border-radius:2px"></i>川西高原（横断山边缘）</div>
+        <div><i style="height:4px;margin-top:3px;background:#4f92b0;border-radius:2px"></i>岷江 · 沱江 · 嘉陵江 · 长江</div>
+        <div><i style="height:4px;margin-top:3px;background:#8a9a72;border-radius:2px"></i>秦岭 / 大巴山 / 邛崃山 / 大娄山</div>
+        <div><i style="height:9px;margin-top:1px;background:linear-gradient(135deg,transparent 44%,#a2905f 44% 56%,transparent 56%)"></i>关隘（剑门 / 瞿塘 / 阳平 / 金沙江渡口）</div>
+        <div><i style="height:9px;margin-top:1px;background:linear-gradient(135deg,transparent 44%,#8a6f45 44% 56%,transparent 56%)"></i>可点击的城邑</div>
+      </div>
+      <p class="panel-foot">省界与山川为示意走势，非精确测绘；历史疆域随朝代变化极大，本图为方位示意。史实以《史记》《汉书》《三国志》《宋史》等为准，争议处标注「一说」。<br><a href="陕西-历史演进.html" style="color:var(--cinnabar);text-decoration:none;border-bottom:1px dashed rgba(192,57,43,.5)">← 同时期关中：《陕西 · 历史演进》</a><br><a href="甘肃-历史演进.html" style="color:var(--cinnabar);text-decoration:none;border-bottom:1px dashed rgba(192,57,43,.5)">← 对照《甘肃-历史演进》，看阴平道入蜀与茶马互市</a></p>
+    </aside>
+  </section>
+
+  <section id="view-time" role="tabpanel" aria-labelledby="tab-time" hidden>
+    <div class="time-inner">
+      <h2>四川历史演进</h2>
+      <p class="lead">从三星堆的青铜神树到蒙哥殒命钓鱼城，「四川」之名要到宋代才出现，而盆地里的故事早在三千年前就开始了。点击卡片展开；按时代筛选可看某一阶段。</p>
+      <div class="toolbar" id="toolbar"></div>
+      <ol class="timeline" id="timeline"></ol>
+      <div class="rules" id="rules"></div>
+      <p class="caveat">说明：年代取通行说法。四川自古「易守难攻、易进难出」，历代割据与统一的博弈都绕不开蜀道与长江；本页以王朝为纲，细节见各卡片。</p>
+    </div>
+  </section>
+
+  <section id="view-detail" role="tabpanel" aria-labelledby="tab-detail" hidden>
+    <div class="detail-inner">
+      <h2>四川详考</h2>
+      <div id="detail-root"></div>
+      <p class="caveat">史实以《史记》《汉书》《三国志》《晋书》《宋史》及考古报告为准，争议处标注「一说」。<br><a href="草原与丝路.html" style="color:var(--cinnabar);text-decoration:none;border-bottom:1px dashed rgba(192,57,43,.5)">← 同时期草原与丝路：《草原与丝路》</a></p>
+    </div>
+  </section>
+</main>
+<noscript>本页需要启用 JavaScript 才能显示地图与时间轴。</noscript>
+
+<script>
+const SVGNS = "http://www.w3.org/2000/svg";
+const el = (tag, attrs = {}, text) => {
+  const n = document.createElementNS(SVGNS, tag);
+  for (const k in attrs) n.setAttribute(k, attrs[k]);
+  if (text !== undefined) n.textContent = text;
+  return n;
+};
+const $ = id => document.getElementById(id);
+const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* ---------------- 地图数据 ---------------- */
+const GATES = [
+  { x: 496, y: 196, label: "剑门关", dy: 24 },
+  { x: 536, y: 122, label: "阳平关", dy: -18 },
+  { x: 838, y: 524, label: "瞿塘关", dy: 26 },
+  { x: 232, y: 646, label: "金沙江渡口", dy: -18 }
+];
+
+const CITIES = [
+  { id: "chengdu", x: 418, y: 424, ly: 42, short: "成都", r: 12, band: "川西", tag: "建都",
+    name: "成都", today: "今 · 成都市",
+    points: [
+      "古蜀开明氏都城，秦置蜀郡、汉为益州，历代为西南政治中心",
+      "蜀汉章武元年（221）刘备称帝于此，诸葛亮居相府治国",
+      "唐为「扬一益二」的天下第二都会；五代前后蜀两度建都",
+      "北宋于1023年设益州官交子务，发行世界最早的官方纸币",
+      "苏轼、李白、杜甫都与成都有深缘：杜甫草堂、望江楼皆在城内"
+    ],
+    fate: "宋末蒙古军与南宋在四川拉锯五十年，成都屡遭战火；明以后重建，清为四川省治。" },
+  { id: "dujiangyan", x: 338, y: 372, ly: -30, short: "都江堰", r: 10, band: "川西", tag: "水利",
+    name: "都江堰 / 灌县", today: "今 · 成都市都江堰市",
+    points: [
+      "秦昭襄王时蜀守李冰修建，分岷江水灌溉成都平原",
+      "「深淘滩、低作堰」，二千二百余年至今仍在使用，世界水利奇迹",
+      "成都平原由此成为「水旱从人、不知饥馑」的天府之国",
+      "秦因此富强，「以蜀之饶，以秦之力」统一天下"
+    ],
+    fate: "历代不断维护；今为世界文化遗产，成都平原仍依赖其灌溉体系。" },
+  { id: "guanghan", x: 390, y: 344, ly: -30, short: "广汉", r: 10, band: "川西", tag: "古蜀",
+    name: "广汉 / 三星堆", today: "今 · 德阳市广汉市",
+    points: [
+      "三星堆遗址距今约4800—3100年，古蜀文明的中心都城之一",
+      "1986年出土青铜大立人、神树、金杖，震惊世界",
+      "金沙遗址与三星堆一脉相承，太阳神鸟金箔为中国文化遗产标志",
+      "证实了古蜀不是「化外之地」，而是中华文明多元一体的重要一元"
+    ],
+    fate: "古蜀开明氏后来迁都成都，三星堆被废弃，古蜀入秦。" },
+  { id: "wenshan", x: 344, y: 240, ly: -30, short: "汶川", r: 8, band: "川西", tag: "边防",
+    name: "汶川 / 汶山郡", today: "今 · 阿坝州汶川县",
+    points: [
+      "秦设汶山郡，是中原王朝经略川西高原的门户",
+      "汉代为羌人聚居地，「冉駹」等部在此；汉武帝置汶山郡以镇羌",
+      "唐宋时为汉蕃交界，文成公主入藏亦经此附近（一说）",
+      "岷江上游的关隘要道，历为兵家必争"
+    ],
+    fate: "历代为边防重镇；今为阿坝州首府汶川，2008年地震举国关注。" },
+  { id: "mianyang", x: 468, y: 300, ly: -30, short: "绵阳", r: 9, band: "川北", tag: "通道",
+    name: "绵阳 / 涪城", today: "今 · 绵阳市",
+    points: [
+      "秦置涪县，汉为涪城，是金牛道入川后的第一重镇",
+      "蜀汉时为北伐粮道与驻军重地，邓艾偷渡阴平亦经此一带",
+      "七曲山大庙为文昌帝君祖庭，历为北道香火盛地",
+      "李白生于绵阳昌隆（一说江油），今有太白祠"
+    ],
+    fate: "唐为绵州，宋属潼川府路；今为成德绵经济走廊核心。" },
+  { id: "guangyuan", x: 490, y: 184, ly: -30, short: "广元", r: 9, band: "川北", tag: "关塞",
+    name: "广元 / 利州", today: "今 · 广元市",
+    points: [
+      "金牛道北口，入蜀第一关；剑门关在其南",
+      "三国诸葛亮以「剑阁」拒魏，姜维守剑阁阻钟会大军",
+      "唐武则天故里（一说出生地广元），有皇泽寺",
+      "利州为川北屏障，历为兵家必争之地"
+    ],
+    fate: "唐设利州，宋为利州路；钓鱼城保卫战时亦为宋军重镇。" },
+  { id: "langzhong", x: 560, y: 236, ly: -30, short: "阆中", r: 9, band: "川北", tag: "人物",
+    name: "阆中 / 保宁府", today: "今 · 南充市阆中市",
+    points: [
+      "阆中古城为春节文化发源地——西汉天文学家落下闳在此编制《太初历》",
+      "三国张飞镇守阆中七年，被部将范疆张达所害；张飞庙、桓侯祠在城内",
+      "唐为阆州，宋为保宁府；嘉陵江三面环城，风水格局绝佳",
+      "阆中牛肉保宁醋、巴人文化交汇之地"
+    ],
+    fate: "明清为保宁府治；今为国家历史文化名城，古城保存完整。" },
+  { id: "nanchong", x: 604, y: 332, ly: -30, short: "南充", r: 8, band: "川北", tag: "通道",
+    name: "南充 / 果州", today: "今 · 南充市",
+    points: [
+      "秦置安汉县，唐设果州，为川北粮仓与商贸中心",
+      "嘉陵江中游水运枢纽，历来为川北重镇",
+      "三国谯周为安汉（南充）人，劝刘禅降魏，著《仇国论》",
+      "宋代为潼川府路要地"
+    ],
+    fate: "唐宋为果州/顺庆府；今为川北区域中心城市。" },
+  { id: "dazhou", x: 744, y: 282, ly: -30, short: "达州", r: 8, band: "川东", tag: "通道",
+    name: "达州 / 通川", today: "今 · 达州市",
+    points: [
+      "秦为宕渠，汉为宣汉，为川东门户",
+      "荔枝道北口：唐时涪州贡鲜荔枝，快马经此入长安（《唐国史补》）",
+      "张飞曾驻守宕渠，大破张郃；渠县有汉阙群",
+      "川东平行岭谷之间，历为通向荆襄的孔道"
+    ],
+    fate: "唐为通州，宋为达州；今为川东北区域中心。" },
+  { id: "wanzhou", x: 864, y: 482, ly: -30, short: "万州", r: 9, band: "川东", tag: "关塞",
+    name: "万州 / 夔州", today: "今 · 重庆市万州区",
+    points: [
+      "古称鱼复、夔州，长江三峡西口，「夔门」天下雄",
+      "白帝城（奉节）为刘备托孤之地，杜甫寓居夔州写下「无边落木萧萧下」",
+      "唐为夔州，宋为夔州路治所——「四川」四路之一",
+      "陆游入蜀任夔州通判，写下「细雨骑驴入剑门」等名篇"
+    ],
+    fate: "明清为夔州府；今为三峡库区中心城市。" },
+  { id: "chongqing", x: 664, y: 518, ly: 34, short: "重庆", r: 11, band: "川东", tag: "建都",
+    name: "重庆 / 渝州", today: "今 · 重庆市",
+    points: [
+      "巴国古都江州，秦置巴郡；两汉为巴郡要地",
+      "南宋淳祐二年（1242）余玠徙合州、泸州等地兵民于钓鱼城，重庆为指挥中心",
+      "1259年蒙哥汗死于钓鱼城下，蒙古西征被迫中止，改变世界格局",
+      "明玉珍据重庆建大夏（1362—1366）；清为重庆府"
+    ],
+    fate: "元置重庆路，属四川行省；明清为重庆府，近代开埠。" },
+  { id: "hechuan", x: 632, y: 468, ly: -28, short: "钓鱼城", r: 10, band: "川东", tag: "战役",
+    name: "合川 / 钓鱼城", today: "今 · 重庆市合川区",
+    points: [
+      "南宋淳祐年间王坚、张珏守此，凭嘉陵江三面之险抗蒙",
+      "1259年蒙哥汗亲征中炮石（一说箭伤）伤重身亡于城下，蒙古西征中止",
+      "守城三十六年（1242—1279），为南宋最后陷落的据点之一",
+      "「上帝折鞭处」——改变世界历史的一座城"
+    ],
+    fate: "1279年城破，南宋灭亡；钓鱼城遗址为全国重点文保。" },
+  { id: "yibin", x: 432, y: 648, ly: -32, short: "宜宾", r: 9, band: "川南", tag: "通道",
+    name: "宜宾 / 戎州", today: "今 · 宜宾市",
+    points: [
+      "岷江与金沙江在此合成长江，「万里长江第一城」",
+      "秦为僰道，汉置僰道县；五尺道经此通往云南，秦始皇时已开发",
+      "唐为戎州，宋为叙州；黄庭寓居宜宾，有流杯池、东楼",
+      "五粮液、竹海所在，川南门户"
+    ],
+    fate: "元置叙州路；今为长江上游重要港口城市。" },
+  { id: "lujiang", x: 542, y: 672, ly: 32, short: "泸州", r: 9, band: "川南", tag: "人物",
+    name: "泸州 / 泸州", today: "今 · 泸州市",
+    points: [
+      "汉置江阳，为川南重镇；「泸州」一名已见于南朝",
+      "唐为泸州都督府；宋代置西南夷边防重地",
+      "泸州老窖国宝窖池连续使用四百余年，明代酒窖至今出酒",
+      "宋明古战场与长江航运交汇"
+    ],
+    fate: "元置泸州路，属四川行省；明清为泸州直隶州。" },
+  { id: "leshan", x: 362, y: 532, ly: -30, short: "乐山", r: 9, band: "川南", tag: "佛教",
+    name: "乐山 / 嘉州", today: "今 · 乐山市",
+    points: [
+      "唐开元元年（713）海通和尚始凿凌云大佛，历时九十年凿成",
+      "乐山大佛通高71米，为世界最大的石刻弥勒坐像，镇水患而建",
+      "峨眉山在旁——普贤菩萨道场，为佛教名山"
+    ],
+    fate: "唐为嘉州，宋为嘉定府；大佛与峨眉山今日俱为世界遗产。" },
+  { id: "yongan", x: 276, y: 452, ly: -30, short: "雅安", r: 8, band: "川西", tag: "古道",
+    name: "雅安 / 雅州", today: "今 · 雅安市",
+    points: [
+      "汉为严道，为「茶马古道」的川藏南线起点",
+      "「雅雨」为川西多雨之证，蒙顶山产茶，唐时即为贡茶",
+      "藏马与川茶在此交易，历代设茶马司管理",
+      "汉代通邛筰、通西南夷，皆以此为枢纽"
+    ],
+    fate: "唐设雅州都督府，宋属成都府路；今为川西门户。" },
+  { id: "xichang", x: 252, y: 712, ly: -28, short: "西昌", r: 9, band: "川西", tag: "边防",
+    name: "西昌 / 建昌", today: "今 · 凉山州西昌市",
+    points: [
+      "汉为邛都，南丝绸之路邛筰道重镇",
+      "邛海为川西最大天然湖，历为边防要地",
+      "唐为巂州，宋为建昌府；彝族先民在此世居",
+      "1935年红军长征过大凉山，刘伯承与彝族首领小叶丹歃血为盟"
+    ],
+    fate: "明代设建昌卫，清为宁远府；今为凉山州首府、航天城。" },
+  { id: "zigong", x: 472, y: 586, ly: -28, short: "自贡", r: 8, band: "川南", tag: "盐业",
+    name: "自贡 / 荣州", today: "今 · 自贡市",
+    points: [
+      "井盐生产始于秦汉，唐代已是产盐重镇，「自流井」得名于此",
+      "宋代为西南盐利之源；「盐帮」文化影响川南百年的盐运",
+      "恐龙化石自贡大山铺闻名中外，为世界级恐龙化石遗址"
+    ],
+    fate: "清代盐业鼎盛，1939年设自贡市；今为中国盐都。" },
+  { id: "moxian", x: 300, y: 618, ly: -28, short: "汉源", r: 8, band: "川南", tag: "关塞",
+    name: "汉源 / 黎州", today: "今 · 雅安市汉源县",
+    points: [
+      "汉为旄牛县，唐为黎州，为川滇交界之门户",
+      "「汉源」之名取「汉水之源」——古时误以大渡河为汉水上游",
+      "唐宋为控驭西南夷的军事重镇，茶马贸易中转站"
+    ],
+    fate: "宋为黎州；今为雅安市下辖县，成昆铁路与川藏公路必经之地。" },
+  { id: "jiangyou", x: 430, y: 262, ly: -28, short: "江油", r: 8, band: "川北", tag: "人物",
+    name: "江油 / 龙州", today: "今 · 绵阳市江油市",
+    points: [
+      "金牛道西线分叉，「李太白读书处」",
+      "李白故里（一说生于碎叶，成长于江油），今有太白祠",
+      "唐为龙州，为陇右与蜀中之间的军事要地",
+      "李白出蜀「仗剑去国、辞亲远游」，写下了《蜀道难》的地理记忆"
+    ],
+    fate: "宋为龙州；今为绵阳市下辖市，李白文化旅游名城。" },
+  { id: "sui", x: 494, y: 142, ly: -28, short: "广元南", r: 8, band: "川北", tag: "关塞",
+    name: "朝天关 / 明月峡", today: "今 · 广元市朝天区",
+    points: [
+      "嘉陵江边的金牛道悬空栈道，「明月峡栈道」为蜀道活化石",
+      "唐玄宗幸蜀经此，李白写「蜀道之难，难于上青天」",
+      "广元至汉中之间的险要关隘，历为兵家必争"
+    ],
+    fate: "今为广元市朝天区，蜀道申遗核心段落。" }
+];
+
+/* ---------------- 时间轴数据 ---------------- */
+const ERAS = ["全部", "古蜀秦汉", "汉魏", "隋唐", "宋元"];
+const POLITIES = [
+  { id: "gushu", name: "古蜀", years: "约前1700—前316", era: "古蜀秦汉", tag: "三星堆",
+    points: [
+      "传说蚕丛、鱼凫、杜宇、开明数代蜀王；李白《蜀道难》叹「蚕丛及鱼凫，开国何茫然」",
+      "三星堆（广汉）距今约4800—3100年，青铜大立人、神树、金杖震惊世界",
+      "金沙遗址出土太阳神鸟金箔，为中国文化遗产标志",
+      "古蜀并非化外之地——中原与长江流域的文明在此交汇"
+    ],
+    out: "前316年秦灭蜀，置蜀郡，古蜀国祚终，但三星堆的青铜神树在三千年后的今天仍令人赞叹。" },
+  { id: "qin", name: "秦灭巴蜀", years: "前316—前206", era: "古蜀秦汉", tag: "都江堰",
+    points: [
+      "前316年司马错灭蜀，秦置蜀郡，张仪筑成都城",
+      "秦昭襄王时李冰建都江堰（约前256），岷江水患被驯服",
+      "成都平原成为「水旱从人、不知饥馑」的天府之国",
+      "秦以蜀之富饶东出，「以蜀人之资，供秦之用」"
+    ],
+    out: "秦亡后，关中残破，而都江堰下的成都平原却成为汉家天下的新起点。" },
+  { id: "han", name: "两汉蜀地", years: "前206—220", era: "古蜀秦汉", tag: "临邛",
+    points: [
+      "汉置益州；临邛（今邛崃）卓王孙、程郑冶铁致富，为富商大贾之首",
+      "司马相如与卓文君「琴心当垆」的故事发生于临邛",
+      "蜀锦为汉代大宗商品，张骞在大夏见「蜀布邛杖」，证实蜀地早与西南夷、身毒（印度）有商道",
+      "落下闳在阆中制定《太初历》，被后世尊为「春节之祖」"
+    ],
+    out: "两汉蜀地之富，使后来的割据势力有了割据的资本；益州之名沿用千年。" },
+  { id: "shuhan", name: "蜀汉", years: "221—263", era: "汉魏", tag: "都成都",
+    points: [
+      "221年刘备称帝于成都，国号汉，史称蜀汉",
+      "诸葛亮治蜀「开诚心、布公道」，治都江堰、平南中、六出祁山",
+      "定军山之战（219）黄忠斩夏侯渊，汉中入蜀汉",
+      "263年邓艾偷渡阴平，刘禅降，姜维诈降复国失败",
+      "张飞镇阆中七年，谯周劝刘禅降魏"
+    ],
+    out: "「蜀汉」虽亡，但诸葛亮的治蜀与北伐成为后世千年的政治范本；「天下未乱蜀先乱」从此成谶。" },
+  { id: "chenghan", name: "成汉", years: "304—347", era: "汉魏", tag: "都成都",
+    points: [
+      "304年李雄在范长生支持下称帝，都成都，国号成，后改汉",
+      "西晋永嘉之乱时，成汉为西南一隅的稳定政权，中原流民入蜀避乱",
+      "347年桓温伐蜀，成汉灭亡——汉末以来的长期割据就此终结"
+    ],
+    out: "成汉之后，蜀地不再独立建制；晋据蜀以制上游，南朝与北朝对蜀反复争夺。" },
+  { id: "sui-tang", name: "隋唐益州", years: "581—907", era: "隋唐", tag: "扬一益二",
+    points: [
+      "唐为益州，属剑南道；「扬一益二」——扬州第一、益州第二的全国都会",
+      "安史之乱爆发，玄宗幸蜀，肃宗在灵武即位，蜀地成为平叛后方",
+      "韦皋镇蜀二十余年，维系与南诏、吐蕃的平衡",
+      "「蜀道难，难于上青天」——李白为蜀道写下永恒注脚",
+      "荔枝道：涪州贡荔枝飞马入长安，杨贵妃「一骑红尘」"
+    ],
+    out: "904年朱温迁昭宗都洛阳，唐亡；王建自蜀东出，据成都建前蜀，五代十国的序幕自此拉开。" },
+  { id: "qianshu", name: "前蜀 · 后蜀", years: "907—965", era: "隋唐", tag: "两度建都",
+    points: [
+      "王建据蜀建前蜀（907—925），都成都；子王衍降于后唐",
+      "孟知祥建后蜀（934—965），子孟昶据有川中",
+      "花蕊夫人《宫词》「四十万人齐卸甲，更无一个是男儿」，写后蜀亡国之痛",
+      "后蜀刻《九经》，蜀地文化鼎盛"
+    ],
+    out: "965年宋军灭后蜀；赵匡胤叹「蜀地既得，天下一统可期」，但宋在四川的统治并不稳固。" },
+  { id: "song", name: "宋代四川", years: "960—1279", era: "宋元", tag: "川峡四路",
+    points: [
+      "1001年设益州路、利州路、夔州路、梓州路，合称「川峡四路」——「四川」之名由此而来",
+      "1023年于益州设官交子务，发行世界最早的官方纸币",
+      "苏轼父子（苏洵、苏轼、苏辙）从眉山走出，唐宋八大家占其三",
+      "南宋余玠徙合州、泸州等地兵民于钓鱼城，重庆为四川制置使治所",
+      "1259年蒙哥汗亲征钓鱼城，伤重而死，蒙古西征被迫中止"
+    ],
+    out: "1279年钓鱼城城破，南宋最后的四川据点陷落；宋亡于崖山，而「四川」之名却保留了下来。" },
+  { id: "yuan", name: "蒙元四川", years: "1236—1368", era: "宋元", tag: "四川行省",
+    points: [
+      "1236年蒙古军初入川，成都遭屠城；此后四川历经蒙宋五十年拉锯",
+      "1258年蒙哥亲征四川，1259年殒命钓鱼城，汗位之争使四川免于更大破坏",
+      "元设四川等处行中书省，为行省制度最早确立的地区之一",
+      "四川行省确立后，「四川」作为一级行政区延续至今"
+    ],
+    out: "明玉珍据重庆建大夏（1362—1366），后被朱元璋所灭；今日「四川」省名即由元代行省一脉相承。" }
+];
+
+const RULES = [
+  { title: "蜀道难",
+    items: [
+      "「蜀道之难，难于上青天」——剑门关、金牛道、米仓道、荔枝道",
+      "剑阁峥嵘而崔嵬，一夫当关、万夫莫开",
+      "邓艾偷渡阴平、姜维守剑阁、玄宗幸蜀，蜀道决定国运"
+    ] },
+  { title: "天府之国",
+    items: [
+      "都江堰——李冰驯服岷江，成都平原「水旱从人」",
+      "秦以蜀之富，统一六国；汉以蜀之资，支撑北伐",
+      "蜀锦、川茶、井盐，是帝国财政的西南支柱"
+    ] },
+  { title: "天下未乱蜀先乱",
+    items: [
+      "刘备、王建、孟知祥、明玉珍：乱世皆先在蜀称王",
+      "「已得陇，复望蜀」——得蜀易，治蜀难",
+      "钓鱼城抗蒙三十六年：一个易守难攻的盆地，是最后的屏障"
+    ] }
+];
+
+/* ---------------- 详考数据 ---------------- */
+const CHRONO = [
+  ["约前316", "秦灭蜀，置蜀郡"],
+  ["约前256", "李冰建都江堰"],
+  ["前135", "张骞出使西南夷，探求蜀身毒道"],
+  ["221", "刘备称帝于成都，蜀汉立"],
+  ["263", "邓艾灭蜀，刘禅降魏"],
+  ["304", "李雄建都成都，成汉立"],
+  ["581", "隋置益州，属剑南道"],
+  ["755", "安史之乱，玄宗幸蜀"],
+  ["766", "杜甫入蜀，成都草堂"],
+  ["907", "王建建前蜀"],
+  ["934", "孟知祥建后蜀"],
+  ["965", "宋灭后蜀"],
+  ["1001", "设川峡四路，「四川」之名始"],
+  ["1023", "益州设官交子务，世界最早官方纸币"],
+  ["1088", "苏轼《念奴娇·赤壁怀古》"],
+  ["1242", "余玠徙兵民于钓鱼城"],
+  ["1259", "蒙哥汗死于钓鱼城下"],
+  ["1260", "元设四川行省（一二六零）"],
+  ["1279", "钓鱼城陷落，南宋亡"],
+  ["1362", "明玉珍建大夏，都重庆"]
+].map(([y, t]) => ({ y, t }));
+const PEOPLE = [
+  ["李冰", "秦（前256年前后）", "蜀守，都江堰工程主持者，使成都平原成天府之国。"],
+  ["司马相如", "前179—前117", "蜀郡成都人，辞赋大家，《子虚赋》《上林赋》，与卓文君的才子佳人故事传为佳话。"],
+  ["落下闳", "西汉", "阆中人，太初历制定者，被尊为「春节之祖」。"],
+  ["刘备", "161—223", "涿郡人，汉室宗亲，入蜀称帝，都成都，建蜀汉。"],
+  ["诸葛亮", "181—234", "琅琊人，蜀汉丞相，治都江堰、六出祁山，「鞠躬尽瘁、死而后已」。"],
+  ["张飞", "?—221", "涿郡人，镇守阆中七年，被部将所害；阆中桓侯祠即为纪念。"],
+  ["李白", "701—762", "江油（一说碎叶），「蜀道难，难于上青天」的千古绝唱。"],
+  ["杜甫", "712—770", "成都草堂，写下「安得广厦千万间」，夔州写「无边落木萧萧下」。"],
+  ["王建", "847—918", "前蜀开国皇帝，原为唐忠武军将领，据蜀建都成都。"],
+  ["孟知祥", "874—934", "后蜀开国皇帝，李克用女婿，据川中称帝，子孟昶降宋。"],
+  ["花蕊夫人", "?—965", "后蜀孟昶宠妃，徐氏，《宫词》百首；「四十万人齐卸甲」写蜀亡之痛。"],
+  ["苏轼", "1037—1101", "眉山人，「唐宋八大家」之一，诗词文书画皆精，四川文化巅峰。"],
+  ["陆游", "1125—1210", "山阴人，入蜀任夔州通判，写下「细雨骑驴入剑门」。"],
+  ["余玠", "?—1253", "南宋四川安抚制置使，筑钓鱼城、万州，抗蒙名将。"],
+  ["王坚", "?—1264", "南宋名将，钓鱼城守将，蒙哥汗伤重而亡，「上帝折鞭」。"],
+  ["张珏", "?—1280", "钓鱼城最后守将，南宋最顽固的孤臣。"],
+  ["蒙哥", "1209—1259", "蒙古大汗，亲征钓鱼城，伤重死于城下，蒙古西征中止。"],
+  ["王阳明", "1472—1529", "贵州龙场悟道于川黔边境，心学开宗立派（流放地近四川）。"],
+  ["杨慎", "1488—1559", "新都人，「大江东去，浪淘尽，千古风流人物」；因大礼议流放云南，途经四川。"],
+  ["朱德", "1886—1976", "仪陇人，开国元帅；早年入川参与辛亥革命保路运动。"]
+];
+const PLACES = [
+  ["成都", "成都 / 益州 / 成都府", "周秦至清均为川中首府；蜀汉、前后蜀建都。"],
+  ["都江堰", "湔氐道 / 灌县", "李冰都江堰工程所在地。"],
+  ["广汉", "雒 / 广汉郡", "三星堆、金沙遗址所在。"],
+  ["绵阳", "涪县 / 涪城 / 绵州", "金牛道重镇，李白成长地。"],
+  ["广元", "利州 / 剑州", "金牛道北口，剑门关。"],
+  ["阆中", "阆中 / 保宁府", "春节文化发源地，张飞镇守。"],
+  ["南充", "安汉 / 果州 / 顺庆府", "川北粮仓。"],
+  ["达州", "宕渠 / 通州 / 达州", "荔枝道北口。"],
+  ["万州", "鱼复 / 夔州 / 夔州路", "长江三峡西口。"],
+  ["重庆", "江州 / 渝州 / 重庆府", "巴国古都，南宋抗蒙指挥中心。"],
+  ["宜宾", "僰道 / 戎州 / 叙州", "万里长江第一城。"],
+  ["泸州", "江阳 / 泸州 / 泸州路", "川南酒都、江运枢纽。"],
+  ["乐山", "南安 / 嘉州 / 嘉定府", "乐山大佛、峨眉山。"],
+  ["雅安", "严道 / 雅州", "茶马古道起点。"],
+  ["西昌", "邛都 / 建昌 / 宁远府", "凉山州首府，邛海。"],
+  ["自贡", "自流井 / 荣州", "井盐重镇，盐都。"],
+  ["汉源", "旄牛 / 黎州", "「汉水之源」误名，川滇门户。"],
+  ["江油", "龙州 / 江油", "李白故里。"]
+];
+const ROUTES = [
+  ["金牛道（褒斜—剑阁）", "汉中经剑阁入蜀，三国蜀出祁山必由；「细雨骑驴入剑门」。"],
+  ["米仓道", "汉中经巴中入川东，刘备取巴蜀之路。"],
+  ["荔枝道", "涪州贡鲜荔枝飞马入长安，「一骑红尘妃子笑」。"],
+  ["阴平道", "邓艾偷渡阴平，绕过剑阁灭蜀的奇谋。"],
+  ["茶马古道", "雅安藏马川茶交易，连接川藏与南诏。"],
+  ["五尺道", "宜宾南下云南，秦开西南夷的官道。"]
+];
+
+/* ---------------- 渲染地图 ---------------- */
+const gatesG = $("gates");
+GATES.forEach(g => {
+  gatesG.appendChild(el("rect", { x: g.x - 6.5, y: g.y - 6.5, width: 13, height: 13, fill: "#8a6f45", transform: `rotate(45 ${g.x} ${g.y})` }));
+  gatesG.appendChild(el("text", { x: g.x, y: g.y + g.dy }, g.label));
+});
+
+const statesG = $("states");
+const stateNodes = {};
+CITIES.forEach(s => {
+  const g = el("g", { class: "state", tabindex: 0, role: "button", "aria-label": `${s.name}，${s.today}，${s.band}`, "aria-pressed": "false", "data-id": s.id });
+  g.appendChild(el("title", {}, `${s.name}（${s.today}）`));
+  g.appendChild(el("circle", { class: "hit", cx: s.x, cy: s.y, r: 30 }));
+  g.appendChild(el("circle", { class: "halo", cx: s.x, cy: s.y, r: s.r + 7 }));
+  g.appendChild(el("circle", { class: "ring", cx: s.x, cy: s.y, r: s.r + 7 }));
+  g.appendChild(el("circle", { class: "dot", cx: s.x, cy: s.y, r: s.r }));
+  g.appendChild(el("text", { x: s.x, y: s.y + s.ly }, s.short));
+  g.addEventListener("click", () => selectCity(s.id));
+  g.addEventListener("keydown", e => {
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); selectCity(s.id); }
+  });
+  statesG.appendChild(g);
+  stateNodes[s.id] = g;
+});
+/* 移动端横滑提示 */
+const mwHint = document.createElement("div");
+mwHint.className = "pan-hint";
+mwHint.textContent = "\u25c2 \u53ef\u5de6\u53f3\u6ed1\u52a8\u67e5\u770b\u5168\u56fe \u25b8";
+document.querySelector(".map-wrap").appendChild(mwHint);
+document.querySelector(".map-wrap").addEventListener("scroll", () => { mwHint.style.opacity = "0"; }, { once: true });
+
+
+const panelDefault = $("panel-default"), panelDetail = $("panel-detail");
+
+function selectCity(id) {
+  const s = CITIES.find(x => x.id === id);
+  if (!s) return;
+  Object.values(stateNodes).forEach(n => { n.classList.remove("selected"); n.setAttribute("aria-pressed", "false"); });
+  stateNodes[id].classList.add("selected");
+  stateNodes[id].setAttribute("aria-pressed", "true");
+  $("d-name").textContent = s.name;
+  $("d-today").textContent = s.today;
+  const ul = $("d-points");
+  ul.replaceChildren(...s.points.map(p => { const li = document.createElement("li"); li.textContent = p; return li; }));
+  const fate = $("d-fate");
+  const b = document.createElement("b");
+  b.textContent = "结局：";
+  fate.replaceChildren(b, document.createTextNode(s.fate));
+  const xl = $("d-link");
+  if (s.link) { xl.textContent = s.link.text + " →"; xl.hidden = false; xl.onclick = () => selectCity(s.link.target); }
+  else { xl.hidden = true; xl.onclick = null; }
+  panelDefault.hidden = true;
+  panelDetail.hidden = false;
+  const st = panelDetail.querySelector(".stagger");
+  st.classList.remove("stagger");
+  void st.offsetHeight;
+  st.classList.add("stagger");
+  document.querySelector("aside").scrollTop = 0;
+  history.replaceState(null, "", "#map:" + id);
+  stateNodes[id].scrollIntoView({ block: "nearest", inline: "nearest", behavior: REDUCED ? "auto" : "smooth" });
+}
+
+/* ---------------- 渲染时间轴 ---------------- */
+const timeline = $("timeline");
+const cards = {};
+POLITIES.forEach((p, i) => {
+  const li = document.createElement("li");
+  li.className = "card";
+  li.dataset.id = p.id;
+  li.style.setProperty("--i", i);
+  const det = document.createElement("details");
+  const sum = document.createElement("summary");
+  const name = document.createElement("span"); name.className = "name"; name.textContent = p.name;
+  const yrs = document.createElement("span"); yrs.className = "years"; yrs.textContent = p.years;
+  const tag = document.createElement("span"); tag.className = "lang"; tag.textContent = p.tag;
+  sum.append(name, yrs, tag);
+  const body = document.createElement("div"); body.className = "body";
+  const ul = document.createElement("ul");
+  p.points.forEach(t => { const x = document.createElement("li"); x.textContent = t; ul.appendChild(x); });
+  const out = document.createElement("div"); out.className = "out";
+  const ob = document.createElement("b"); ob.textContent = "此后：";
+  out.append(ob, document.createTextNode(p.out));
+  body.append(ul, out);
+  det.append(sum, body);
+  li.appendChild(det);
+  sum.addEventListener("click", () => {
+    if (!det.open) history.replaceState(null, "", "#time:" + p.id);
+  });
+  timeline.appendChild(li);
+  cards[p.id] = { li, det };
+});
+
+const toolbar = $("toolbar");
+toolbar.appendChild(Object.assign(document.createElement("span"), { textContent: "按时代筛选：" }));
+const chips = ERAS.map(e => {
+  const b = document.createElement("button");
+  b.className = "chip"; b.textContent = e;
+  b.setAttribute("aria-pressed", e === "全部" ? "true" : "false");
+  b.addEventListener("click", () => applyFilter(e));
+  toolbar.appendChild(b);
+  return b;
+});
+const toggleAll = document.createElement("button");
+toggleAll.className = "tool"; toggleAll.textContent = "全部展开";
+let allOpen = false;
+toggleAll.addEventListener("click", () => {
+  allOpen = !allOpen;
+  Object.values(cards).forEach(c => { c.det.open = allOpen; });
+  toggleAll.textContent = allOpen ? "全部收起" : "全部展开";
+});
+toolbar.appendChild(toggleAll);
+
+function applyFilter(e) {
+  chips.forEach(c => c.setAttribute("aria-pressed", String(c.textContent === e)));
+  POLITIES.forEach(p => cards[p.id].li.classList.toggle("dim", e !== "全部" && p.era !== e));
+}
+
+const rulesEl = $("rules");
+RULES.forEach((r, i) => {
+  const box = document.createElement("div");
+  box.className = "rule";
+  box.style.setProperty("--i", i);
+  const h = document.createElement("h3"); h.textContent = r.title;
+  const ul = document.createElement("ul");
+  r.items.forEach(t => { const li = document.createElement("li"); li.textContent = t; ul.appendChild(li); });
+  box.append(h, ul);
+  rulesEl.appendChild(box);
+});
+
+/* ---------------- 详考渲染 ---------------- */
+const detailRoot = $("detail-root");
+(function renderDetail() {
+  const sec = (h, sub, inner) => {
+    const s = document.createElement("section");
+    s.className = "sec";
+    const h3 = document.createElement("h3");
+    h3.textContent = h;
+    if (sub) h3.appendChild(Object.assign(document.createElement("span"), { textContent: sub }));
+    s.appendChild(h3);
+    const box = document.createElement("div");
+    box.innerHTML = inner;
+    s.appendChild(box);
+    detailRoot.appendChild(s);
+  };
+  sec("大事年表", "从立国到行省 · 选择性列大事",
+    '<ul class="chrono">' + CHRONO.map(c => `<li><span class="y">${c.y}</span><span>${c.t}</span></li>`).join("") + "</ul>");
+  sec("人物志", "与四川有关的人物 · 简考",
+    '<div class="people">' + PEOPLE.map(p => `<div class="person"><b>${p[0]}</b><span class="d">${p[1]}</span><p>${p[2]}</p></div>`).join("") + "</div>");
+  sec("地名沿革", "古今对照",
+    '<div class="two-col"><table class="plain"><thead><tr><th>今地</th><th>古名</th><th>说明</th></tr></thead><tbody>'
+    + PLACES.map(p => `<tr><td>${p[0]}</td><td>${p[1]}</td><td>${p[2]}</td></tr>`).join("") + "</tbody></table></div>");
+  sec("古道与关隘", "蜀道体系",
+    '<div class="two-col"><table class="plain"><thead><tr><th>古道</th><th>走向及故事</th></tr></thead><tbody>'
+    + ROUTES.map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join("") + "</tbody></table></div>");
+})();
+
+/* ---------------- 视图切换 ---------------- */
+function openCard(id) {
+  const c = cards[id];
+  if (!c) return;
+  c.det.open = true;
+  history.replaceState(null, "", "#time:" + id);
+  c.li.scrollIntoView({ behavior: REDUCED ? "auto" : "smooth", block: "center" });
+  c.det.querySelector("summary").focus({ preventScroll: true });
+}
+
+const tabs = { map: $("tab-map"), time: $("tab-time"), detail: $("tab-detail") };
+const views = { map: $("view-map"), time: $("view-time"), detail: $("view-detail") };
+const pill = document.querySelector("nav .pill");
+
+function movePill() {
+  const active = Object.values(tabs).find(t => t.getAttribute("aria-selected") === "true");
+  if (!active || !pill) return;
+  pill.style.width = active.offsetWidth + "px";
+  pill.style.transform = `translateX(${active.offsetLeft}px)`;
+}
+function showView(name) {
+  Object.keys(tabs).forEach(k => {
+    const on = k === name;
+    tabs[k].setAttribute("aria-selected", String(on));
+    tabs[k].tabIndex = on ? 0 : -1;
+    views[k].hidden = !on;
+    views[k].style.animation = "none";
+    void views[k].offsetHeight;
+    views[k].style.animation = "";
+  });
+  movePill();
+  history.replaceState(null, "", "#" + name);
+}
+const tabKeys = Object.keys(tabs);
+tabKeys.forEach(k => tabs[k].addEventListener("click", () => showView(k)));
+addEventListener("keydown", e => {
+  const i = tabKeys.findIndex(k => tabs[k] === document.activeElement);
+  if (i < 0) return;
+  const j = e.key === "ArrowRight" ? i + 1 : e.key === "ArrowLeft" ? i - 1
+    : e.key === "Home" ? 0 : e.key === "End" ? tabKeys.length - 1 : -1;
+  if (j < 0) return;
+  e.preventDefault();
+  const k = tabKeys[(j + tabKeys.length) % tabKeys.length];
+  tabs[k].focus();
+  showView(k);
+});
+addEventListener("resize", movePill);
+addEventListener("load", movePill);
+addEventListener("beforeprint", () => Object.values(cards).forEach(c => { c.det.open = true; }));
+function initFromHash() {
+  const [v, id] = location.hash.slice(1).split(":");
+  showView(["time", "detail"].includes(v) ? v : "map");
+  if (id) {
+    if (v === "map") selectCity(id);
+    else if (v === "time") openCard(id);
+  }
+}
+initFromHash();
+addEventListener("hashchange", initFromHash);
+requestAnimationFrame(movePill);
+</script>
+</body>
+</html>

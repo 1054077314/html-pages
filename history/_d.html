@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>陕西 · 周秦至元的两千年</title>
+<style>
+  * { box-sizing: border-box; margin: 0; }
+  :root {
+    --ink: #241d14; --ink-2: #4a3b26; --ink-3: #6d5f43; --ink-4: #9a8a6a;
+    --paper: #f7f1e3; --paper-2: #fffdf7; --paper-3: #efe4cd;
+    --line: #dcccaa; --line-2: #c9b68d;
+    --cinnabar: #c0392b; --cinnabar-2: #e2604a;
+    --jade: #1f7a63; --gold: #b08a3e;
+    --river: #4f92b0; --wall: #8a7a5c;
+    --shadow-s: 0 1px 2px rgba(60,44,20,.06), 0 2px 8px rgba(60,44,20,.07);
+    --shadow-m: 0 6px 18px rgba(60,44,20,.11), 0 1px 3px rgba(60,44,20,.07);
+    --ease: cubic-bezier(.22,.61,.36,1);
+    --serif: "Source Han Serif SC", "Noto Serif SC", "Songti SC", "STSong", "SimSun", serif;
+  }
+  html, body { height: 100%; }
+  body {
+    font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans SC", sans-serif;
+    color: var(--ink); display: flex; flex-direction: column; height: 100dvh; overflow: hidden;
+    background:
+      radial-gradient(1200px 700px at 10% -12%, #fffcf4 0%, transparent 62%),
+      radial-gradient(900px 620px at 102% 112%, #efe0c0 0%, transparent 58%),
+      var(--paper);
+    -webkit-font-smoothing: antialiased;
+  }
+  button { font-family: inherit; }
+  button:focus-visible, .state:focus-visible, summary:focus-visible { outline: 2.5px solid #2b6cb0; outline-offset: 3px; border-radius: 6px; }
+  [hidden] { display: none !important; }
+
+  header {
+    position: relative; display: flex; align-items: center; gap: 26px; padding: 0 26px;
+    height: 64px; flex-shrink: 0; z-index: 5;
+    background: linear-gradient(180deg, #fffdf7, #f4ebd7);
+    border-bottom: 1px solid var(--line);
+    box-shadow: inset 0 1px 0 #fff, 0 10px 24px -18px rgba(60,44,20,.55);
+  }
+  header::after {
+    content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold) 30%, var(--gold) 70%, transparent);
+    opacity: .45;
+  }
+  .brand {
+    font-family: var(--serif); font-size: 21px; letter-spacing: .18em; color: var(--ink);
+    display: flex; align-items: center; gap: 11px; white-space: nowrap;
+  }
+  .brand::before {
+    content: ""; width: 10px; height: 10px; border-radius: 1.5px; background: var(--cinnabar);
+    transform: rotate(45deg); box-shadow: 0 0 0 3px rgba(192,57,43,.14);
+    animation: sealIn .8s var(--ease) both;
+  }
+  @keyframes sealIn { from { transform: rotate(45deg) scale(0); } }
+  nav { position: relative; display: flex; gap: 3px; padding: 4px; border-radius: 999px; background: #ece0c6; box-shadow: inset 0 1px 3px rgba(60,44,20,.15); }
+  nav .pill {
+    position: absolute; top: 4px; left: 0; height: calc(100% - 8px); border-radius: 999px;
+    background: linear-gradient(180deg, #3e3221, #241d14);
+    box-shadow: 0 2px 10px rgba(36,29,20,.38);
+    transition: transform .42s var(--ease), width .42s var(--ease);
+  }
+  nav button {
+    position: relative; z-index: 1; font-size: 13.5px; letter-spacing: .08em; padding: 7px 19px;
+    border: 0; background: none; color: var(--ink-3); cursor: pointer; border-radius: 999px;
+    transition: color .3s var(--ease);
+  }
+  nav button[aria-selected="true"] { color: #fdf6e6; }
+  .hint { margin-left: auto; font-size: 12px; color: var(--ink-4); letter-spacing: .08em; }
+
+  main { flex: 1; min-height: 0; display: flex; }
+  [role="tabpanel"] { animation: viewIn .5s var(--ease) both; }
+  @keyframes viewIn { from { opacity: 0; transform: translateY(10px); } }
+
+  /* ===== 地图 ===== */
+  #view-map { flex: 1; display: flex; min-width: 0; }
+  .map-wrap {
+    flex: 1; position: relative; min-width: 0; overflow: auto;
+    background: radial-gradient(1100px 640px at 34% 18%, #fffdf6 0%, transparent 64%), linear-gradient(180deg, #f8f2e4, #f0e7d2);
+  }
+  .map-wrap svg { width: 100%; height: 100%; display: block; }
+  .title-block { position: absolute; top: 20px; left: 28px; pointer-events: none; animation: titleIn 1s var(--ease) .35s both; }
+  @keyframes titleIn { from { opacity: 0; transform: translateX(-14px); } }
+  .title-block h2 { font-family: var(--serif); font-size: 30px; letter-spacing: .3em; color: var(--ink); text-shadow: 0 1px 0 #fff; }
+  .title-block p { font-size: 13px; color: var(--ink-3); margin-top: 8px; letter-spacing: .14em; }
+  .title-block .title-rule { width: 46px; height: 2px; background: var(--cinnabar); margin-top: 11px; border-radius: 2px; }
+
+  .band-label { font-family: var(--serif); font-size: 17px; fill: #a08b56; letter-spacing: .28em; text-anchor: middle; paint-order: stroke; stroke: #f7f1e3; stroke-width: 5px; }
+  .geo-label { fill: #8c7d5a; paint-order: stroke; stroke: #f7f1e3; stroke-width: 5px; letter-spacing: .1em; }
+
+  .state { cursor: pointer; }
+  .state .hit { fill: transparent; }
+  .state .dot {
+    fill: #fffdf6; stroke: #7a6547; stroke-width: 2.2;
+    transform-box: fill-box; transform-origin: center;
+    transition: transform .3s var(--ease), fill .3s var(--ease), stroke .3s var(--ease);
+    filter: drop-shadow(0 1px 2px rgba(60,44,20,.28));
+  }
+  .state .ring, .state .halo {
+    fill: none; stroke: var(--cinnabar); stroke-width: 1.6;
+    transform-box: fill-box; transform-origin: center; opacity: 0;
+    transition: opacity .3s var(--ease), transform .3s var(--ease);
+  }
+  .state .ring { transform: scale(.82); }
+  .state:hover .dot, .state:focus-visible .dot { transform: scale(1.3); fill: #ffe4ab; stroke: #6b5836; }
+  .state:hover .ring, .state:focus-visible .ring { opacity: .55; transform: scale(1); }
+  .state.selected .dot { fill: var(--cinnabar); stroke: #7d2419; transform: scale(1.36); }
+  .state.selected .ring { opacity: 1; transform: scale(1.14); }
+  .state.selected .halo { animation: pulse 2.6s ease-out infinite; }
+  @keyframes pulse { 0% { transform: scale(1); opacity: .75; } 70%,100% { transform: scale(1.85); opacity: 0; } }
+  .state text {
+    font-family: var(--serif); font-size: 16px; font-weight: 700; fill: var(--ink-2);
+    paint-order: stroke; stroke: #f7f1e3; stroke-width: 4px; text-anchor: middle;
+    transition: fill .3s var(--ease);
+  }
+  .state.selected text { fill: #8c2f14; }
+  .marker text { font-size: 12.5px; fill: var(--ink-3); paint-order: stroke; stroke: #f7f1e3; stroke-width: 3px; text-anchor: middle; letter-spacing: .04em; }
+
+  aside {
+    width: 372px; flex-shrink: 0; border-left: 1px solid var(--line); overflow-y: auto;
+    padding: 26px 24px 40px;
+    background: linear-gradient(180deg, #fffdf7, #f8f1e2);
+    box-shadow: -14px 0 30px -24px rgba(60,44,20,.5);
+  }
+  aside h3 { font-family: var(--serif); font-size: 26px; color: var(--ink); letter-spacing: .1em; }
+  .today {
+    display: inline-block; margin: 11px 0 16px; padding: 4px 12px; border-radius: 999px;
+    background: linear-gradient(180deg, #f3e8cd, #ece0c2); border: 1px solid var(--line);
+    font-size: 12.5px; color: var(--ink-3);
+  }
+  aside ul { list-style: none; padding: 0; }
+  aside li { font-size: 14.5px; line-height: 1.75; margin-bottom: 11px; padding-left: 17px; position: relative; color: var(--ink-2); }
+  aside li::before {
+    content: ""; position: absolute; left: 0; top: 10px; width: 6px; height: 6px;
+    border-radius: 50%; background: var(--cinnabar-2); box-shadow: 0 0 0 3px rgba(226,96,74,.14);
+  }
+  .fate {
+    margin-top: 18px; padding: 13px 15px; border-radius: 3px 8px 8px 3px;
+    background: linear-gradient(100deg, #f4e8ce, #fbf4e4);
+    border-left: 4px solid var(--gold); font-size: 13.5px; line-height: 1.75; color: var(--ink-3); box-shadow: var(--shadow-s);
+  }
+  .fate b { color: var(--ink); }
+  .xlink {
+    display: inline-flex; align-items: center; gap: 6px; margin-top: 16px; font-size: 13.5px;
+    color: var(--cinnabar); background: none; border: 0; padding: 0; cursor: pointer;
+    border-bottom: 1px dashed rgba(192,57,43,.5); transition: gap .25s var(--ease), color .25s;
+  }
+  .xlink:hover { gap: 11px; color: #7d2419; }
+  .default-tip { color: var(--ink-3); font-size: 14.5px; line-height: 2; margin: 10px 0 6px; text-align: center; }
+  .legend {
+    margin-top: 26px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 10px;
+    font-size: 13.5px; color: var(--ink-3); background: rgba(255,253,247,.75); box-shadow: var(--shadow-s);
+  }
+  .legend div { display: flex; align-items: center; gap: 11px; margin: 8px 0; }
+  .legend i { width: 44px; height: 10px; flex-shrink: 0; display: block; position: relative; }
+  .panel-foot { margin-top: 20px; font-size: 12px; color: var(--ink-4); line-height: 1.8; border-top: 1px solid var(--line); padding-top: 14px; }
+
+  .stagger > * { animation: itemIn .5s var(--ease) both; }
+  .stagger > *:nth-child(1) { animation-delay: .02s; }
+  .stagger > *:nth-child(2) { animation-delay: .07s; }
+  .stagger > *:nth-child(3) { animation-delay: .12s; }
+  .stagger > *:nth-child(4) { animation-delay: .17s; }
+  @keyframes itemIn { from { opacity: 0; transform: translateX(9px); } }
+
+  /* ===== 时间轴 ===== */
+  #view-time { flex: 1; overflow-y: auto; padding: 34px 26px 60px; }
+  .time-inner { max-width: 900px; margin: 0 auto; }
+  .time-inner h2 { font-family: var(--serif); font-size: 30px; letter-spacing: .18em; color: var(--ink); }
+  .lead { font-size: 14px; color: var(--ink-3); margin: 10px 0 20px; line-height: 1.85; max-width: 64ch; }
+  .toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 22px; font-size: 13px; color: var(--ink-4); }
+  .chip {
+    font-size: 13px; padding: 5px 14px; border-radius: 999px; border: 1px solid var(--line);
+    background: linear-gradient(180deg, #fffdf7, #f4ebd8); color: var(--ink-3); cursor: pointer;
+    transition: transform .22s var(--ease), box-shadow .22s var(--ease), background .22s, color .22s, border-color .22s;
+  }
+  .chip:hover { transform: translateY(-1px); box-shadow: var(--shadow-s); }
+  .chip[aria-pressed="true"] { background: linear-gradient(180deg, #3e3221, #241d14); color: #fdf6e6; border-color: transparent; box-shadow: 0 3px 12px rgba(36,29,20,.3); }
+  .tool { margin-left: auto; font-size: 13px; padding: 5px 15px; border-radius: 999px; border: 1px dashed var(--line-2); background: none; color: var(--ink-3); cursor: pointer; transition: background .22s, color .22s; }
+  .tool:hover { background: rgba(255,253,247,.9); color: var(--ink); }
+
+  .timeline { list-style: none; padding: 0 0 0 26px; position: relative; }
+  .timeline::before {
+    content: ""; position: absolute; left: 6px; top: 6px; bottom: 26px; width: 2px;
+    background: linear-gradient(180deg, rgba(201,182,141,0), var(--line-2) 8%, var(--line-2) 92%, rgba(201,182,141,0));
+    transform-origin: top; animation: growLine 1.1s var(--ease) .1s both;
+  }
+  @keyframes growLine { from { transform: scaleY(0); } }
+
+  .card {
+    position: relative; margin: 0 0 12px; border-radius: 10px; border: 1px solid var(--line);
+    background: linear-gradient(180deg, #fffdf8, #faf4e7); box-shadow: var(--shadow-s);
+    transition: transform .3s var(--ease), box-shadow .3s var(--ease), opacity .35s var(--ease), border-color .3s;
+    animation: cardIn .6s var(--ease) both; animation-delay: calc(var(--i) * 55ms);
+  }
+  @keyframes cardIn { from { opacity: 0; transform: translateY(16px) scale(.985); } }
+  .card::before {
+    content: ""; position: absolute; left: -26px; top: 21px; width: 11px; height: 11px; border-radius: 50%;
+    background: #fffdf6; border: 2.5px solid var(--cinnabar-2); box-shadow: 0 0 0 4px var(--paper);
+    transition: transform .3s var(--ease), background .3s, border-color .3s;
+  }
+  .card:hover { transform: translateY(-2px); box-shadow: var(--shadow-m); border-color: var(--line-2); }
+  .card:hover::before { transform: scale(1.25); border-color: var(--cinnabar); }
+  .card[open] { box-shadow: var(--shadow-m); border-color: var(--line-2); background: linear-gradient(180deg, #fffefa, #fbf6ea); }
+  .card[open]::before { background: var(--cinnabar); border-color: var(--cinnabar); }
+  .card.dim { opacity: .26; filter: saturate(.35); }
+  .card summary { list-style: none; cursor: pointer; padding: 13px 17px; display: flex; flex-wrap: wrap; align-items: baseline; gap: 5px 12px; }
+  .card summary::-webkit-details-marker { display: none; }
+  .card summary::after { content: "＋"; margin-left: auto; color: var(--ink-4); font-size: 15px; transition: transform .35s var(--ease), color .25s; }
+  .card[open] summary::after { content: "－"; color: var(--cinnabar); }
+  .card .name { font-family: var(--serif); font-size: 19px; font-weight: 700; color: var(--ink); letter-spacing: .06em; }
+  .card .years { font-size: 12.5px; color: var(--ink-3); }
+  .card .lang { font-size: 11.5px; padding: 2px 9px; border-radius: 999px; background: #efe4cd; color: var(--ink-3); border: 1px solid rgba(201,182,141,.7); }
+  .card .body { padding: 0 17px 15px; animation: bodyIn .45s var(--ease) both; }
+  @keyframes bodyIn { from { opacity: 0; transform: translateY(-6px); } }
+  .card ul { list-style: none; padding: 0; }
+  .card li { font-size: 14.5px; line-height: 1.8; padding-left: 17px; position: relative; margin-bottom: 5px; color: var(--ink-2); }
+  .card li::before { content: ""; position: absolute; left: 1px; top: 11px; width: 5px; height: 5px; border-radius: 50%; background: var(--gold); }
+  .card .out {
+    margin-top: 11px; padding: 10px 14px; border-radius: 3px 8px 8px 3px;
+    background: linear-gradient(100deg, #f4e8ce, #fbf4e4); border-left: 4px solid var(--gold);
+    font-size: 13.5px; line-height: 1.8; color: var(--ink-3);
+  }
+  .card .out b { color: var(--ink); }
+
+  .rules { margin-top: 30px; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; }
+  .rule {
+    border-radius: 12px; padding: 17px 18px; border: 1px solid var(--line);
+    background: linear-gradient(160deg, #fffdf8, #f6eddb); box-shadow: var(--shadow-s);
+    transition: transform .3s var(--ease), box-shadow .3s var(--ease);
+    animation: cardIn .6s var(--ease) both; animation-delay: calc(430ms + var(--i) * 70ms);
+  }
+  .rule:hover { transform: translateY(-3px); box-shadow: var(--shadow-m); }
+  .rule h3 { font-family: var(--serif); font-size: 17px; color: var(--ink); margin-bottom: 11px; letter-spacing: .08em; padding-bottom: 9px; border-bottom: 1px solid var(--line); }
+  .rule ul { padding: 0; }
+  .rule li { font-size: 14px; line-height: 1.8; margin-bottom: 6px; list-style: none; padding-left: 15px; position: relative; color: var(--ink-2); }
+  .rule li::before { content: ""; position: absolute; left: 2px; top: 11px; width: 5px; height: 5px; background: var(--cinnabar-2); transform: rotate(45deg); }
+  .caveat { margin: 22px 0 0; font-size: 12px; color: var(--ink-4); line-height: 1.9; border-top: 1px solid var(--line); padding-top: 14px; }
+
+  /* ===== 详考 ===== */
+  #view-detail { flex: 1; overflow-y: auto; padding: 34px 26px 60px; }
+  .detail-inner { max-width: 1000px; margin: 0 auto; }
+  .detail-inner h2 { font-family: var(--serif); font-size: 30px; letter-spacing: .18em; color: var(--ink); }
+  .sec { margin-top: 34px; animation: cardIn .6s var(--ease) both; }
+  .sec > h3 {
+    font-family: var(--serif); font-size: 20px; color: var(--ink); letter-spacing: .1em;
+    padding-bottom: 10px; border-bottom: 2px solid var(--line-2); margin-bottom: 16px;
+    display: flex; align-items: baseline; gap: 12px;
+  }
+  .sec > h3 span { font-family: inherit; font-size: 12px; color: var(--ink-4); letter-spacing: .04em; font-weight: 400; }
+  .chrono { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(330px, 1fr)); gap: 0 30px; }
+  .chrono li {
+    display: grid; grid-template-columns: 86px 1fr; gap: 12px; font-size: 13.5px; line-height: 1.7;
+    padding: 6px 0; border-bottom: 1px dashed rgba(201,182,141,.5); color: var(--ink-2);
+  }
+  .chrono .y { font-family: var(--serif); font-weight: 700; color: var(--cinnabar); font-size: 13px; white-space: nowrap; }
+  .people { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 11px; }
+  .person {
+    padding: 12px 15px; border: 1px solid var(--line); border-radius: 9px;
+    background: linear-gradient(180deg, #fffdf8, #faf4e7); box-shadow: var(--shadow-s);
+    transition: transform .25s var(--ease), box-shadow .25s var(--ease);
+  }
+  .person:hover { transform: translateY(-2px); box-shadow: var(--shadow-m); }
+  .person b { font-family: var(--serif); font-size: 16px; color: var(--ink); }
+  .person .d { font-size: 11.5px; color: var(--ink-4); margin-left: 8px; }
+  .person p { font-size: 13.5px; line-height: 1.72; color: var(--ink-3); margin-top: 6px; }
+  table.plain { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  table.plain th { text-align: left; font-weight: 400; color: var(--ink-4); font-size: 12px; padding: 8px 12px; border-bottom: 1px solid var(--line-2); letter-spacing: .06em; }
+  table.plain td { padding: 9px 12px; border-bottom: 1px dashed rgba(201,182,141,.5); line-height: 1.75; vertical-align: top; color: var(--ink-3); }
+  table.plain td:first-child { font-family: var(--serif); font-weight: 700; color: var(--ink); white-space: nowrap; }
+  .two-col { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 0 34px; }
+
+  noscript { padding: 26px; display: block; }
+
+  @media (max-width: 880px) {
+    header { padding: 0 14px; gap: 12px; }
+    .brand { font-size: 17px; letter-spacing: .1em; }
+    .hint { display: none; }
+    #view-map { flex-direction: column; }
+    .map-wrap { flex: none; height: 54dvh; }
+    .map-wrap svg { min-width: 900px; }
+    .title-block { top: 14px; left: 18px; }
+    .title-block h2 { font-size: 22px; }
+    aside { width: 100%; border-left: 0; border-top: 1px solid var(--line); flex: 1; min-height: 0; padding: 18px 16px 30px; box-shadow: none; }
+    #view-time { padding: 22px 15px 46px; }
+    .timeline { padding-left: 22px; }
+    .card::before { left: -22px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition-duration: .01ms !important; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">陕西 · 两千年</div>
+  <nav role="tablist" aria-label="切换视图">
+    <span class="pill" aria-hidden="true" style="width: 96px; transform: translateX(4px);"></span>
+    <button role="tab" id="tab-map" aria-selected="true" aria-controls="view-map">陕西地图</button>
+    <button role="tab" id="tab-time" aria-selected="false" aria-controls="view-time">历史演进</button>
+    <button role="tab" id="tab-detail" aria-selected="false" aria-controls="view-detail">详考</button>
+  </nav>
+  <span class="hint">周秦至明 · 关中 / 陕北 / 陕南 · 全部离线</span>
+</header>
+
+<main>
+  <section id="view-map" role="tabpanel" aria-labelledby="tab-map" style="">
+    <div class="map-wrap">
+      <svg id="map" viewBox="128 62 812 856" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="group" aria-label="陕西省历史地理示意图">
+        <defs>
+          <linearGradient id="bandNorth" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#e6d3a8" stop-opacity=".55"></stop>
+            <stop offset="100%" stop-color="#ead9b2" stop-opacity=".18"></stop>
+          </linearGradient>
+          <linearGradient id="bandCentral" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#cfe0c2" stop-opacity=".5"></stop>
+            <stop offset="100%" stop-color="#dfe8d2" stop-opacity=".22"></stop>
+          </linearGradient>
+          <linearGradient id="bandSouth" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#c7dbd0" stop-opacity=".42"></stop>
+            <stop offset="100%" stop-color="#d6e4dc" stop-opacity=".18"></stop>
+          </linearGradient>
+          <linearGradient id="riverGrad" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#8fc0d6"></stop>
+            <stop offset="100%" stop-color="#4f92b0"></stop>
+          </linearGradient>
+        </defs>
+
+        <g opacity=".45">
+          <rect x="140" y="74" width="790" height="832" fill="none" stroke="#dcccaa" stroke-width=".8" display="none"></rect>
+        </g>
+
+        <!-- 三大地理带 -->
+        <path d="M520,104 L640,84 L772,124 L872,190 L840,270 L800,352 L790,404 Q700,392 580,372 Q440,382 320,370 Q196,388 172,382 L204,286 L286,204 L404,146 Z" fill="url(#bandNorth)"></path>
+        <path d="M196,388 Q320,370 440,382 Q580,372 700,392 Q762,402 782,428 L828,516 L796,528 Q700,534 600,548 Q500,552 400,566 Q300,556 214,596 L200,452 Z" fill="url(#bandCentral)"></path>
+        <path d="M214,596 Q300,556 400,566 Q500,552 600,548 Q700,534 796,528 L742,624 L706,700 L726,798 L700,872 L596,894 L452,872 L300,832 L182,792 L214,700 L252,618 Z" fill="url(#bandSouth)"></path>
+
+        <!-- 省界 -->
+        <path d="M520,104 L640,84 L772,124 L872,190 L840,270 L800,352 L782,428 L828,516 L796,596 L742,624 L706,700 L726,798 L700,872 L596,894 L452,872 L300,832 L182,792 L214,700 L252,618 L232,540 L200,452 L172,382 L204,286 L286,204 L404,146 Z" fill="none" stroke="#9a8a6a" stroke-width="2.6" stroke-linejoin="round"></path>
+        <path d="M520,104 L640,84 L772,124 L872,190 L840,270 L800,352 L782,428 L828,516 L796,596 L742,624 L706,700 L726,798 L700,872 L596,894 L452,872 L300,832 L182,792 L214,700 L252,618 L232,540 L200,452 L172,382 L204,286 L286,204 L404,146 Z" fill="none" stroke="#fffdf7" stroke-width="1" stroke-dasharray="6 7" opacity=".7"></path>
+
+        <!-- 黄河：省境东界 -->
+        <path d="M872,190 Q856,262 838,332 Q820,392 790,426 Q816,472 838,516 Q820,572 796,600 Q770,640 742,690 Q730,760 726,800" fill="none" stroke="url(#riverGrad)" stroke-width="3.6" stroke-linecap="round" opacity=".9"></path>
+        <text x="884" y="300" class="geo-label" font-size="15">黄　河</text>
+
+        <!-- 渭河 -->
+        <path d="M330,486 Q440,500 520,492 Q640,478 720,452 Q760,440 788,430" fill="none" stroke="url(#riverGrad)" stroke-width="3" stroke-linecap="round" opacity=".85"></path>
+        <text x="628" y="466" class="geo-label" font-size="13">渭河</text>
+
+        <!-- 汉江 -->
+        <path d="M262,690 Q320,730 400,752 Q500,780 560,800 Q640,830 700,860" fill="none" stroke="url(#riverGrad)" stroke-width="3" stroke-linecap="round" opacity=".85"></path>
+        <text x="470" y="784" class="geo-label" font-size="13">汉　江</text>
+
+        <!-- 秦岭 / 北山 / 大巴山 -->
+        <path d="M214,596 Q300,556 400,566 Q500,552 600,548 Q700,534 796,528" fill="none" stroke="#8a9a72" stroke-width="4" opacity=".65" stroke-linecap="round"></path>
+        <path d="M196,388 Q320,370 440,382 Q580,372 700,392 Q762,402 790,404" fill="none" stroke="#b09c6b" stroke-width="3" opacity=".6" stroke-linecap="round"></path>
+        <path d="M186,796 Q300,842 440,874 Q560,902 700,878" fill="none" stroke="#8a9a72" stroke-width="3" opacity=".5" stroke-linecap="round"></path>
+
+        <text x="700" y="562" class="geo-label" font-size="16">秦　岭</text>
+        <text x="150" y="374" class="geo-label" font-size="14">北山</text>
+        <text x="300" y="856" class="geo-label" font-size="14">大巴山</text>
+
+        <!-- 长城（陕北北缘） -->
+        <path d="M452,152 Q560,128 656,138 Q752,150 812,186" fill="none" stroke="var(--wall)" stroke-width="3" stroke-dasharray="11 6" opacity=".75"></path>
+        <text x="562" y="112" class="geo-label" font-size="13">长　城</text>
+
+        <!-- 三带名称 -->
+        <text x="608" y="238" class="band-label">陕北黄土高原</text>
+        <text x="468" y="612" class="band-label" font-size="15">关中平原</text>
+        <text x="470" y="712" class="band-label">陕南秦巴山地</text>
+
+        <!-- 四塞 -->
+        <g class="marker" id="gates"><rect x="777.5" y="423.5" width="13" height="13" fill="#8a6f45" transform="rotate(45 784 430)"></rect><text x="784" y="410">潼关</text><rect x="737.5" y="609.5" width="13" height="13" fill="#8a6f45" transform="rotate(45 744 616)"></rect><text x="744" y="644">武关</text><rect x="279.5" y="549.5" width="13" height="13" fill="#8a6f45" transform="rotate(45 286 556)"></rect><text x="286" y="584">散关</text><rect x="163.5" y="345.5" width="13" height="13" fill="#8a6f45" transform="rotate(45 170 352)"></rect><text x="170" y="332">萧关</text></g>
+        <!-- 城邑 -->
+        <g id="states"><g class="state" tabindex="0" role="button" aria-label="长安，今 · 西安市，关中" aria-pressed="false" data-id="changAn"><circle class="hit" cx="546" cy="478" r="30"></circle><circle class="halo" cx="546" cy="478" r="19"></circle><circle class="ring" cx="546" cy="478" r="19"></circle><circle class="dot" cx="546" cy="478" r="12"></circle><text x="546" y="516">长安</text></g><g class="state" tabindex="0" role="button" aria-label="凤翔 / 雍城，今 · 宝鸡市凤翔区，关中" aria-pressed="false" data-id="fengming"><circle class="hit" cx="306" cy="440" r="30"></circle><circle class="halo" cx="306" cy="440" r="16"></circle><circle class="ring" cx="306" cy="440" r="16"></circle><circle class="dot" cx="306" cy="440" r="9"></circle><text x="306" y="410">凤翔</text></g><g class="state" tabindex="0" role="button" aria-label="咸阳，今 · 咸阳市，关中" aria-pressed="false" data-id="xianyang"><circle class="hit" cx="462" cy="458" r="30"></circle><circle class="halo" cx="462" cy="458" r="18"></circle><circle class="ring" cx="462" cy="458" r="18"></circle><circle class="dot" cx="462" cy="458" r="11"></circle><text x="462" y="428">咸阳</text></g><g class="state" tabindex="0" role="button" aria-label="宝鸡 / 陈仓，今 · 宝鸡市，关中" aria-pressed="false" data-id="baoji"><circle class="hit" cx="330" cy="486" r="30"></circle><circle class="halo" cx="330" cy="486" r="17"></circle><circle class="ring" cx="330" cy="486" r="17"></circle><circle class="dot" cx="330" cy="486" r="10"></circle><text x="330" y="454">宝鸡</text></g><g class="state" tabindex="0" role="button" aria-label="韩城 / 夏阳，今 · 韩城市，关中" aria-pressed="false" data-id="hanCheng"><circle class="hit" cx="742" cy="340" r="30"></circle><circle class="halo" cx="742" cy="340" r="17"></circle><circle class="ring" cx="742" cy="340" r="17"></circle><circle class="dot" cx="742" cy="340" r="10"></circle><text x="742" y="310">韩城</text></g><g class="state" tabindex="0" role="button" aria-label="铜川 / 耀州，今 · 铜川市，关中" aria-pressed="false" data-id="tongchuan"><circle class="hit" cx="610" cy="452" r="30"></circle><circle class="halo" cx="610" cy="452" r="16"></circle><circle class="ring" cx="610" cy="452" r="16"></circle><circle class="dot" cx="610" cy="452" r="9"></circle><text x="610" y="420">铜川</text></g><g class="state" tabindex="0" role="button" aria-label="蒲城 / 桥陵，今 · 渭南市蒲城县，关中" aria-pressed="false" data-id="pucheng"><circle class="hit" cx="640" cy="420" r="30"></circle><circle class="halo" cx="640" cy="420" r="16"></circle><circle class="ring" cx="640" cy="420" r="16"></circle><circle class="dot" cx="640" cy="420" r="9"></circle><text x="640" y="390">蒲城</text></g><g class="state" tabindex="0" role="button" aria-label="华阴 / 华山，今 · 渭南市华阴市，关中" aria-pressed="false" data-id="huayin"><circle class="hit" cx="716" cy="452" r="30"></circle><circle class="halo" cx="716" cy="452" r="16"></circle><circle class="ring" cx="716" cy="452" r="16"></circle><circle class="dot" cx="716" cy="452" r="9"></circle><text x="716" y="482">华阴</text></g><g class="state" tabindex="0" role="button" aria-label="统万城，今 · 靖边县红墩界一带，陕北" aria-pressed="false" data-id="tongwan"><circle class="hit" cx="566" cy="168" r="30"></circle><circle class="halo" cx="566" cy="168" r="18"></circle><circle class="ring" cx="566" cy="168" r="18"></circle><circle class="dot" cx="566" cy="168" r="11"></circle><text x="566" y="198">统万城</text></g><g class="state" tabindex="0" role="button" aria-label="延州 / 延安，今 · 延安市，陕北" aria-pressed="false" data-id="yanAn"><circle class="hit" cx="592" cy="300" r="30"></circle><circle class="halo" cx="592" cy="300" r="17"></circle><circle class="ring" cx="592" cy="300" r="17"></circle><circle class="dot" cx="592" cy="300" r="10"></circle><text x="592" y="270">延安</text></g><g class="state" tabindex="0" role="button" aria-label="绥德 / 上郡，今 · 榆林市绥德县，陕北" aria-pressed="false" data-id="suide"><circle class="hit" cx="664" cy="288" r="30"></circle><circle class="halo" cx="664" cy="288" r="16"></circle><circle class="ring" cx="664" cy="288" r="16"></circle><circle class="dot" cx="664" cy="288" r="9"></circle><text x="664" y="258">绥德</text></g><g class="state" tabindex="0" role="button" aria-label="榆林卫 / 榆林，今 · 榆林市，陕北" aria-pressed="false" data-id="yulin"><circle class="hit" cx="664" cy="130" r="30"></circle><circle class="halo" cx="664" cy="130" r="17"></circle><circle class="ring" cx="664" cy="130" r="17"></circle><circle class="dot" cx="664" cy="130" r="10"></circle><text x="664" y="100">榆林</text></g><g class="state" tabindex="0" role="button" aria-label="定边 / 盐州，今 · 榆林市定边县，陕北" aria-pressed="false" data-id="dingbian"><circle class="hit" cx="468" cy="210" r="30"></circle><circle class="halo" cx="468" cy="210" r="15"></circle><circle class="ring" cx="468" cy="210" r="15"></circle><circle class="dot" cx="468" cy="210" r="8"></circle><text x="468" y="182">定边</text></g><g class="state" tabindex="0" role="button" aria-label="汉中 / 南郑，今 · 汉中市，陕南" aria-pressed="false" data-id="hanZhong"><circle class="hit" cx="300" cy="726" r="30"></circle><circle class="halo" cx="300" cy="726" r="19"></circle><circle class="ring" cx="300" cy="726" r="19"></circle><circle class="dot" cx="300" cy="726" r="12"></circle><text x="300" y="766">汉中</text></g><g class="state" tabindex="0" role="button" aria-label="安康 / 金州，今 · 安康市，陕南" aria-pressed="false" data-id="anKang"><circle class="hit" cx="540" cy="800" r="30"></circle><circle class="halo" cx="540" cy="800" r="17"></circle><circle class="ring" cx="540" cy="800" r="17"></circle><circle class="dot" cx="540" cy="800" r="10"></circle><text x="540" y="770">安康</text></g><g class="state" tabindex="0" role="button" aria-label="商洛 / 商於，今 · 商洛市，陕南" aria-pressed="false" data-id="shangluo"><circle class="hit" cx="672" cy="664" r="30"></circle><circle class="halo" cx="672" cy="664" r="16"></circle><circle class="ring" cx="672" cy="664" r="16"></circle><circle class="dot" cx="672" cy="664" r="9"></circle><text x="672" y="694">商洛</text></g><g class="state" tabindex="0" role="button" aria-label="勉县 / 沔县，今 · 汉中市勉县，陕南" aria-pressed="false" data-id="mianxian"><circle class="hit" cx="222" cy="720" r="30"></circle><circle class="halo" cx="222" cy="720" r="15"></circle><circle class="ring" cx="222" cy="720" r="15"></circle><circle class="dot" cx="222" cy="720" r="8"></circle><text x="222" y="692">勉县</text></g><g class="state" tabindex="0" role="button" aria-label="柞水 / 终南古道，今 · 商洛市柞水县，陕南" aria-pressed="false" data-id="zhashui"><circle class="hit" cx="600" cy="624" r="30"></circle><circle class="halo" cx="600" cy="624" r="15"></circle><circle class="ring" cx="600" cy="624" r="15"></circle><circle class="dot" cx="600" cy="624" r="8"></circle><text x="600" y="596">柞水</text></g></g>
+
+        <!-- 指北针 -->
+        <g transform="translate(1322,102)" opacity=".9">
+          <circle cx="0" cy="2" r="26" fill="#fffdf7" opacity=".7" stroke="#dcccaa" stroke-width="1"></circle>
+          <path d="M0,-24 L6,-8 L-6,-8 Z" fill="#c0392b"></path>
+          <line x1="0" y1="22" x2="0" y2="-6" stroke="#8c7d5a" stroke-width="1.8"></line>
+          <line x1="-7" y1="22" x2="7" y2="22" stroke="#8c7d5a" stroke-width="1.8"></line>
+          <text x="0" y="45" font-size="14" fill="#6d5f43" text-anchor="middle">北</text>
+        </g>
+      </svg>
+
+      <div class="title-block">
+        <h2>陕西</h2>
+        <p>关中 · 陕北 · 陕南 三大地理带</p>
+        <span class="title-rule"></span>
+      </div>
+    </div>
+
+    <aside aria-live="polite">
+      <div id="panel-default"><p class="default-tip">点击（或 Tab + 回车）地图上的圆点<br>看这座城邑在同时期的角色</p></div>
+      <div id="panel-detail" hidden="">
+        <div class="stagger">
+          <h3 id="d-name"></h3>
+          <div class="today" id="d-today"></div>
+          <ul id="d-points"></ul>
+          <div class="fate" id="d-fate"></div>
+        </div>
+        <button class="xlink" id="d-link" hidden=""></button>
+      </div>
+      <div class="legend" aria-label="图例">
+        <div><i style="background:linear-gradient(90deg,transparent,#d9c79c,transparent);border-radius:2px"></i>陕北黄土高原</div>
+        <div><i style="background:linear-gradient(90deg,transparent,#b9cf9f,transparent);border-radius:2px"></i>关中平原</div>
+        <div><i style="background:linear-gradient(90deg,transparent,#a9c9b8,transparent);border-radius:2px"></i>陕南秦巴山地</div>
+        <div><i style="height:4px;margin-top:3px;background:#4f92b0;border-radius:2px"></i>黄河 · 渭河 · 汉江</div>
+        <div><i style="height:4px;margin-top:3px;background:repeating-linear-gradient(90deg,#8a7a5c 0 7px,transparent 7px 12px)"></i>长城</div>
+        <div><i style="height:9px;margin-top:1px;background:linear-gradient(135deg,transparent 44%,#a2905f 44% 56%,transparent 56%)"></i>关塞（四塞）</div>
+      </div>
+      <p class="panel-foot">省界与山川为示意走势，非精确测绘；三带划分按地貌简化。史实以《史记》《汉书》及历代地理志为准，争议处标注「一说」。<br><a href="草原与丝路.html" style="color:var(--cinnabar);text-decoration:none;border-bottom:1px dashed rgba(192,57,43,.5)">← 回到《草原与丝路》看陕北如何连着草原</a></p>
+    </aside>
+  </section>
+
+  <section id="view-time" role="tabpanel" aria-labelledby="tab-time" hidden="" style="">
+    <div class="time-inner">
+      <h2>陕西历史演进</h2>
+      <p class="lead">从西周的丰镐到元代的行省，「陕西」这个名字本身就是在这一时期最后诞生的。点击卡片展开；按时代筛选可看某一阶段。</p>
+      <div class="toolbar" id="toolbar"><span>按时代筛选：</span><button class="chip" aria-pressed="true">全部</button><button class="chip" aria-pressed="false">周秦</button><button class="chip" aria-pressed="false">汉魏</button><button class="chip" aria-pressed="false">隋唐</button><button class="chip" aria-pressed="false">宋元</button><button class="tool">全部展开</button></div>
+      <ol class="timeline" id="timeline"><li class="card" data-id="zhou" style="--i: 0;"><details><summary><span class="name">西周</span><span class="years">前11世纪—前771</span><span class="lang">都丰镐</span></summary><div class="body"><ul><li>文王都丰、武王都镐，在今西安沣河两岸，是关中最早的全国性都城</li><li>周原（今宝鸡扶风、岐山）为周人发祥地，出土大量青铜器</li><li>「何尊」铭文中的「宅兹中国」，是目前所见「中国」二字最早的实物记录</li></ul><div class="out"><b>此后：</b>前771年犬戎攻破镐京，周室东迁洛邑；关中随后为秦所据。</div></div></details></li><li class="card" data-id="qin" style="--i: 1;"><details><summary><span class="name">秦</span><span class="years">前770—前206</span><span class="lang">都咸阳</span></summary><div class="body"><ul><li>秦襄公护送平王东迁受封，秦人自陇西进入关中</li><li>商鞅变法、郑国渠、都江堰，关中始称「天府之国」（《战国策》《史记》）</li><li>前350年迁都咸阳，前221年统一六国</li><li>秦始皇陵及兵马俑、「车同轨、书同文」</li></ul><div class="out"><b>此后：</b>前206年灭亡；项羽焚咸阳，关中残破，随后归刘邦。</div></div></details></li><li class="card" data-id="han" style="--i: 2;"><details><summary><span class="name">西汉</span><span class="years">前202—8</span><span class="lang">都长安</span></summary><div class="body"><ul><li>刘邦定都长安，取「长治久安」之意；长乐宫、未央宫、建章宫次第兴建</li><li>丝绸之路自长安出发，张骞两次出使西域</li><li>关中为京畿，设京兆尹、左冯翊、右扶风「三辅」</li><li>汉武帝茂陵、霍去病墓石刻至今犹存</li></ul><div class="out"><b>此后：</b>8年王莽篡汉，长安遭战乱破坏；东汉定都洛阳，长安降为西京陪都。</div></div></details></li><li class="card" data-id="donghan" style="--i: 3;"><details><summary><span class="name">东汉 · 新莽</span><span class="years">8—220</span><span class="lang">降为陪都</span></summary><div class="body"><ul><li>东汉都洛阳，长安称西京，政治地位下降但仍为关陇中心</li><li>汉末董卓挟献帝迁长安，李傕、郭汜之乱使关中「人相食」</li><li>关中人口与经济在此期大幅衰退</li></ul><div class="out"><b>此后：</b>220年汉亡，关中入曹魏版图，此前长期是军阀争夺的战场。</div></div></details></li><li class="card" data-id="sanguo" style="--i: 4;"><details><summary><span class="name">三国 · 曹魏</span><span class="years">220—265</span><span class="lang">雍州</span></summary><div class="body"><ul><li>曹魏设雍州，治长安，为西部重镇</li><li>蜀汉自汉中北伐，走的是陕南的祁山道、褒斜道、傥骆道、子午道</li><li>诸葛亮五次北伐、姜维多次出兵，皆未能突破秦岭防线</li><li>秦岭作为天险，使南北政权长期对峙</li></ul><div class="out"><b>此后：</b>265年司马炎代魏；关中随后成为西晋的核心区域之一。</div></div></details></li><li class="card" data-id="shiliuguo" style="--i: 5;"><details><summary><span class="name">十六国</span><span class="years">304—439</span><span class="lang">全境</span></summary><div class="body"><ul><li>前赵、前秦、后秦相继以长安为都；苻坚、姚兴皆都于此</li><li>413年匈奴铁弗部赫连勃勃筑统万城，建大夏于陕北</li><li>这一时期匈奴、氐、羌、羯等各族在关中激烈交融</li><li>鸠摩罗什被迎至长安译经，长安成为北方佛教中心</li></ul><div class="out"><b>此后：</b>439年北魏统一北方；统万城被北魏占领，陕北从此纳入中原王朝的北部边地体系。</div></div></details></li><li class="card" data-id="beichao" style="--i: 6;"><details><summary><span class="name">北朝</span><span class="years">386—581</span><span class="lang">都长安</span></summary><div class="body"><ul><li>北魏孝文帝迁都洛阳后，关中设雍州；后期形成东魏西魏对峙</li><li>西魏、北周皆以长安为都，宇文泰推行府兵制，关陇集团由此崛起</li><li>隋唐皇室与大批重臣皆出此集团，深刻影响此后三百年政局</li></ul><div class="out"><b>此后：</b>581年杨坚代周建隋，长安再度成为统一帝国的都城。</div></div></details></li><li class="card" data-id="sui" style="--i: 7;"><details><summary><span class="name">隋</span><span class="years">581—618</span><span class="lang">建大兴城</span></summary><div class="body"><ul><li>因汉长安城残破且水质咸卤，582年另建新都大兴城（今西安市区）</li><li>宇文恺规划，先布棋盘方格再筑宫室，是中国古代都城规划的典范</li><li>广通渠、大运河把关中的粮食补给与东部连通</li></ul><div class="out"><b>此后：</b>618年隋亡；唐承隋大兴城，改名长安，把这座都城推向鼎盛。</div></div></details></li><li class="card" data-id="tang" style="--i: 8;"><details><summary><span class="name">唐</span><span class="years">618—907</span><span class="lang">长安鼎盛</span></summary><div class="body"><ul><li>唐长安城面积约84平方公里，108坊整齐如棋盘，人口逾百万</li><li>289年间约300个国家和地区的人往来于此，西市、东市胡商云集</li><li>日本、新罗、天竺、大食的使者僧侣留学生长期居留</li><li>昭陵、乾陵等帝陵「因山为陵」，十八陵分布关中北部</li></ul><div class="out"><b>此后：</b>安史之乱后长安六陷、屡遭焚掠；904年朱温迫昭宗迁洛阳，长安为都史至此终结。</div></div></details></li><li class="card" data-id="wudai" style="--i: 9;"><details><summary><span class="name">五代</span><span class="years">907—960</span><span class="lang">岐 · 定难军</span></summary><div class="body"><ul><li>长安降为雍州，不再是国都；李茂贞据凤翔建岐国，割据关中西部</li><li>陕北的定难军（党项拓跋氏）据夏州、银州等地，中原政权鞭长莫及</li><li>关中水利失修，经济重心已转向江南</li></ul><div class="out"><b>此后：</b>定难军历五代而不倒，最终在1038年建西夏；陕北因此成为此后两百年的宋夏前线。</div></div></details></li><li class="card" data-id="song" style="--i: 10;"><details><summary><span class="name">北宋</span><span class="years">960—1127</span><span class="lang">宋夏前线</span></summary><div class="body"><ul><li>初设陕西路，后分置永兴军路、秦凤路，治所仍在长安（京兆府）</li><li>陕北横山、绥德、延州一线为宋夏反复争夺的边疆</li><li>范仲淹、韩琦知延州御西夏，筑青涧城、大顺城等寨堡</li><li>沈括在延州知见石油，记入《梦溪笔谈》；「石油」一词即出自他</li></ul><div class="out"><b>此后：</b>1127年靖康之变，北宋亡；陕西随即被金与西夏分割。</div></div></details></li><li class="card" data-id="jin" style="--i: 11;"><details><summary><span class="name">金</span><span class="years">1115—1234</span><span class="lang">京兆府路</span></summary><div class="body"><ul><li>金设京兆府路，治长安，关中归金所有</li><li>陕北横山以西归西夏，形成金、夏对峙</li><li>金在关中推行屯田，与南宋在秦岭一线长期拉锯</li></ul><div class="out"><b>此后：</b>1234年金亡于蒙古与南宋联军；关中进入蒙古控制之下。</div></div></details></li><li class="card" data-id="yuan" style="--i: 12;"><details><summary><span class="name">元</span><span class="years">1271—1368</span><span class="lang">陕西行省</span></summary><div class="body"><ul><li>设陕西等处行中书省，「陕西」第一次成为正式的地方最高政区名称</li><li>行省把原本属四川的汉中、安康划入陕西，使秦岭南北合为一名</li><li>「陕西」之名源于陕原（今河南陕州区）以西，本指关陇，元代之后才固定为今日的省域</li></ul><div class="out"><b>此后：</b>明承元制，沿用陕西省并沿用至今。今日陕西「北接草原、中据关中、南连巴蜀」的格局，正是在元代定型。</div></div></details></li></ol>
+      <div class="rules" id="rules"><div class="rule" style="--i: 0;"><h3>为什么是关中</h3><ul><li>「被山带河，四塞之国」——东潼关、南武关、西散关、北萧关</li><li>渭河冲积平原，土肥水足，战国时即称「天府」</li><li>退可守关中，进可制天下，故周秦汉唐皆都于此</li></ul></div><div class="rule" style="--i: 1;"><h3>陕北：农牧交界线</h3><ul><li>匈奴—统万城—党项—宋夏—长城，两千年反复拉锯</li><li>是草原与中原之间的过渡带，也是本页与「草原接力」的连接处</li><li>一旦中原衰弱，这里最先易手；中原强盛，这里成为前线</li></ul></div><div class="rule" style="--i: 2;"><h3>陕南：与巴蜀一体</h3><ul><li>汉中、安康在汉江上游，气候物产与四川相近，方言属西南官话</li><li>历代多与四川同属一政区，是入蜀的门户</li><li>元代划归陕西，才有了今日跨越秦岭南北的陕西省</li></ul></div></div>
+      <p class="caveat">说明：年代取通行说法。关中长期为都畿，陕北长期是农牧交界与军事前沿，陕南则与巴蜀同属一个地理单元——三带的历史节奏并不一致，时间轴以王朝为纲，细节见各卡片。</p>
+    </div>
+  </section>
+
+  <section id="view-detail" role="tabpanel" aria-labelledby="tab-detail" hidden="" style="">
+    <div class="detail-inner">
+      <h2>详考</h2>
+      <p class="lead">年表、人物、地名沿革与关隘古道。年表按时代分组，可作前两页的注脚。</p>
+      <div id="detail-root"><section class="sec"><h3>大事年表<span>从立国到行省 · 选择性地列三十年大事</span></h3><div><ul class="chrono"><li><span class="y">前11世纪</span><span>周人立国于周原（岐山扶风一带）</span></li><li><span class="y">前1046</span><span>武王克商，都镐（丰镐）</span></li><li><span class="y">前771</span><span>犬戎破镐京，平王东迁，秦襄公受封关中</span></li><li><span class="y">前677</span><span>秦德公迁都雍（今凤翔）</span></li><li><span class="y">前350</span><span>商鞅变法，秦迁都咸阳</span></li><li><span class="y">前316</span><span>秦灭巴蜀，并汉中</span></li><li><span class="y">前221</span><span>秦始皇统一，都咸阳</span></li><li><span class="y">前206</span><span>刘邦为汉王都南郑，后定都长安</span></li><li><span class="y">前200</span><span>汉高帝定都长安，建未央宫</span></li><li><span class="y">前130</span><span>张骞通西域，丝绸之路东端起于长安</span></li><li><span class="y">314</span><span>晋愍帝封司马邺为晋王，都长安（永嘉南渡前）</span></li><li><span class="y">383</span><span>淝水之战，前秦苻坚（都长安）败于东晋</span></li><li><span class="y">407</span><span>赫连勃勃建大夏，都统万城</span></li><li><span class="y">439</span><span>北魏统一北方，关中新入北魏</span></li><li><span class="y">557</span><span>北周代西魏，仍都长安，关陇集团成型</span></li><li><span class="y">582</span><span>隋文帝营建大兴城，迁都</span></li><li><span class="y">618</span><span>唐建都长安，长安进入鼎盛</span></li><li><span class="y">755</span><span>安史之乱爆发，长安六陷九守</span></li><li><span class="y">904</span><span>朱温迫昭宗迁洛阳，拆长安宫室</span></li><li><span class="y">960</span><span>宋定都汴京，长安降为京兆府</span></li><li><span class="y">1038</span><span>李元昊建西夏，陕北成宋夏前线</span></li><li><span class="y">1041</span><span>范仲淹知延州，筑大顺城御西夏</span></li><li><span class="y">1234</span><span>蒙古灭金，关中入蒙古</span></li><li><span class="y">1271</span><span>忽必烈设陕西行省，汉中划入——「陕西」定型</span></li></ul></div></section><section class="sec"><h3>人物志<span>与陕西有关的人物 · 简考</span></h3><div><div class="people"><div class="person"><b>秦始皇</b><span class="d">前259—前210</span><p>臧政，统一六国定都咸阳，修驰道直通各地，兵马俑即为其陵。</p></div><div class="person"><b>汉武帝</b><span class="d">前156—前87</span><p>刘彻，以内政外交经营长安，开河西四郡，派张骞两通西域。</p></div><div class="person"><b>司马迁</b><span class="d">前145—?</span><p>夏阳（今韩城）人，著《史记》，鲁迅称「史家之绝唱，无韵之离骚」。</p></div><div class="person"><b>张骞</b><span class="d">前164—前114</span><p>汉中城固人，两使西域，凿空之功，中国通西域第一人。</p></div><div class="person"><b>李广</b><span class="d">?—前119</span><p>陇西成纪人，数任北地太守，飞将军，自刎于漠北之役。</p></div><div class="person"><b>霍去病</b><span class="d">前140—前117</span><p>河东平阳人，六出祁连山北击匈奴，「匈奴未灭，何以家为」。</p></div><div class="person"><b>苏武</b><span class="d">前140—前60</span><p>杜陵人，出使匈奴被留十九年，牧羊北海，执节不屈。</p></div><div class="person"><b>董仲舒</b><span class="d">前179—前104</span><p>广川人，向武帝献「罢黜百家，独尊儒术」之策。</p></div><div class="person"><b>班超</b><span class="d">32—102</span><p>扶风平陵人，经营西域三十一年，封定远侯。</p></div><div class="person"><b>鸠摩罗什</b><span class="d">344—413</span><p>天竺高僧，被后秦姚兴迎至长安译经，影响汉地佛教。</p></div><div class="person"><b>赫连勃勃</b><span class="d">381—425</span><p>匈奴铁弗部，建大夏都统万城，匈奴最后一次独立建都。</p></div><div class="person"><b>李渊</b><span class="d">566—635</span><p>唐高祖，起兵太原，定都长安，开大唐三百载基业。</p></div><div class="person"><b>唐太宗</b><span class="d">598—649</span><p>李世民，玄武门之变后即位于长安，贞观之治。</p></div><div class="person"><b>武则天</b><span class="d">624—705</span><p>于洛阳称帝后复用长安为都，乾陵在梁山。</p></div><div class="person"><b>唐玄宗</b><span class="d">685—762</span><p>李隆基，开元盛世于长安，安史之乱亦起于长安周边。</p></div><div class="person"><b>李白</b><span class="d">701—762</span><p>入京供奉翰林，长安三年，「冠盖满京华，斯人独憔悴」。</p></div><div class="person"><b>杜甫</b><span class="d">712—770</span><p>居长安少陵原十余年，「安史之乱」中见国乱民生，诗史由此而成。</p></div><div class="person"><b>范仲淹</b><span class="d">989—1052</span><p>知延州御西夏，筑大顺城，「先天下之忧而忧」。</p></div><div class="person"><b>沈括</b><span class="d">1031—1095</span><p>任鄜延路经略使，于延州首记石油，著《梦溪笔谈》。</p></div><div class="person"><b>杨虎城</b><span class="d">1893—1949</span><p>陕西蒲城人，西安事变发起者之一，爱国将领。</p></div></div></div></section><section class="sec"><h3>地名沿革<span>古今对照</span></h3><div><div class="two-col"><table class="plain"><thead><tr><th>今地</th><th>古名</th><th>说明</th></tr></thead><tbody><tr><td>西安</td><td>丰镐 / 咸阳 / 长安 / 大兴 / 京兆府</td><td>周秦汉隋唐都城，唐末后衰落。</td></tr><tr><td>咸阳</td><td>秦都咸阳 / 汉京畿 / 明清咸阳县</td><td>秦都湮灭，今为地级市。</td></tr><tr><td>宝鸡</td><td>陈仓 / 岐州 / 凤翔府</td><td>周原、青铜器之乡。</td></tr><tr><td>渭南</td><td>下邽 / 华州 / 同州</td><td>华山、渭河要冲。</td></tr><tr><td>韩城</td><td>少梁 / 夏阳 / 韩城</td><td>司马迁故里，古城完整。</td></tr><tr><td>延安</td><td>上郡 / 延州 / 延安府</td><td>陕北中心，宋夏前线，革命圣地。</td></tr><tr><td>榆林</td><td>九边重镇 / 榆林卫</td><td>明代延绥镇治所，长城要地。</td></tr><tr><td>汉中</td><td>南郑 / 兴元府 / 汉中府</td><td>蜀汉门户，元划入陕西。</td></tr><tr><td>安康</td><td>西城 / 金州 / 兴安府</td><td>汉江水运要道。</td></tr><tr><td>商洛</td><td>商於之地 / 上洛 / 商州</td><td>武关道门户。</td></tr><tr><td>铜川</td><td>同官 / 耀州</td><td>耀州窑、药王山。</td></tr><tr><td>华阴</td><td>华阴县 / 西岳庙</td><td>华山所在。</td></tr><tr><td>勉县</td><td>沔阳 / 沔县</td><td>定军山、武侯墓。</td></tr><tr><td>柞水</td><td>终南古道 / 柞水</td><td>子午道、秦岭溶洞。</td></tr></tbody></table></div></div></section><section class="sec"><h3>关隘与古道<span>秦岭屏障 · 入蜀与出关之路</span></h3><div><div class="two-col"><table class="plain"><thead><tr><th>古道 / 关隘</th><th>走向及故事</th></tr></thead><tbody><tr><td>金牛道（汉—蜀）</td><td>汉中经剑阁入蜀，三国蜀出祁山皆由此。</td></tr><tr><td>褒斜道</td><td>沿褒水斜水入秦岭，石门栈道起点。</td></tr><tr><td>子午道</td><td>直插长安南，魏延奇谋之地。</td></tr><tr><td>傥骆道</td><td>傥駱二水之间，唐荔枝之路。</td></tr><tr><td>武关道</td><td>商洛通襄阳，刘邦入关之路。</td></tr><tr><td>萧关道</td><td>陇山通塞外，回中道之通道。</td></tr></tbody></table></div></div></section></div>
+      <p class="caveat">说明：大事年表取通行说法，部分年代学界有异说；人物生卒与任职年份多据正史本传，个别取约数。地名沿革一栏，「今地」按现行行政区划对应，古今辖境并不等同。</p>
+    </div>
+  </section>
+</main>
+<noscript>本页需要启用 JavaScript 才能显示地图与时间轴。</noscript>
+
+<script>
+const SVGNS = "http://www.w3.org/2000/svg";
+const el = (tag, attrs = {}, text) => {
+  const n = document.createElementNS(SVGNS, tag);
+  for (const k in attrs) n.setAttribute(k, attrs[k]);
+  if (text !== undefined) n.textContent = text;
+  return n;
+};
+const $ = id => document.getElementById(id);
+const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* ---------------- 地图数据 ---------------- */
+const GATES = [
+  { x: 784, y: 430, label: "潼关", dy: -20 },
+  { x: 744, y: 616, label: "武关", dy: 28 },
+  { x: 286, y: 556, label: "散关", dy: 28 },
+  { x: 170, y: 352, label: "萧关", dy: -20 }
+];
+
+const CITIES = [
+  { id: "changAn", x: 546, y: 478, ly: 38, short: "长安", r: 12, band: "关中",
+    name: "长安", today: "今 · 西安市",
+    points: [
+      "西周丰镐、秦咸阳、汉长安、隋大兴、唐长安——十三朝建都于此",
+      "隋文帝命宇文恺营建大兴城，唐改称长安；面积约84平方公里，是当时世界最大城市之一",
+      "丝绸之路的东方起点，西市胡商云集",
+      "汉唐帝陵环绕北原：茂陵、昭陵、乾陵"
+    ],
+    fate: "904年朱温挟唐昭宗迁都洛阳，拆毁长安宫室，建材浮渭水东下；此后长安再未成为国都，但仍是西北政治军事中心。" },
+  { id: "fengming", x: 306, y: 440, ly: -30, short: "凤翔", r: 9, band: "关中", tag: "古都",
+    name: "凤翔 / 雍城", today: "今 · 宝鸡市凤翔区",
+    points: [
+      "秦德公元年（前677）迁都于此，秦国在此连续建都近三百年，是秦最长久之国都",
+      "秦穆公霸西戎，秦国从这里走向关中与天下",
+      "雍城遗址、血池祭天遗址为国家级文保单位",
+      "五代李茂贞据凤翔建岐国，西府凤翔之名即源于此"
+    ],
+    fate: "秦迁都咸阳后地位渐降；历代为县郡，今存秦雍城遗址。" },
+  { id: "xianyang", x: 462, y: 458, ly: -30, short: "咸阳", r: 11, band: "关中", tag: "建都",
+    name: "咸阳", today: "今 · 咸阳市",
+    points: [
+      "秦孝公十二年（前350）迁都于此，商鞅变法的都城",
+      "秦始皇统一后，仿六国宫室营建宫苑；阿房宫、骊山陵皆在其侧",
+      "西汉与长安隔渭相望，属京畿三辅，渭北五陵邑环列"
+    ],
+    fate: "前206年项羽屠烧咸阳，火三月不灭；秦都就此湮灭，地面遗迹极少。" },
+  { id: "baoji", x: 330, y: 486, ly: -32, short: "宝鸡", r: 10, band: "关中", tag: "发祥",
+    name: "宝鸡 / 陈仓", today: "今 · 宝鸡市",
+    points: [
+      "周原所在（扶风、岐山一带），西周发祥地与青铜器之乡；何尊、毛公鼎皆出于此",
+      "秦文公东猎至汧渭之会（约前765），秦国早期都邑多在关中西部一线",
+      "「明修栈道，暗度陈仓」——刘邦由汉中北出关中的关键，韩信拜将后由此东出",
+      "扼守关中通往陇西（陇关）与巴蜀（褒斜道）的咽喉"
+    ],
+    fate: "历代为关中西部重镇，今为陇海、宝成铁路交汇的工业城市。" },
+  { id: "hanCheng", x: 742, y: 340, ly: -30, short: "韩城", r: 10, band: "关中", tag: "人物",
+    name: "韩城 / 夏阳", today: "今 · 韩城市",
+    points: [
+      "西周为韩侯国封地（《诗经·大雅·韩奕》），春秋属晋，战国属魏，后归秦",
+      "魏文侯派吴起守西河，筑少梁城（今韩城南），秦魏在此反复争夺",
+      "司马迁故里（今韩城芝川镇），司马迁祠墓在韩城芝川，龙门黄河在其东",
+      "保存完整的明清古城与党家村，元代庙学文庙规制完好"
+    ],
+    fate: "明清为韩城县，今为历史文化名城。「关中文物最韩城」。" },
+  { id: "tongchuan", x: 610, y: 452, ly: -32, short: "铜川", r: 9, band: "关中", tag: "佛教",
+    name: "铜川 / 耀州", today: "今 · 铜川市",
+    points: [
+      "隋唐耀州窑为北方青瓷名窑，唐三彩、黑釉剔花驰名，瓷器销往丝路",
+      "孙思邈晚年隐居五台山（今药王山），著《千金要方》《千金翼方》",
+      "药王山碑刻、唐代舍利塔为国家级文保",
+      "唐为京畿北部屏障，同官（铜川）驻军控守"
+    ],
+    fate: "明清为同官县，近代因煤而兴，今为资源型转型城市。" },
+  { id: "pucheng", x: 640, y: 420, ly: -30, short: "蒲城", r: 9, band: "关中", tag: "帝陵",
+    name: "蒲城 / 桥陵", today: "今 · 渭南市蒲城县",
+    points: [
+      "唐玄宗泰陵、唐宪宗景陵、唐睿宗桥陵皆在蒲城县境",
+      "桥陵石刻群规模雄伟，为唐陵艺术代表作",
+      "杨虎城将军故里（今蒲城），「西安事变」发动者之一",
+      "宋代属永兴军路，元明为同州属县"
+    ],
+    fate: "今为渭南市下辖县，帝陵考古与旅游并重。" },
+  { id: "huayin", x: 716, y: 452, ly: 30, short: "华阴", r: 9, band: "关中", tag: "关塞",
+    name: "华阴 / 华山", today: "今 · 渭南市华阴市",
+    points: [
+      "华山为五岳之西岳，《尚书·禹贡》已载；汉武帝建西岳庙祭祀",
+      "潼关在其东十余公里，黄河、渭河、洛河三河交汇",
+      "「四知先生」杨震暮夜却金，典故即涉及华阴杨氏",
+      "历代帝王祭山，西岳庙亦称「陕西小故宫」"
+    ],
+    fate: "今为县级市，华山为国家级风景名胜与道教圣地。" },
+  { id: "tongwan", x: 566, y: 168, ly: 30, short: "统万城", r: 11, band: "陕北", tag: "建都",
+    name: "统万城", today: "今 · 靖边县红墩界一带",
+    points: [
+      "413年匈奴铁弗部赫连勃勃倾十万民夫所筑，大夏国都，取「统一天下，君临万邦」之意",
+      "蒸土筑城、石灰土夯打，城墙坚硬可磨刀斧，城内一度可泛舟（《水经注》）",
+      "大夏虽仅存二十五年（407—431），却是匈奴贵族最后一次独立建都",
+      "接上南匈奴内附后的线索——匈奴在两百年后于陕北作最后一搏"
+    ],
+    fate: "431年被北魏灭，置统万镇；唐设夏州，宋为西夏据，后废于流沙，今存白城则遗址。" },
+  { id: "yanAn", x: 592, y: 300, ly: -30, short: "延安", r: 10, band: "陕北", tag: "边塞",
+    name: "延州 / 延安", today: "今 · 延安市",
+    points: [
+      "秦汉为上郡肤施县地（今延安一带），上郡为陕北平胡要地",
+      "隋置延州，唐属鄜延节度使，为关内道北部屏障",
+      "北宋庆历二年（1041）范仲淹知延州，筑青涧城、大顺城练兵御西夏",
+      "沈括任鄜延路经略使，见延川石液可燃，首创「石油」一词记入《梦溪笔谈》"
+    ],
+    fate: "明设延安府；1935—1948年为中共中央所在地，延安时期十三年。" },
+  { id: "suide", x: 664, y: 288, ly: -30, short: "绥德", r: 9, band: "陕北", tag: "边塞",
+    name: "绥德 / 上郡", today: "今 · 榆林市绥德县",
+    points: [
+      "秦汉上郡核心区，蒙恬率三十万众北逐匈奴，上郡为屯兵要地",
+      "北宋名将种世衡筑青涧城于绥德治所一带，为宋夏前线堡垒",
+      "宋代米脂、绥德一带为党项与汉族杂居区，李继迁反宋的根据地所在",
+      "「米脂的婆姨绥德的汉」，陕北民歌与秧歌的发源地"
+    ],
+    fate: "明属延安府绥德州；今为陕北文化名县，无定河穿城。" },
+  { id: "yulin", x: 664, y: 130, ly: -30, short: "榆林", r: 10, band: "陕北", tag: "边塞",
+    name: "榆林卫 / 榆林", today: "今 · 榆林市",
+    points: [
+      "战国为林胡、楼烦地，秦汉属上郡北境",
+      "明成化七年（1471）余子俊筑榆林城并修边墙，延袤千里，称「九边重镇」之首",
+      "延绥镇治榆林，明长城「东起黄河，西至花马池」",
+      "明末李自成、张献忠皆出身陕北，大顺军从陕北崛起席卷中原"
+    ],
+    fate: "清代设榆林府；今为陕北文化、能源重要城市。" },
+  { id: "dingbian", x: 468, y: 210, ly: -28, short: "定边", r: 8, band: "陕北", tag: "边塞",
+    name: "定边 / 盐州", today: "今 · 榆林市定边县",
+    points: [
+      "唐代盐州，为唐与吐蕃、党项争夺的边疆重镇",
+      "北宋西夏立国前长期经营横山以西，定边盐池是党项经济命脉",
+      "明代为三边总制驻地之一，与宁夏花马池互为犄角",
+      "花马池盐自汉代即开采，「青白盐」驰名西北"
+    ],
+    fate: "今为陕甘宁交界县，盐化工与风电基地。" },
+  { id: "hanZhong", x: 300, y: 726, ly: 40, short: "汉中", r: 12, band: "陕南",
+    name: "汉中 / 南郑", today: "今 · 汉中市",
+    points: [
+      "秦置汉中郡；前206年刘邦受封汉王，都南郑，由汉中发迹而得天下，「汉」成为族名国号",
+      "诸葛亮屯汉中，以此为基地六出祁山；定军山、武侯墓在勉县",
+      "地处汉江上游谷地，气候与物产近巴蜀，方言属西南官话"
+    ],
+    fate: "元代设陕西行省，汉中由四川划入陕西，从此陕南与关中同省——这是今日陕西省版图的关键一步。" },
+  { id: "anKang", x: 540, y: 800, ly: -30, short: "安康", r: 10, band: "陕南", tag: "通道",
+    name: "安康 / 金州", today: "今 · 安康市",
+    points: [
+      "汉江上游谷地，秦巴山地之间的南北孔道",
+      "三国魏得汉中后置西城郡（今安康），魏蜀在此反复争夺",
+      "西晋太康元年（280）设安康县，「安宁康泰」得名",
+      "唐代金州为山南西道要州，李白、白居易皆有咏金州诗篇",
+      "汉水船工号子与安康鱼尾粽，为汉水文化代表"
+    ],
+    fate: "明清为兴安州、兴安府；今为南水北调中线水源涵养地。",
+    link: { text: "看汉水如何连接巴蜀 →", target: "hanZhong" } },
+  { id: "shangluo", x: 672, y: 664, ly: 30, short: "商洛", r: 9, band: "陕南", tag: "通道",
+    name: "商洛 / 商於", today: "今 · 商洛市",
+    points: [
+      "战国商於之地，张仪「以六里之地欺楚」，「商君」封邑本于此",
+      "秦设商县，汉置上洛县，为武关道通向关中的门户",
+      "「商山四皓」隐居商洛山中，助刘盈保太子之位，《史记》《汉书》有传",
+      "李自成自商洛山中率十八骑再起，重入中原推翻明王朝"
+    ],
+    fate: "今为商洛市，丹江口水库水源地之一。" },
+  { id: "mianxian", x: 222, y: 720, ly: -28, short: "勉县", r: 8, band: "陕南", tag: "人物",
+    name: "勉县 / 沔县", today: "今 · 汉中市勉县",
+    points: [
+      "古沔阳，刘邦还定三秦前驻军之地",
+      "定军山之战（219），黄忠斩夏侯渊，雄据汉中",
+      "武侯墓、武侯祠在定军山下，诸葛亮葬于此",
+      "褒斜道南口，石门栈道为世界最早的人工交通隧道（东汉）"
+    ],
+    fate: "1964年沔县改勉县；今为汉中西部文化旅游重镇。" },
+  { id: "zhashui", x: 600, y: 624, ly: -28, short: "柞水", r: 8, band: "陕南", tag: "古道",
+    name: "柞水 / 终南古道", today: "今 · 商洛市柞水县",
+    points: [
+      "子午道南段，秦岭南北最险的古道之一",
+      "魏延曾请兵万人出子午谷奇袭长安，诸葛亮以「悬危」不用",
+      "柞水溶洞为秦岭最大溶洞群，「秦岭神洞」",
+      "终南山南麓，隐士文化与佛道交汇"
+    ],
+    fate: "今为商洛市下辖县，秦岭生态旅游与康养基地。" },
+];
+
+/* ---------------- 时间轴数据 ---------------- */
+const ERAS = ["全部", "周秦", "汉魏", "隋唐", "宋元"];
+const POLITIES = [
+  { id: "zhou", name: "西周", years: "前11世纪—前771", era: "周秦", tag: "都丰镐",
+    points: [
+      "文王都丰、武王都镐，在今西安沣河两岸，是关中最早的全国性都城",
+      "周原（今宝鸡扶风、岐山）为周人发祥地，出土大量青铜器",
+      "「何尊」铭文中的「宅兹中国」，是目前所见「中国」二字最早的实物记录"
+    ],
+    out: "前771年犬戎攻破镐京，周室东迁洛邑；关中随后为秦所据。" },
+  { id: "qin", name: "秦", years: "前770—前206", era: "周秦", tag: "都咸阳",
+    points: [
+      "秦襄公护送平王东迁受封，秦人自陇西进入关中",
+      "商鞅变法、郑国渠、都江堰，关中始称「天府之国」（《战国策》《史记》）",
+      "前350年迁都咸阳，前221年统一六国",
+      "秦始皇陵及兵马俑、「车同轨、书同文」"
+    ],
+    out: "前206年灭亡；项羽焚咸阳，关中残破，随后归刘邦。" },
+  { id: "han", name: "西汉", years: "前202—8", era: "汉魏", tag: "都长安",
+    points: [
+      "刘邦定都长安，取「长治久安」之意；长乐宫、未央宫、建章宫次第兴建",
+      "丝绸之路自长安出发，张骞两次出使西域",
+      "关中为京畿，设京兆尹、左冯翊、右扶风「三辅」",
+      "汉武帝茂陵、霍去病墓石刻至今犹存"
+    ],
+    out: "8年王莽篡汉，长安遭战乱破坏；东汉定都洛阳，长安降为西京陪都。" },
+  { id: "donghan", name: "东汉 · 新莽", years: "8—220", era: "汉魏", tag: "降为陪都",
+    points: [
+      "东汉都洛阳，长安称西京，政治地位下降但仍为关陇中心",
+      "汉末董卓挟献帝迁长安，李傕、郭汜之乱使关中「人相食」",
+      "关中人口与经济在此期大幅衰退"
+    ],
+    out: "220年汉亡，关中入曹魏版图，此前长期是军阀争夺的战场。" },
+  { id: "sanguo", name: "三国 · 曹魏", years: "220—265", era: "汉魏", tag: "雍州",
+    points: [
+      "曹魏设雍州，治长安，为西部重镇",
+      "蜀汉自汉中北伐，走的是陕南的祁山道、褒斜道、傥骆道、子午道",
+      "诸葛亮五次北伐、姜维多次出兵，皆未能突破秦岭防线",
+      "秦岭作为天险，使南北政权长期对峙"
+    ],
+    out: "265年司马炎代魏；关中随后成为西晋的核心区域之一。" },
+  { id: "shiliuguo", name: "十六国", years: "304—439", era: "汉魏", tag: "全境",
+    points: [
+      "前赵、前秦、后秦相继以长安为都；苻坚、姚兴皆都于此",
+      "413年匈奴铁弗部赫连勃勃筑统万城，建大夏于陕北",
+      "这一时期匈奴、氐、羌、羯等各族在关中激烈交融",
+      "鸠摩罗什被迎至长安译经，长安成为北方佛教中心"
+    ],
+    out: "439年北魏统一北方；统万城被北魏占领，陕北从此纳入中原王朝的北部边地体系。" },
+  { id: "beichao", name: "北朝", years: "386—581", era: "汉魏", tag: "都长安",
+    points: [
+      "北魏孝文帝迁都洛阳后，关中设雍州；后期形成东魏西魏对峙",
+      "西魏、北周皆以长安为都，宇文泰推行府兵制，关陇集团由此崛起",
+      "隋唐皇室与大批重臣皆出此集团，深刻影响此后三百年政局"
+    ],
+    out: "581年杨坚代周建隋，长安再度成为统一帝国的都城。" },
+  { id: "sui", name: "隋", years: "581—618", era: "隋唐", tag: "建大兴城",
+    points: [
+      "因汉长安城残破且水质咸卤，582年另建新都大兴城（今西安市区）",
+      "宇文恺规划，先布棋盘方格再筑宫室，是中国古代都城规划的典范",
+      "广通渠、大运河把关中的粮食补给与东部连通"
+    ],
+    out: "618年隋亡；唐承隋大兴城，改名长安，把这座都城推向鼎盛。" },
+  { id: "tang", name: "唐", years: "618—907", era: "隋唐", tag: "长安鼎盛",
+    points: [
+      "唐长安城面积约84平方公里，108坊整齐如棋盘，人口逾百万",
+      "289年间约300个国家和地区的人往来于此，西市、东市胡商云集",
+      "日本、新罗、天竺、大食的使者僧侣留学生长期居留",
+      "昭陵、乾陵等帝陵「因山为陵」，十八陵分布关中北部"
+    ],
+    out: "安史之乱后长安六陷、屡遭焚掠；904年朱温迫昭宗迁洛阳，长安为都史至此终结。" },
+  { id: "wudai", name: "五代", years: "907—960", era: "宋元", tag: "岐 · 定难军",
+    points: [
+      "长安降为雍州，不再是国都；李茂贞据凤翔建岐国，割据关中西部",
+      "陕北的定难军（党项拓跋氏）据夏州、银州等地，中原政权鞭长莫及",
+      "关中水利失修，经济重心已转向江南"
+    ],
+    out: "定难军历五代而不倒，最终在1038年建西夏；陕北因此成为此后两百年的宋夏前线。" },
+  { id: "song", name: "北宋", years: "960—1127", era: "宋元", tag: "宋夏前线",
+    points: [
+      "初设陕西路，后分置永兴军路、秦凤路，治所仍在长安（京兆府）",
+      "陕北横山、绥德、延州一线为宋夏反复争夺的边疆",
+      "范仲淹、韩琦知延州御西夏，筑青涧城、大顺城等寨堡",
+      "沈括在延州知见石油，记入《梦溪笔谈》；「石油」一词即出自他"
+    ],
+    out: "1127年靖康之变，北宋亡；陕西随即被金与西夏分割。" },
+  { id: "jin", name: "金", years: "1115—1234", era: "宋元", tag: "京兆府路",
+    points: [
+      "金设京兆府路，治长安，关中归金所有",
+      "陕北横山以西归西夏，形成金、夏对峙",
+      "金在关中推行屯田，与南宋在秦岭一线长期拉锯"
+    ],
+    out: "1234年金亡于蒙古与南宋联军；关中进入蒙古控制之下。" },
+  { id: "yuan", name: "元", years: "1271—1368", era: "宋元", tag: "陕西行省",
+    points: [
+      "设陕西等处行中书省，「陕西」第一次成为正式的地方最高政区名称",
+      "行省把原本属四川的汉中、安康划入陕西，使秦岭南北合为一名",
+      "「陕西」之名源于陕原（今河南陕州区）以西，本指关陇，元代之后才固定为今日的省域"
+    ],
+    out: "明承元制，沿用陕西省并沿用至今。今日陕西「北接草原、中据关中、南连巴蜀」的格局，正是在元代定型。" }
+];
+
+const RULES = [
+  { title: "为什么是关中",
+    items: [
+      "「被山带河，四塞之国」——东潼关、南武关、西散关、北萧关",
+      "渭河冲积平原，土肥水足，战国时即称「天府」",
+      "退可守关中，进可制天下，故周秦汉唐皆都于此"
+    ] },
+  { title: "陕北：农牧交界线",
+    items: [
+      "匈奴—统万城—党项—宋夏—长城，两千年反复拉锯",
+      "是草原与中原之间的过渡带，也是本页与「草原接力」的连接处",
+      "一旦中原衰弱，这里最先易手；中原强盛，这里成为前线"
+    ] },
+  { title: "陕南：与巴蜀一体",
+    items: [
+      "汉中、安康在汉江上游，气候物产与四川相近，方言属西南官话",
+      "历代多与四川同属一政区，是入蜀的门户",
+      "元代划归陕西，才有了今日跨越秦岭南北的陕西省"
+    ] }
+];
+
+/* ---------------- 渲染地图 ---------------- */
+const gatesG = $("gates");
+GATES.forEach(g => {
+  gatesG.appendChild(el("rect", { x: g.x - 6.5, y: g.y - 6.5, width: 13, height: 13, fill: "#8a6f45", transform: `rotate(45 ${g.x} ${g.y})` }));
+  gatesG.appendChild(el("text", { x: g.x, y: g.y + g.dy }, g.label));
+});
+
+const statesG = $("states");
+const stateNodes = {};
+CITIES.forEach(s => {
+  const g = el("g", { class: "state", tabindex: 0, role: "button", "aria-label": `${s.name}，${s.today}，${s.band}`, "aria-pressed": "false", "data-id": s.id });
+  g.appendChild(el("circle", { class: "hit", cx: s.x, cy: s.y, r: 30 }));
+  g.appendChild(el("circle", { class: "halo", cx: s.x, cy: s.y, r: s.r + 7 }));
+  g.appendChild(el("circle", { class: "ring", cx: s.x, cy: s.y, r: s.r + 7 }));
+  g.appendChild(el("circle", { class: "dot", cx: s.x, cy: s.y, r: s.r }));
+  g.appendChild(el("text", { x: s.x, y: s.y + s.ly }, s.short));
+  g.addEventListener("click", () => selectCity(s.id));
+  g.addEventListener("keydown", e => {
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); selectCity(s.id); }
+  });
+  statesG.appendChild(g);
+  stateNodes[s.id] = g;
+});
+
+const panelDefault = $("panel-default"), panelDetail = $("panel-detail");
+
+function selectCity(id) {
+  const s = CITIES.find(x => x.id === id);
+  if (!s) return;
+  Object.values(stateNodes).forEach(n => { n.classList.remove("selected"); n.setAttribute("aria-pressed", "false"); });
+  stateNodes[id].classList.add("selected");
+  stateNodes[id].setAttribute("aria-pressed", "true");
+  $("d-name").textContent = s.name;
+  $("d-today").textContent = s.today;
+  const ul = $("d-points");
+  ul.replaceChildren(...s.points.map(p => { const li = document.createElement("li"); li.textContent = p; return li; }));
+  const fate = $("d-fate");
+  const b = document.createElement("b");
+  b.textContent = "结局：";
+  fate.replaceChildren(b, document.createTextNode(s.fate));
+  const xl = $("d-link");
+  if (s.link) { xl.textContent = s.link.text + " →"; xl.hidden = false; xl.onclick = () => selectCity(s.link.target); }
+  else { xl.hidden = true; xl.onclick = null; }
+  panelDefault.hidden = true;
+  panelDetail.hidden = false;
+  const st = panelDetail.querySelector(".stagger");
+  st.classList.remove("stagger");
+  void st.offsetHeight;
+  st.classList.add("stagger");
+  document.querySelector("aside").scrollTop = 0;
+}
+
+/* ---------------- 渲染时间轴 ---------------- */
+const timeline = $("timeline");
+const cards = {};
+POLITIES.forEach((p, i) => {
+  const li = document.createElement("li");
+  li.className = "card";
+  li.dataset.id = p.id;
+  li.style.setProperty("--i", i);
+  const det = document.createElement("details");
+  const sum = document.createElement("summary");
+  const name = document.createElement("span"); name.className = "name"; name.textContent = p.name;
+  const yrs = document.createElement("span"); yrs.className = "years"; yrs.textContent = p.years;
+  const tag = document.createElement("span"); tag.className = "lang"; tag.textContent = p.tag;
+  sum.append(name, yrs, tag);
+  const body = document.createElement("div"); body.className = "body";
+  const ul = document.createElement("ul");
+  p.points.forEach(t => { const x = document.createElement("li"); x.textContent = t; ul.appendChild(x); });
+  const out = document.createElement("div"); out.className = "out";
+  const ob = document.createElement("b"); ob.textContent = "此后：";
+  out.append(ob, document.createTextNode(p.out));
+  body.append(ul, out);
+  det.append(sum, body);
+  li.appendChild(det);
+  timeline.appendChild(li);
+  cards[p.id] = { li, det };
+});
+
+const toolbar = $("toolbar");
+toolbar.appendChild(Object.assign(document.createElement("span"), { textContent: "按时代筛选：" }));
+const chips = ERAS.map(e => {
+  const b = document.createElement("button");
+  b.className = "chip"; b.textContent = e;
+  b.setAttribute("aria-pressed", e === "全部" ? "true" : "false");
+  b.addEventListener("click", () => applyFilter(e));
+  toolbar.appendChild(b);
+  return b;
+});
+const toggleAll = document.createElement("button");
+toggleAll.className = "tool"; toggleAll.textContent = "全部展开";
+let allOpen = false;
+toggleAll.addEventListener("click", () => {
+  allOpen = !allOpen;
+  Object.values(cards).forEach(c => { c.det.open = allOpen; });
+  toggleAll.textContent = allOpen ? "全部收起" : "全部展开";
+});
+toolbar.appendChild(toggleAll);
+
+function applyFilter(e) {
+  chips.forEach(c => c.setAttribute("aria-pressed", String(c.textContent === e)));
+  POLITIES.forEach(p => cards[p.id].li.classList.toggle("dim", e !== "全部" && p.era !== e));
+}
+
+const rulesEl = $("rules");
+RULES.forEach((r, i) => {
+  const box = document.createElement("div");
+  box.className = "rule";
+  box.style.setProperty("--i", i);
+  const h = document.createElement("h3"); h.textContent = r.title;
+  const ul = document.createElement("ul");
+  r.items.forEach(t => { const li = document.createElement("li"); li.textContent = t; ul.appendChild(li); });
+  box.append(h, ul);
+  rulesEl.appendChild(box);
+});
+
+/* ---------------- 详考数据 + 渲染 ---------------- */
+const CHRONO = [
+  ["前11世纪", "周人立国于周原（岐山扶风一带）"],
+  ["前1046", "武王克商，都镐（丰镐）"],
+  ["前771", "犬戎破镐京，平王东迁，秦襄公受封关中"],
+  ["前677", "秦德公迁都雍（今凤翔）"],
+  ["前350", "商鞅变法，秦迁都咸阳"],
+  ["前316", "秦灭巴蜀，并汉中"],
+  ["前221", "秦始皇统一，都咸阳"],
+  ["前206", "刘邦为汉王都南郑，后定都长安"],
+  ["前200", "汉高帝定都长安，建未央宫"],
+  ["前130", "张骞通西域，丝绸之路东端起于长安"],
+  ["314", "晋愍帝封司马邺为晋王，都长安（永嘉南渡前）"],
+  ["383", "淝水之战，前秦苻坚（都长安）败于东晋"],
+  ["407", "赫连勃勃建大夏，都统万城"],
+  ["439", "北魏统一北方，关中新入北魏"],
+  ["557", "北周代西魏，仍都长安，关陇集团成型"],
+  ["582", "隋文帝营建大兴城，迁都"],
+  ["618", "唐建都长安，长安进入鼎盛"],
+  ["755", "安史之乱爆发，长安六陷九守"],
+  ["904", "朱温迫昭宗迁洛阳，拆长安宫室"],
+  ["960", "宋定都汴京，长安降为京兆府"],
+  ["1038", "李元昊建西夏，陕北成宋夏前线"],
+  ["1041", "范仲淹知延州，筑大顺城御西夏"],
+  ["1234", "蒙古灭金，关中入蒙古"],
+  ["1271", "忽必烈设陕西行省，汉中划入——「陕西」定型"]
+].map(([y, t]) => ({ y, t }));
+const PEOPLE = [
+  ["秦始皇", "前259—前210", "臧政，统一六国定都咸阳，修驰道直通各地，兵马俑即为其陵。"],
+  ["汉武帝", "前156—前87", "刘彻，以内政外交经营长安，开河西四郡，派张骞两通西域。"],
+  ["司马迁", "前145—?", "夏阳（今韩城）人，著《史记》，鲁迅称「史家之绝唱，无韵之离骚」。"],
+  ["张骞", "前164—前114", "汉中城固人，两使西域，凿空之功，中国通西域第一人。"],
+  ["李广", "?—前119", "陇西成纪人，数任北地太守，飞将军，自刎于漠北之役。"],
+  ["霍去病", "前140—前117", "河东平阳人，六出祁连山北击匈奴，「匈奴未灭，何以家为」。"],
+  ["苏武", "前140—前60", "杜陵人，出使匈奴被留十九年，牧羊北海，执节不屈。"],
+  ["董仲舒", "前179—前104", "广川人，向武帝献「罢黜百家，独尊儒术」之策。"],
+  ["班超", "32—102", "扶风平陵人，经营西域三十一年，封定远侯。"],
+  ["鸠摩罗什", "344—413", "天竺高僧，被后秦姚兴迎至长安译经，影响汉地佛教。"],
+  ["赫连勃勃", "381—425", "匈奴铁弗部，建大夏都统万城，匈奴最后一次独立建都。"],
+  ["李渊", "566—635", "唐高祖，起兵太原，定都长安，开大唐三百载基业。"],
+  ["唐太宗", "598—649", "李世民，玄武门之变后即位于长安，贞观之治。"],
+  ["武则天", "624—705", "于洛阳称帝后复用长安为都，乾陵在梁山。"],
+  ["唐玄宗", "685—762", "李隆基，开元盛世于长安，安史之乱亦起于长安周边。"],
+  ["李白", "701—762", "入京供奉翰林，长安三年，「冠盖满京华，斯人独憔悴」。"],
+  ["杜甫", "712—770", "居长安少陵原十余年，「安史之乱」中见国乱民生，诗史由此而成。"],
+  ["范仲淹", "989—1052", "知延州御西夏，筑大顺城，「先天下之忧而忧」。"],
+  ["沈括", "1031—1095", "任鄜延路经略使，于延州首记石油，著《梦溪笔谈》。"],
+  ["杨虎城", "1893—1949", "陕西蒲城人，西安事变发起者之一，爱国将领。"]
+];
+const PLACES = [
+  ["西安", "丰镐 / 咸阳 / 长安 / 大兴 / 京兆府", "周秦汉隋唐都城，唐末后衰落。"],
+  ["咸阳", "秦都咸阳 / 汉京畿 / 明清咸阳县", "秦都湮灭，今为地级市。"],
+  ["宝鸡", "陈仓 / 岐州 / 凤翔府", "周原、青铜器之乡。"],
+  ["渭南", "下邽 / 华州 / 同州", "华山、渭河要冲。"],
+  ["韩城", "少梁 / 夏阳 / 韩城", "司马迁故里，古城完整。"],
+  ["延安", "上郡 / 延州 / 延安府", "陕北中心，宋夏前线，革命圣地。"],
+  ["榆林", "九边重镇 / 榆林卫", "明代延绥镇治所，长城要地。"],
+  ["汉中", "南郑 / 兴元府 / 汉中府", "蜀汉门户，元划入陕西。"],
+  ["安康", "西城 / 金州 / 兴安府", "汉江水运要道。"],
+  ["商洛", "商於之地 / 上洛 / 商州", "武关道门户。"],
+  ["铜川", "同官 / 耀州", "耀州窑、药王山。"],
+  ["华阴", "华阴县 / 西岳庙", "华山所在。"],
+  ["勉县", "沔阳 / 沔县", "定军山、武侯墓。"],
+  ["柞水", "终南古道 / 柞水", "子午道、秦岭溶洞。"]
+];
+const ROUTES = [
+  ["金牛道（汉—蜀）", "汉中经剑阁入蜀，三国蜀出祁山皆由此。"],
+  ["褒斜道", "沿褒水斜水入秦岭，石门栈道起点。"],
+  ["子午道", "直插长安南，魏延奇谋之地。"],
+  ["傥骆道", "傥駱二水之间，唐荔枝之路。"],
+  ["武关道", "商洛通襄阳，刘邦入关之路。"],
+  ["萧关道", "陇山通塞外，回中道之通道。"]
+];
+
+const detailRoot = $("detail-root");
+(function renderDetail() {
+  const wrap = detailRoot;
+  const sec = (h, sub, inner) => {
+    const s = document.createElement("section");
+    s.className = "sec";
+    const h3 = document.createElement("h3");
+    h3.textContent = h;
+    if (sub) h3.appendChild(Object.assign(document.createElement("span"), { textContent: sub }));
+    s.appendChild(h3);
+    const box = document.createElement("div");
+    box.innerHTML = inner;
+    s.appendChild(box);
+    wrap.appendChild(s);
+  };
+  sec("大事年表", "从立国到行省 · 选择性地列三十年大事",
+    '<ul class="chrono">' + CHRONO.map(c => `<li><span class="y">${c.y}</span><span>${c.t}</span></li>`).join("") + "</ul>");
+  sec("人物志", "与陕西有关的人物 · 简考",
+    '<div class="people">' + PEOPLE.map(p => `<div class="person"><b>${p[0]}</b><span class="d">${p[1]}</span><p>${p[2]}</p></div>`).join("") + "</div>");
+  sec("地名沿革", "古今对照",
+    '<div class="two-col"><table class="plain"><thead><tr><th>今地</th><th>古名</th><th>说明</th></tr></thead><tbody>'
+    + PLACES.map(p => `<tr><td>${p[0]}</td><td>${p[1]}</td><td>${p[2]}</td></tr>`).join("") + "</tbody></table></div>");
+  sec("关隘与古道", "秦岭屏障 · 入蜀与出关之路",
+    '<div class="two-col"><table class="plain"><thead><tr><th>古道 / 关隘</th><th>走向及故事</th></tr></thead><tbody>'
+    + ROUTES.map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join("") + "</tbody></table></div>");
+})();
+
+/* ---------------- 视图切换 ---------------- */
+const tabs = { map: $("tab-map"), time: $("tab-time"), detail: $("tab-detail") };
+const views = { map: $("view-map"), time: $("view-time"), detail: $("view-detail") };
+const pill = document.querySelector("nav .pill");
+
+function movePill() {
+  const active = Object.values(tabs).find(t => t.getAttribute("aria-selected") === "true");
+  if (!active || !pill) return;
+  pill.style.width = active.offsetWidth + "px";
+  pill.style.transform = `translateX(${active.offsetLeft}px)`;
+}
+function showView(name) {
+  Object.keys(tabs).forEach(k => {
+    const on = k === name;
+    tabs[k].setAttribute("aria-selected", String(on));
+    views[k].hidden = !on;
+    views[k].style.animation = "none";
+    void views[k].offsetHeight;
+    views[k].style.animation = "";
+  });
+  movePill();
+  history.replaceState(null, "", "#" + name);
+}
+tabs.map.addEventListener("click", () => showView("map"));
+tabs.time.addEventListener("click", () => showView("time"));
+tabs.detail.addEventListener("click", () => showView("detail"));
+addEventListener("resize", movePill);
+addEventListener("load", movePill);
+showView(["time", "detail"].includes(location.hash.slice(1)) ? location.hash.slice(1) : "map");
+requestAnimationFrame(movePill);
+</script>
+
+
+</body></html>

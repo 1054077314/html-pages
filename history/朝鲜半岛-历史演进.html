@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="朝鲜半岛 · 从古朝鲜到高丽 — 互动历史演进图鉴：方位地图、朝代年表、大事详考（离线单文件）">
+<title>朝鲜半岛 · 从古朝鲜到高丽</title>
+<style>
+  * { box-sizing: border-box; margin: 0; }
+  :root {
+    --ink: #241d14; --ink-2: #4a3b26; --ink-3: #6d5f43; --ink-4: #9a8a6a;
+    --paper: #f7f1e3; --paper-2: #fffdf7; --paper-3: #efe4cd;
+    --line: #dcccaa; --line-2: #c9b68d;
+    --cinnabar: #c0392b; --cinnabar-2: #e2604a;
+    --jade: #1f7a63; --gold: #b08a3e;
+    --river: #4f92b0; --wall: #8a7a5c;
+    --shadow-s: 0 1px 2px rgba(60,44,20,.06), 0 2px 8px rgba(60,44,20,.07);
+    --shadow-m: 0 6px 18px rgba(60,44,20,.11), 0 1px 3px rgba(60,44,20,.07);
+    --ease: cubic-bezier(.22,.61,.36,1);
+    --serif: "Source Han Serif SC", "Noto Serif SC", "Songti SC", "STSong", "SimSun", serif;
+  }
+  html, body { height: 100%; }
+  body {
+    font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans SC", sans-serif;
+    color: var(--ink); display: flex; flex-direction: column; height: 100dvh; overflow: hidden;
+    background:
+      radial-gradient(1200px 700px at 10% -12%, #fffcf4 0%, transparent 62%),
+      radial-gradient(900px 620px at 102% 112%, #efe0c0 0%, transparent 58%),
+      var(--paper);
+    -webkit-font-smoothing: antialiased;
+  }
+  button { font-family: inherit; }
+  button:focus-visible, .state:focus-visible, summary:focus-visible { outline: 2.5px solid #2b6cb0; outline-offset: 3px; border-radius: 6px; }
+  [hidden] { display: none !important; }
+
+  header {
+    position: relative; display: flex; align-items: center; gap: 26px; padding: 0 26px;
+    height: 64px; flex-shrink: 0; z-index: 5;
+    background: linear-gradient(180deg, #fffdf7, #f4ebd7);
+    border-bottom: 1px solid var(--line);
+    box-shadow: inset 0 1px 0 #fff, 0 10px 24px -18px rgba(60,44,20,.55);
+  }
+  header::after {
+    content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold) 30%, var(--gold) 70%, transparent);
+    opacity: .45;
+  }
+  .brand {
+    font-family: var(--serif); font-size: 21px; letter-spacing: .18em; color: var(--ink);
+    display: flex; align-items: center; gap: 11px; white-space: nowrap;
+  }
+  .brand::before {
+    content: ""; width: 10px; height: 10px; border-radius: 1.5px; background: var(--cinnabar);
+    transform: rotate(45deg); box-shadow: 0 0 0 3px rgba(192,57,43,.14);
+    animation: sealIn .8s var(--ease) both;
+  }
+  @keyframes sealIn { from { transform: rotate(45deg) scale(0); } }
+  nav { position: relative; display: flex; gap: 3px; padding: 4px; border-radius: 999px; background: #ece0c6; box-shadow: inset 0 1px 3px rgba(60,44,20,.15); }
+  nav .pill {
+    position: absolute; top: 4px; left: 0; height: calc(100% - 8px); border-radius: 999px;
+    background: linear-gradient(180deg, #3e3221, #241d14);
+    box-shadow: 0 2px 10px rgba(36,29,20,.38);
+    transition: transform .42s var(--ease), width .42s var(--ease);
+  }
+  nav button {
+    position: relative; z-index: 1; font-size: 13.5px; letter-spacing: .08em; padding: 7px 19px;
+    border: 0; background: none; color: var(--ink-3); cursor: pointer; border-radius: 999px;
+    transition: color .3s var(--ease);
+  }
+  nav button[aria-selected="true"] { color: #fdf6e6; }
+  .hint { margin-left: auto; font-size: 12px; color: var(--ink-4); letter-spacing: .08em; }
+  .nav-home { margin-left: 12px; font-size: 12.5px; color: var(--ink-3); text-decoration: none; letter-spacing: .1em; white-space: nowrap; border: 1px solid var(--line-2); border-radius: 999px; padding: 4px 12px; transition: background .25s, color .25s, border-color .25s; }
+  .nav-home:hover { background: #3e3221; color: #fdf6e6; border-color: transparent; }
+
+  main { flex: 1; min-height: 0; display: flex; }
+  [role="tabpanel"] { animation: viewIn .5s var(--ease) both; }
+  @keyframes viewIn { from { opacity: 0; transform: translateY(10px); } }
+
+  #view-map { flex: 1; display: flex; min-width: 0; }
+  .map-wrap {
+    flex: 1; position: relative; min-width: 0; overflow: auto;
+    background: radial-gradient(1100px 640px at 34% 18%, #fffdf6 0%, transparent 64%), linear-gradient(180deg, #f8f2e4, #f0e7d2);
+  }
+  .map-wrap svg { width: 100%; height: 100%; display: block; }
+  .title-block { position: absolute; top: 20px; left: 28px; pointer-events: none; animation: titleIn 1s var(--ease) .35s both; }
+  @keyframes titleIn { from { opacity: 0; transform: translateX(-14px); } }
+  .title-block h2 { font-family: var(--serif); font-size: 30px; letter-spacing: .3em; color: var(--ink); text-shadow: 0 1px 0 #fff; }
+  .title-block p { font-size: 13px; color: var(--ink-3); margin-top: 8px; letter-spacing: .14em; }
+  .title-block .title-rule { width: 46px; height: 2px; background: var(--cinnabar); margin-top: 11px; border-radius: 2px; }
+
+  .geo-label { fill: #8c7d5a; paint-order: stroke; stroke: #f7f1e3; stroke-width: 5px; letter-spacing: .1em; }
+  .state { cursor: pointer; }
+  .state .hit { fill: transparent; }
+  .state .dot {
+    fill: #fffdf6; stroke: #7a6547; stroke-width: 2.2;
+    transform-box: fill-box; transform-origin: center;
+    transition: transform .3s var(--ease), fill .3s var(--ease), stroke .3s var(--ease);
+    filter: drop-shadow(0 1px 2px rgba(60,44,20,.28));
+  }
+  .state .ring, .state .halo {
+    fill: none; stroke: var(--cinnabar); stroke-width: 1.6;
+    transform-box: fill-box; transform-origin: center; opacity: 0;
+    transition: opacity .3s var(--ease), transform .3s var(--ease);
+  }
+  .state .ring { transform: scale(.82); }
+  .state:hover .dot, .state:focus-visible .dot { transform: scale(1.3); fill: #ffe4ab; stroke: #6b5836; }
+  .state:hover .ring, .state:focus-visible .ring { opacity: .55; transform: scale(1); }
+  .state.selected .dot { fill: var(--cinnabar); stroke: #7d2419; transform: scale(1.36); }
+  .state.selected .ring { opacity: 1; transform: scale(1.14); }
+  .state.selected .halo { animation: pulse 2.6s ease-out infinite; }
+  @keyframes pulse { 0% { transform: scale(1); opacity: .75; } 70%,100% { transform: scale(1.85); opacity: 0; } }
+  .state text {
+    font-family: var(--serif); font-size: 15px; font-weight: 700; fill: var(--ink-2);
+    paint-order: stroke; stroke: #f7f1e3; stroke-width: 4px; text-anchor: middle;
+    transition: fill .3s var(--ease);
+  }
+  .state.selected text { fill: #8c2f14; }
+  .marker text { font-size: 12px; fill: var(--ink-3); paint-order: stroke; stroke: #f7f1e3; stroke-width: 3px; text-anchor: middle; letter-spacing: .04em; }
+
+  aside {
+    width: 372px; flex-shrink: 0; border-left: 1px solid var(--line); overflow-y: auto;
+    padding: 26px 24px 40px;
+    background: linear-gradient(180deg, #fffdf7, #f8f1e2);
+    box-shadow: -14px 0 30px -24px rgba(60,44,20,.5);
+  }
+  aside h3 { font-family: var(--serif); font-size: 26px; color: var(--ink); letter-spacing: .1em; }
+  .today {
+    display: inline-block; margin: 11px 0 16px; padding: 4px 12px; border-radius: 999px;
+    background: linear-gradient(180deg, #f3e8cd, #ece0c2); border: 1px solid var(--line);
+    font-size: 12.5px; color: var(--ink-3);
+  }
+  aside ul { list-style: none; padding: 0; }
+  aside li { font-size: 14.5px; line-height: 1.75; margin-bottom: 11px; padding-left: 17px; position: relative; color: var(--ink-2); }
+  aside li::before {
+    content: ""; position: absolute; left: 0; top: 10px; width: 6px; height: 6px;
+    border-radius: 50%; background: var(--cinnabar-2); box-shadow: 0 0 0 3px rgba(226,96,74,.14);
+  }
+  .fate {
+    margin-top: 18px; padding: 13px 15px; border-radius: 3px 8px 8px 3px;
+    background: linear-gradient(100deg, #f4e8ce, #fbf4e4);
+    border-left: 4px solid var(--gold); font-size: 13.5px; line-height: 1.75; color: var(--ink-3); box-shadow: var(--shadow-s);
+  }
+  .fate b { color: var(--ink); }
+  .xlink {
+    display: inline-flex; align-items: center; gap: 6px; margin-top: 16px; font-size: 13.5px;
+    color: var(--cinnabar); background: none; border: 0; padding: 0; cursor: pointer;
+    border-bottom: 1px dashed rgba(192,57,43,.5); transition: gap .25s var(--ease), color .25s;
+  }
+  .xlink:hover { gap: 11px; color: #7d2419; }
+  .default-tip { color: var(--ink-3); font-size: 14.5px; line-height: 2; margin: 10px 0 6px; text-align: center; }
+  .legend {
+    margin-top: 26px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 10px;
+    font-size: 13.5px; color: var(--ink-3); background: rgba(255,253,247,.75); box-shadow: var(--shadow-s);
+  }
+  .legend div { display: flex; align-items: center; gap: 11px; margin: 8px 0; }
+  .legend i { width: 44px; height: 10px; flex-shrink: 0; display: block; position: relative; }
+  .panel-foot { margin-top: 20px; font-size: 12px; color: var(--ink-4); line-height: 1.8; border-top: 1px solid var(--line); padding-top: 14px; }
+
+  .stagger > * { animation: itemIn .5s var(--ease) both; }
+  .stagger > *:nth-child(1) { animation-delay: .02s; }
+  .stagger > *:nth-child(2) { animation-delay: .07s; }
+  .stagger > *:nth-child(3) { animation-delay: .12s; }
+  .stagger > *:nth-child(4) { animation-delay: .17s; }
+  @keyframes itemIn { from { opacity: 0; transform: translateX(9px); } }
+
+  #view-time, #view-detail { flex: 1; overflow-y: auto; padding: 34px 26px 60px; }
+  .time-inner, .detail-inner { max-width: 900px; margin: 0 auto; }
+  .time-inner h2, .detail-inner h2 { font-family: var(--serif); font-size: 30px; letter-spacing: .18em; color: var(--ink); }
+  .lead { font-size: 14px; color: var(--ink-3); margin: 10px 0 20px; line-height: 1.85; max-width: 64ch; }
+  .toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 22px; font-size: 13px; color: var(--ink-4); }
+  .chip {
+    font-size: 13px; padding: 5px 14px; border-radius: 999px; border: 1px solid var(--line);
+    background: linear-gradient(180deg, #fffdf7, #f4ebd8); color: var(--ink-3); cursor: pointer;
+    transition: transform .22s var(--ease), box-shadow .22s var(--ease), background .22s, color .22s, border-color .22s;
+  }
+  .chip:hover { transform: translateY(-1px); box-shadow: var(--shadow-s); }
+  .chip[aria-pressed="true"] { background: linear-gradient(180deg, #3e3221, #241d14); color: #fdf6e6; border-color: transparent; box-shadow: 0 3px 12px rgba(36,29,20,.3); }
+  .tool { margin-left: auto; font-size: 13px; padding: 5px 15px; border-radius: 999px; border: 1px dashed var(--line-2); background: none; color: var(--ink-3); cursor: pointer; transition: background .22s, color .22s; }
+  .tool:hover { background: rgba(255,253,247,.9); color: var(--ink); }
+
+  .timeline { list-style: none; padding: 0 0 0 26px; position: relative; }
+  .timeline::before {
+    content: ""; position: absolute; left: 6px; top: 6px; bottom: 26px; width: 2px;
+    background: linear-gradient(180deg, rgba(201,182,141,0), var(--line-2) 8%, var(--line-2) 92%, rgba(201,182,141,0));
+    transform-origin: top; animation: growLine 1.1s var(--ease) .1s both;
+  }
+  @keyframes growLine { from { transform: scaleY(0); } }
+
+  .card {
+    position: relative; margin: 0 0 12px; border-radius: 10px; border: 1px solid var(--line);
+    background: linear-gradient(180deg, #fffdf8, #faf4e7); box-shadow: var(--shadow-s);
+    transition: transform .3s var(--ease), box-shadow .3s var(--ease), opacity .35s var(--ease), border-color .3s;
+    animation: cardIn .6s var(--ease) both; animation-delay: calc(var(--i) * 55ms);
+  }
+  @keyframes cardIn { from { opacity: 0; transform: translateY(16px) scale(.985); } }
+  .card::before {
+    content: ""; position: absolute; left: -26px; top: 21px; width: 11px; height: 11px; border-radius: 50%;
+    background: #fffdf6; border: 2.5px solid var(--cinnabar-2); box-shadow: 0 0 0 4px var(--paper);
+    transition: transform .3s var(--ease), background .3s, border-color .3s;
+  }
+  .card:hover { transform: translateY(-2px); box-shadow: var(--shadow-m); border-color: var(--line-2); }
+  .card:hover::before { transform: scale(1.25); border-color: var(--cinnabar); }
+  .card:has(> details[open]) { box-shadow: var(--shadow-m); border-color: var(--line-2); background: linear-gradient(180deg, #fffefa, #fbf6ea); }
+  .card:has(> details[open])::before { background: var(--cinnabar); border-color: var(--cinnabar); }
+  .card.dim { opacity: .26; filter: saturate(.35); }
+  .card summary { list-style: none; cursor: pointer; padding: 13px 17px; display: flex; flex-wrap: wrap; align-items: baseline; gap: 5px 12px; }
+  .card summary::-webkit-details-marker { display: none; }
+  .card summary::after { content: "＋"; margin-left: auto; color: var(--ink-4); font-size: 15px; transition: transform .35s var(--ease), color .25s; }
+  .card:has(> details[open]) summary::after { content: "－"; color: var(--cinnabar); }
+  .card .name { font-family: var(--serif); font-size: 19px; font-weight: 700; color: var(--ink); letter-spacing: .06em; }
+  .card .years { font-size: 12.5px; color: var(--ink-3); }
+  .card .lang { font-size: 11.5px; padding: 2px 9px; border-radius: 999px; background: #efe4cd; color: var(--ink-3); border: 1px solid rgba(201,182,141,.7); }
+  .card .body { padding: 0 17px 15px; animation: bodyIn .45s var(--ease) both; }
+  @keyframes bodyIn { from { opacity: 0; transform: translateY(-6px); } }
+  .card ul { list-style: none; padding: 0; }
+  .card li { font-size: 14.5px; line-height: 1.8; padding-left: 17px; position: relative; margin-bottom: 5px; color: var(--ink-2); }
+  .card li::before { content: ""; position: absolute; left: 1px; top: 11px; width: 5px; height: 5px; border-radius: 50%; background: var(--gold); }
+  .card .out {
+    margin-top: 11px; padding: 10px 14px; border-radius: 3px 8px 8px 3px;
+    background: linear-gradient(100deg, #f4e8ce, #fbf4e4); border-left: 4px solid var(--gold);
+    font-size: 13.5px; line-height: 1.8; color: var(--ink-3);
+  }
+  .card .out b { color: var(--ink); }
+
+  .rules { margin-top: 30px; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; }
+  .rule {
+    border-radius: 12px; padding: 17px 18px; border: 1px solid var(--line);
+    background: linear-gradient(160deg, #fffdf8, #f6eddb); box-shadow: var(--shadow-s);
+    transition: transform .3s var(--ease), box-shadow .3s var(--ease);
+    animation: cardIn .6s var(--ease) both; animation-delay: calc(430ms + var(--i) * 70ms);
+  }
+  .rule:hover { transform: translateY(-3px); box-shadow: var(--shadow-m); }
+  .rule h3 { font-family: var(--serif); font-size: 17px; color: var(--ink); margin-bottom: 11px; letter-spacing: .08em; padding-bottom: 9px; border-bottom: 1px solid var(--line); }
+  .rule ul { padding: 0; }
+  .rule li { font-size: 14px; line-height: 1.8; margin-bottom: 6px; list-style: none; padding-left: 15px; position: relative; color: var(--ink-2); }
+  .rule li::before { content: ""; position: absolute; left: 2px; top: 11px; width: 5px; height: 5px; background: var(--cinnabar-2); transform: rotate(45deg); }
+  .caveat { margin: 22px 0 0; font-size: 12px; color: var(--ink-4); line-height: 1.9; border-top: 1px solid var(--line); padding-top: 14px; }
+
+  .sec { margin-top: 34px; animation: cardIn .6s var(--ease) both; }
+  .sec > h3 {
+    font-family: var(--serif); font-size: 20px; color: var(--ink); letter-spacing: .1em;
+    padding-bottom: 10px; border-bottom: 2px solid var(--line-2); margin-bottom: 16px;
+    display: flex; align-items: baseline; gap: 12px;
+  }
+  .sec > h3 span { font-family: inherit; font-size: 12px; color: var(--ink-4); letter-spacing: .04em; font-weight: 400; }
+  .chrono { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(330px, 1fr)); gap: 0 30px; }
+  .chrono li {
+    display: grid; grid-template-columns: 86px 1fr; gap: 12px; font-size: 13.5px; line-height: 1.7;
+    padding: 6px 0; border-bottom: 1px dashed rgba(201,182,141,.5); color: var(--ink-2);
+  }
+  .chrono .y { font-family: var(--serif); font-weight: 700; color: var(--cinnabar); font-size: 13px; white-space: nowrap; }
+  .people { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 11px; }
+  .person {
+    padding: 12px 15px; border: 1px solid var(--line); border-radius: 9px;
+    background: linear-gradient(180deg, #fffdf8, #faf4e7); box-shadow: var(--shadow-s);
+    transition: transform .25s var(--ease), box-shadow .25s var(--ease);
+  }
+  .person:hover { transform: translateY(-2px); box-shadow: var(--shadow-m); }
+  .person b { font-family: var(--serif); font-size: 16px; color: var(--ink); }
+  .person .d { font-size: 11.5px; color: var(--ink-4); margin-left: 8px; }
+  .person p { font-size: 13.5px; line-height: 1.72; color: var(--ink-3); margin-top: 6px; }
+  table.plain { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  table.plain th { text-align: left; font-weight: 400; color: var(--ink-4); font-size: 12px; padding: 8px 12px; border-bottom: 1px solid var(--line-2); letter-spacing: .06em; }
+  table.plain td { padding: 9px 12px; border-bottom: 1px dashed rgba(201,182,141,.5); line-height: 1.75; vertical-align: top; color: var(--ink-3); }
+  table.plain td:first-child { font-family: var(--serif); font-weight: 700; color: var(--ink); white-space: nowrap; }
+  .two-col { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 0 34px; }
+
+  noscript { padding: 26px; display: block; }
+
+  .pan-hint { display: none; }
+  @media (max-width: 880px) {
+    .pan-hint { display: block; position: sticky; left: 50%; bottom: 10px; transform: translateX(-50%); width: max-content; height: 30px; margin-top: -34px; padding: 0 14px; border-radius: 999px; background: rgba(36,29,20,.75); color: #f7f1e3; font-size: 11.5px; letter-spacing: .08em; line-height: 30px; pointer-events: none; transition: opacity .4s; }
+    header { padding: 0 14px; gap: 12px; }
+    .brand { font-size: 17px; letter-spacing: .1em; }
+    .hint { display: none; }
+    #view-map { flex-direction: column; }
+    .map-wrap { flex: none; height: 54dvh; }
+    .map-wrap svg { min-width: 900px; }
+    .title-block { top: 14px; left: 18px; }
+    .title-block h2 { font-size: 22px; }
+    aside { width: 100%; border-left: 0; border-top: 1px solid var(--line); flex: 1; min-height: 0; padding: 18px 16px 30px; box-shadow: none; }
+    #view-time, #view-detail { padding: 22px 15px 46px; }
+    .timeline { padding-left: 22px; }
+    .card::before { left: -22px; }
+  }
+
+  .plink { color: var(--cinnabar); text-decoration: none; border-bottom: 1px dashed rgba(192,57,43,.5); }
+  @media print {
+    body { height: auto; overflow: visible; }
+    header, .hint, .pan-hint { display: none; }
+    main { overflow: visible; }
+    #view-map[hidden], #view-time[hidden], #view-detail[hidden], #view-steppe[hidden] { display: block !important; }
+    #view-map { display: block; overflow: visible; }
+    .map-wrap { height: auto; overflow: visible; }
+    .map-wrap svg { min-width: 0; width: 100%; height: auto; }
+    aside { width: auto; border: 0; overflow: visible; }
+    #view-time, #view-detail, .steppe-inner { overflow: visible; padding: 10mm 0; }
+    .card, .rule, .sec, .person { break-inside: avoid; box-shadow: none; }
+    .toolbar, .chip, .tool, .xlink { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition-duration: .01ms !important; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">朝鲜半岛 · 两千年</div>
+  <nav role="tablist" aria-label="切换视图">
+    <span class="pill" aria-hidden="true"></span>
+    <button role="tab" id="tab-map" aria-selected="true" aria-controls="view-map">半岛地图</button>
+    <button role="tab" id="tab-time" aria-selected="false" aria-controls="view-time">历史演进</button>
+    <button role="tab" id="tab-detail" aria-selected="false" aria-controls="view-detail">详考</button>
+  </nav>
+  <a class="nav-home" href="历史总览.html">总览</a> <span class="hint">古朝鲜至高丽 · 三韩与三国 · 全部离线</span>
+</header>
+
+<main>
+  <section id="view-map" role="tabpanel" aria-labelledby="tab-map">
+    <div class="map-wrap">
+      <svg id="map" viewBox="140 60 720 820" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="group" aria-label="朝鲜半岛历史地理示意图">
+        <defs>
+          <linearGradient id="north" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#cfe0c2" stop-opacity=".45"/>
+            <stop offset="100%" stop-color="#dfe8d2" stop-opacity=".2"/>
+          </linearGradient>
+          <linearGradient id="south" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#e8d9b8" stop-opacity=".35"/>
+            <stop offset="100%" stop-color="#e8e2c4" stop-opacity=".15"/>
+          </linearGradient>
+          <linearGradient id="riverGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#8fc0d6"/>
+            <stop offset="100%" stop-color="#4f92b0"/>
+          </linearGradient>
+        </defs>
+
+        <!-- 半岛轮廓（示意） -->
+        <path d="M300,90 Q360,80 420,100 Q480,120 520,170 Q560,230 570,300 Q580,380 560,460
+                 Q540,540 500,600 Q460,660 420,700 Q390,730 360,745 Q340,755 320,745
+                 Q300,720 295,670 Q290,600 275,540 Q260,470 250,400 Q245,330 255,260
+                 Q265,180 280,130 Z" fill="url(#north)"/>
+
+        <!-- 北部（高句丽）/ 南部（三韩）示意 -->
+        <path d="M255,260 Q260,200 275,140 Q300,95 360,85 Q420,90 470,130 Q520,175 545,250
+                 Q560,310 555,370 Q490,360 420,350 Q350,345 290,340 Q255,320 255,260 Z" fill="#cfe0c2" opacity=".3"/>
+        <text x="400" y="210" class="geo-label" font-size="14" text-anchor="middle">高句丽势力范围</text>
+        <path d="M290,420 Q300,500 320,570 Q350,640 400,690 Q440,720 470,730
+                 Q430,745 370,740 Q310,720 290,660 Q270,580 270,500 Q275,450 290,420 Z" fill="#e8d9b8" opacity=".3"/>
+        <text x="380" y="620" class="geo-label" font-size="13" text-anchor="middle">马韩 · 辰韩 · 弁韩</text>
+
+        <!-- 太白山（白头山） -->
+        <path d="M330,95 L350,70 L370,95 Z" fill="#8a9a72" opacity=".8"/>
+        <text x="350" y="62" class="geo-label" font-size="12">太白山</text>
+
+        <!-- 河流：大同江 / 汉江 / 锦江 / 洛东江 / 清川江 -->
+        <path d="M320,220 Q340,250 355,290 Q365,320 375,350" fill="none" stroke="url(#riverGrad)" stroke-width="2.8" stroke-linecap="round"/>
+        <text x="290" y="250" class="geo-label" font-size="12">大同江</text>
+        <path d="M340,430 Q360,460 385,490 Q400,510 415,530" fill="none" stroke="url(#riverGrad)" stroke-width="2.6" stroke-linecap="round"/>
+        <text x="318" y="450" class="geo-label" font-size="12">汉江</text>
+        <path d="M330,540 Q350,580 370,620 Q380,645 390,670" fill="none" stroke="url(#riverGrad)" stroke-width="2.4" stroke-linecap="round" opacity=".85"/>
+        <text x="300" y="580" class="geo-label" font-size="12">锦江</text>
+        <path d="M450,480 Q465,540 480,600 Q490,645 495,690" fill="none" stroke="url(#riverGrad)" stroke-width="2.6" stroke-linecap="round"/>
+        <text x="505" y="580" class="geo-label" font-size="12">洛东江</text>
+        <path d="M300,160 Q315,200 330,240 Q340,270 350,300" fill="none" stroke="url(#riverGrad)" stroke-width="2.4" stroke-linecap="round" opacity=".85"/>
+        <text x="278" y="180" class="geo-label" font-size="12">清川江</text>
+
+        <!-- 海岸标注 -->
+        <text x="230" y="380" class="geo-label" font-size="13" transform="rotate(-80 230 380)">黄海</text>
+        <text x="545" y="400" class="geo-label" font-size="13" transform="rotate(80 545 400)">日本海</text>
+        <text x="430" y="770" class="geo-label" font-size="12" text-anchor="middle">对马海峡</text>
+
+        <!-- 关隘 -->
+        <g class="marker" id="gates"></g>
+        <!-- 城邑 -->
+        <g id="states"></g>
+
+        <g transform="translate(790,110)" opacity=".9">
+          <circle cx="0" cy="2" r="24" fill="#fffdf7" opacity=".7" stroke="#dcccaa" stroke-width="1"/>
+          <path d="M0,-22 L5.5,-7 L-5.5,-7 Z" fill="#c0392b"/>
+          <line x1="0" y1="20" x2="0" y2="-6" stroke="#8c7d5a" stroke-width="1.8"/>
+          <line x1="-6" y1="20" x2="6" y2="20" stroke="#8c7d5a" stroke-width="1.8"/>
+          <text x="0" y="40" font-size="13" fill="#6d5f43" text-anchor="middle">北</text>
+        </g>
+      </svg>
+
+      <div class="title-block">
+        <h2>朝鲜半岛</h2>
+        <p>古朝鲜 · 三韩 · 三国 · 统一新罗 · 高丽</p>
+        <span class="title-rule"></span>
+      </div>
+    </div>
+
+    <aside aria-live="polite">
+      <div id="panel-default"><p class="default-tip">点击（或 Tab + 回车）地图上的圆点<br>看这座城邑在同时期的角色</p></div>
+      <div id="panel-detail" hidden>
+        <div class="stagger">
+          <h3 id="d-name"></h3>
+          <div class="today" id="d-today"></div>
+          <ul id="d-points"></ul>
+          <div class="fate" id="d-fate"></div>
+        </div>
+        <button class="xlink" id="d-link" hidden></button>
+      </div>
+      <div class="legend" aria-label="图例">
+        <div><i style="background:linear-gradient(90deg,transparent,#cfe0c2,transparent);border-radius:2px"></i>高句丽势力范围（鸭绿江—大同江流域）</div>
+        <div><i style="background:linear-gradient(90deg,transparent,#e8d9b8,transparent);border-radius:2px"></i>三韩（马韩 · 辰韩 · 弁韩）</div>
+        <div><i style="height:4px;margin-top:3px;background:#4f92b0;border-radius:2px"></i>大同江 · 汉江 · 锦江 · 洛东江</div>
+        <div><i style="height:9px;margin-top:1px;background:linear-gradient(135deg,transparent 44%,#a2905f 44% 56%,transparent 56%)"></i>关隘（石门 · 临津 · 熊津 · 对马）</div>
+        <div><i style="height:9px;margin-top:1px;background:linear-gradient(135deg,transparent 44%,#8a6f45 44% 56%,transparent 56%)"></i>可点击的城邑</div>
+      </div>
+      <p class="panel-foot">半岛轮廓与山川为示意走势，非精确测绘；今半岛分属朝鲜、韩国，本页以历史时期为纲。史实以《史记》《汉书》《三国史记》《高丽史》等为准，争议处标注「一说」。<br><a href="草原与丝路.html" style="color:var(--cinnabar);text-decoration:none;border-bottom:1px dashed rgba(192,57,43,.5)">← 同时期草原：《草原与丝路》（蒙古征东）</a></p>
+    </aside>
+  </section>
+
+  <section id="view-time" role="tabpanel" aria-labelledby="tab-time" hidden>
+    <div class="time-inner">
+      <h2>朝鲜半岛历史演进</h2>
+      <p class="lead">从檀君传说与卫满朝鲜，到汉四郡、三韩鼎立，再到高句丽、百济、新罗三国争雄——半岛历史始终与中国王朝深度交织。统一新罗之后是后三国与高丽；蒙古东征后设征东行省，半岛进入「事大」与「自立」并存的新阶段。今半岛分属朝鲜与韩国，本页以历史时期为纲。</p>
+      <div class="toolbar" id="toolbar"></div>
+      <ol class="timeline" id="timeline"></ol>
+      <div class="rules" id="rules"></div>
+      <p class="caveat">说明：年代取《三国史记》《高丽史》等通行说法；传说时代（檀君）标注为传说，考古学年代与文献年代可能不一致。本页以时代为纲，细节见各卡片。</p>
+    </div>
+  </section>
+
+  <section id="view-detail" role="tabpanel" aria-labelledby="tab-detail" hidden>
+    <div class="detail-inner">
+      <h2>朝鲜半岛详考</h2>
+      <div id="detail-root"></div>
+      <p class="caveat">史实以《史记》《汉书》《三国史记》《三国遗事》《高丽史》及考古报告为准，争议处标注「一说」。<br><a href="陕西-历史演进.html" style="color:var(--cinnabar);text-decoration:none;border-bottom:1px dashed rgba(192,57,43,.5)">← 同时期中国：《陕西 · 历史演进》</a></p>
+    </div>
+  </section>
+</main>
+<noscript>本页需要启用 JavaScript 才能显示地图与时间轴。</noscript>
+
+<script>
+const SVGNS = "http://www.w3.org/2000/svg";
+const el = (tag, attrs = {}, text) => {
+  const n = document.createElementNS(SVGNS, tag);
+  for (const k in attrs) n.setAttribute(k, attrs[k]);
+  if (text !== undefined) n.textContent = text;
+  return n;
+};
+const $ = id => document.getElementById(id);
+
+const GATES = [
+  { x: 355, y: 250, label: "石门关", dy: -22 },
+  { x: 380, y: 470, label: "临津关", dy: -22 },
+  { x: 375, y: 560, label: "熊津口", dy: 28 },
+  { x: 440, y: 755, label: "对马", dy: 26 }
+];
+
+const CITIES = [
+  { id: "pyongyang", x: 355, y: 300, ly: -30, short: "平壤", r: 11, band: "北部", tag: "建都",
+    name: "平壤 / 王俭城", today: "今 · 朝鲜平壤",
+    points: [
+      "古朝鲜王俭城所在，箕子朝鲜、卫满朝鲜皆都于此",
+      "汉武帝灭卫满朝鲜设乐浪郡（前108），治所在此",
+      "高句丽后期都城（427年迁都平壤），好太王碑、高句丽古墓群",
+      "大同江畔「三国故都」——半岛北部的政治中心"
+    ],
+    fate: "唐罗联军灭高句丽（668）后，平壤归属新罗；今为朝鲜首都。" },
+  { id: "pyongwon", x: 380, y: 330, ly: -28, short: "平壤北", r: 8, band: "北部", tag: "关塞",
+    name: "大同江渡口", today: "今 · 平壤附近",
+    points: [
+      "高句丽都城平壤的水路门户",
+      "「大同江」为半岛北部的母亲河",
+      "隋唐征高句丽皆以大同江为前线"
+    ],
+    fate: "今为平壤都市圈的一部分。" },
+  { id: "pyongyanggang", x: 330, y: 240, ly: -28, short: "清川江", r: 8, band: "北部", tag: "关塞",
+    name: "清川江 / 安州", today: "今 · 朝鲜安州市",
+    points: [
+      "高句丽与中原王朝的天然边界之一",
+      "「清川江」为半岛北部主要河流",
+      "安州为高句丽边防重镇"
+    ],
+    fate: "今为朝鲜安州市。" },
+  { id: "kaesong", x: 375, y: 395, ly: -30, short: "开城", r: 11, band: "中部", tag: "建都",
+    name: "开城 / 开京", today: "今 · 朝鲜开城",
+    points: [
+      "高丽都城（919—1392），「开京」三百年",
+      "高丽青瓷、高丽大藏经、活字印刷——高丽文化巅峰",
+      "松岳山下的王宫、满月台、成均馆",
+      "开城参、高丽参的原产地"
+    ],
+    fate: "1392年李成桂建朝鲜王朝，迁都汉阳；开城为高丽故都，今为朝鲜开城工业特区。" },
+  { id: "hanyang", x: 370, y: 460, ly: -30, short: "汉阳", r: 10, band: "中部", tag: "建都",
+    name: "汉阳 / 汉城", today: "今 · 韩国首尔",
+    points: [
+      "百济慰礼城（前18）所在，后为新罗、高丽重镇",
+      "1394年朝鲜王朝迁都汉阳，「汉城」之名沿用六百年",
+      "北岳山、汉江环绕，「山水之城」",
+      "今为首尔特别市，半岛最大都市"
+    ],
+    fate: "朝鲜王朝定都汉城近五百年；2005年「汉城」更名为「首尔」。" },
+  { id: "gyeongju", x: 455, y: 610, ly: -30, short: "庆州", r: 11, band: "东南", tag: "建都",
+    name: "庆州 / 月城", today: "今 · 韩国庆州市",
+    points: [
+      "新罗都城「月城」（前57—935），九百年古都",
+      "统一新罗的都城——佛教文化鼎盛，佛国寺、石窟庵",
+      "「一村一佛」——庆州遍布佛寺与古墓",
+      "「没有围墙的博物馆」——新罗王陵、瞻星台、雁鸭池"
+    ],
+    fate: "935年新罗降于高丽，庆州失去都城地位；今为韩国庆尚北道首府，世界文化遗产。" },
+  { id: "ubju", x: 350, y: 520, ly: -30, short: "扶余", r: 9, band: "西南", tag: "建都",
+    name: "扶余 / 泗沘", today: "今 · 韩国忠清南道扶余郡",
+    points: [
+      "百济后期都城泗沘（538—660），佛教文化鼎盛",
+      "「百济文化圈」——经海路影响日本飞鸟文化",
+      "定林寺址、陵山里古墓群",
+      "「熊津—泗沘」——百济两度迁都，皆为战略选择"
+    ],
+    fate: "660年唐罗联军灭百济，泗沘陷落；今为韩国扶余郡，百济古都遗址。" },
+  { id: "gongju", x: 385, y: 510, ly: -28, short: "公州", r: 9, band: "西南", tag: "建都",
+    name: "公州 / 熊津", today: "今 · 韩国忠清南道公州市",
+    points: [
+      "百济前期都城熊津（前18—538），三百年",
+      "「熊津城」——百济的发祥地",
+      "武宁王陵——百济王陵中保存最完好者，出土大量中国南朝文物",
+      "百济与南朝、倭国的外交通道"
+    ],
+    fate: "538年迁都泗沘；熊津为百济重镇，今为公州市。" },
+  { id: "naju", x: 360, y: 590, ly: 30, short: "罗州", r: 8, band: "西南", tag: "民族",
+    name: "罗州 / 古马韩", today: "今 · 韩国全罗南道罗州市",
+    points: [
+      "马韩的核心区域，「五十五国」中的重镇",
+      "「马韩」为三韩中最大的部落联盟",
+      "「罗州」之名见于高丽时代"
+    ],
+    fate: "今为罗州市，全罗南道重要城市。" },
+  { id: "gimhae", x: 470, y: 660, ly: 30, short: "金海", r: 9, band: "东南", tag: "民族",
+    name: "金海 / 大伽倻", today: "今 · 韩国庆尚南道金海市",
+    points: [
+      "弁韩的核心区域，「大伽倻」——铁器文化中心",
+      "「金海」之名，取「金属之海」之意",
+      "伽倻文化与倭国、百济的文化交流"
+    ],
+    fate: "6世纪被新罗吞并；今为金海市，伽倻文化之乡。" },
+  { id: "busan", x: 480, y: 700, ly: 30, short: "釜山", r: 8, band: "东南", tag: "通道",
+    name: "釜山 / 釜山浦", today: "今 · 韩国釜山广域市",
+    points: [
+      "洛东江入海口，半岛东南门户",
+      "「釜山」之名，取「釜山」（山形如釜）之意",
+      "对马海峡的要冲——与倭国海路的起点"
+    ],
+    fate: "今为釜山广域市，韩国第二大城市、最大港口。" },
+  { id: "andong", x: 430, y: 560, ly: -28, short: "安东", r: 8, band: "东南", tag: "人物",
+    name: "安东 / 义兴", today: "今 · 韩国庆尚北道安东市",
+    points: [
+      "「安东」为高丽时代的重要郡县",
+      "朝鲜时代士林派的中心——「安东学派」",
+      "河回回文假面舞——世界非物质文化遗产"
+    ],
+    fate: "今为安东市，韩国传统文化重镇。" },
+  { id: "jeonju", x: 370, y: 570, ly: -28, short: "全州", r: 8, band: "西南", tag: "人物",
+    name: "全州 / 完山", today: "今 · 韩国全罗北道全州市",
+    points: [
+      "后三国时期「后百济」的都城（900—936），甄萱所建",
+      "「全州」之名见于高丽时代",
+      "朝鲜王朝的王族本贯「全州李氏」——李成桂的本籍"
+    ],
+    fate: "今为全州市，全罗北道首府，「美食之都」。" },
+  { id: "jinhae", x: 490, y: 680, ly: -28, short: "镇海", r: 7, band: "东南", tag: "通道",
+    name: "镇海 / 镇海浦", today: "今 · 韩国庆尚南道昌原市镇海区",
+    points: [
+      "半岛南端的良港，与倭国海路的要冲",
+      "「镇海」之名，取「镇守海疆」之意"
+    ],
+    fate: "今为韩国海军重镇。" },
+  { id: "hamhung", x: 400, y: 220, ly: -30, short: "咸兴", r: 8, band: "北部", tag: "通道",
+    name: "咸兴 / 德源", today: "今 · 朝鲜咸兴市",
+    points: [
+      "高句丽的「东平壤」——半岛东北部重镇",
+      "「德源」为高句丽时代的郡名",
+      "「咸兴」之名见于高丽时代"
+    ],
+    fate: "今为朝鲜咸兴市，咸兴冷面的原产地。" },
+  { id: "wonsan", x: 420, y: 280, ly: -28, short: "元山", r: 8, band: "北部", tag: "通道",
+    name: "元山 / 元山津", today: "今 · 朝鲜元山市",
+    points: [
+      "日本海西岸的良港，「元山津」为高句丽时代的港口",
+      "「元山」之名见于朝鲜时代"
+    ],
+    fate: "今为朝鲜元山市，金刚山旅游区的门户。" },
+  { id: "ganggye", x: 340, y: 170, ly: -28, short: "江界", r: 7, band: "北部", tag: "关塞",
+    name: "江界 / 江界府", today: "今 · 朝鲜慈江道江界市",
+    points: [
+      "「江界」为高句丽时代的边防重镇",
+      "「满浦」为鸭绿江渡口，与中国丹东隔江相望",
+      "「江界」之名见于朝鲜时代"
+    ],
+    fate: "今为江界市，朝鲜东北部军事重镇。" },
+  { id: "anju", x: 340, y: 260, ly: -28, short: "安州", r: 8, band: "北部", tag: "关塞",
+    name: "安州 / 安北府", today: "今 · 朝鲜平安南道安州市",
+    points: [
+      "「安北府」为高句丽时代的边防重镇",
+      "清川江渡口——半岛北部的天然边界",
+      "「安州」之名见于高丽时代"
+    ],
+    fate: "今为安州市。" },
+  { id: "hwacheon", x: 370, y: 380, ly: -28, short: "华川", r: 7, band: "中部", tag: "关塞",
+    name: "华川 / 华川郡", today: "今 · 韩国江原道华川郡",
+    points: [
+      "「华川」为高句丽时代的边防重镇",
+      "「临津江」上游——半岛中部的天然防线",
+      "朝鲜战争「华川水库之战」的战场"
+    ],
+    fate: "今为华川郡，韩国江原道内陆县。" },
+  { id: "yangju", x: 370, y: 350, ly: -28, short: "杨州", r: 7, band: "中部", tag: "关塞",
+    name: "杨州 / 杨州牧", today: "今 · 韩国京畿道杨州市",
+    points: [
+      "「杨州」为高丽时代的京畿重镇",
+      "「三角山」（北汉山）为汉阳的天然屏障"
+    ],
+    fate: "今为杨州市，首尔都市圈城市。" }
+];
+
+const ERAS = ["全部", "秦汉", "汉魏", "隋唐", "宋元"];
+const POLITIES = [
+  { id: "goguryeo-early", name: "古朝鲜 · 卫满", years: "约前2333—前108", era: "秦汉", tag: "传说",
+    points: [
+      "檀君神话：檀君王俭建国于王俭城（平壤）——传说时代，非信史",
+      "箕子朝鲜（约前1120—前194）：箕子受封于朝鲜，带去礼乐与农耕",
+      "卫满朝鲜（前194—前108）：燕人卫满推翻箕子朝鲜，自立为王",
+      "「朝鲜」之名：「朝日鲜明」——半岛东部最早见于中国文献的称呼"
+    ],
+    out: "前108年汉武帝灭卫满朝鲜，设乐浪、真番、临屯、玄菟四郡——半岛北部进入汉郡县时代。" },
+  { id: "han-commanderies", name: "汉四郡时代", years: "前108—313", era: "秦汉", tag: "汉",
+    points: [
+      "汉武帝灭卫满朝鲜设四郡：乐浪（治平壤）、真番、临屯、玄菟",
+      "乐浪郡存续约四百年（前108—313），为中原文化传入半岛的主通道",
+      "「乐浪印」「乐浪漆器」——汉文化在半岛的考古见证",
+      "真番、临屯、玄菟三郡先后省并，乐浪为四郡之首"
+    ],
+    out: "313年高句丽攻占乐浪郡，汉郡县时代结束；半岛北部进入高句丽时代。" },
+  { id: "samhan", name: "三韩", years: "约前2世纪—4世纪", era: "秦汉", tag: "部落",
+    points: [
+      "马韩（西南，五十五国）、辰韩（东南）、弁韩（东南）——三韩部落联盟",
+      "「辰韩」——「秦人避苦役来韩」（一说），铁器文化发达",
+      "弁韩「大伽倻」——铁器生产中心，与倭国、百济交流密切",
+      "三韩为后来百济、新罗、伽倻的起源"
+    ],
+    out: "4世纪马韩被百济吞并、辰韩与弁韩被新罗吞并；「韩」成为半岛的自称。" },
+  { id: "goguryeo", name: "高句丽", years: "前37—668", era: "汉魏", tag: "好太王碑",
+    points: [
+      "前37年朱蒙建国于纥升骨城（今辽宁桓仁），后迁都国内城（集安）",
+      "好太王碑（414）——广开土王功绩碑，「广开土境好太王」",
+      "427年迁都平壤，进入鼎盛期",
+      "「三国鼎立」：高句丽、百济、新罗三分半岛",
+      "隋唐四征高句丽（612—668），隋炀帝三征而亡，唐太宗亦未能灭之"
+    ],
+    out: "668年唐罗联军灭高句丽；高句丽遗民建立渤海国（698）——「海东盛国」。" },
+  { id: "baekje", name: "百济", years: "前18—660", era: "隋唐", tag: "海路",
+    points: [
+      "前18年高丽王室温祚建国，都慰礼城（汉阳），后迁熊津、泗沘",
+      "百济与南朝、倭国的海路外交——「百济文化圈」影响日本飞鸟文化",
+      "佛教经百济传入日本（538）——「佛教东传」的关键一环",
+      "「马韩五十五国」中的最强者，统一西南"
+    ],
+    out: "660年唐罗联军灭百济；百济王族逃往倭国，后复兴失败（663）；百济文化经日本延续。" },
+  { id: "silla", name: "新罗 · 统一新罗", years: "前57—935", era: "隋唐", tag: "骨品",
+    points: [
+      "前57年朴赫居世建国于月城（庆州），三韩之一的辰韩势力",
+      "「骨品制度」——以血统定等级，王族垄断王位",
+      "528年佛教正式传入新罗，「佛国寺」「石窟庵」为佛教文化巅峰",
+      "660年联唐灭百济，668年联唐灭高句丽，统一半岛——「统一新罗」（668—935）",
+      "「张保皋海上贸易」——黄海通道的海上霸主"
+    ],
+    out: "902年后三国分裂，935年新罗降于高丽；统一新罗的佛教与艺术影响延续至今。" },
+  { id: "later-silla", name: "后三国", years: "900—936", era: "宋元", tag: "分裂",
+    points: [
+      "900年甄萱建后百济（都全州），902年弓裔建后高句丽（后改泰封）",
+      "918年王建取代弓裔，建高丽——三国争雄",
+      "「后三国」为新罗末年的乱世，也是高丽统一的前奏"
+    ],
+    out: "936年王建统一后三国，高丽王朝（918—1392）开始。" },
+  { id: "goryeo", name: "高丽", years: "918—1392", era: "宋元", tag: "事大",
+    points: [
+      "918年王建建高丽，都开京（开城）——「高丽」之名从此流传海外",
+      "高丽青瓷、高丽大藏经、活字印刷——高丽文化巅峰",
+      "「事大主义」——对中原王朝称臣纳贡，保持半独立",
+      "蒙古东征（1231—1270）：高丽抵抗五十年，迁都江华岛",
+      "元设「征东行省」（1287）——高丽为元朝的藩属国"
+    ],
+    out: "1392年李成桂建朝鲜王朝，高丽灭亡；「高丽」之名成为半岛的国际代称（Korea）。" },
+  { id: "menggu", name: "蒙古东征与征东行省", years: "1231—1368", era: "宋元", tag: "征东",
+    points: [
+      "1231年蒙古窝阔台汗东征高丽，高丽迁都江华岛以避兵锋",
+      "高丽与蒙古断续战争五十年（1231—1270），「三别抄军」为最后抵抗力量",
+      "1270年高丽降元，元设征东行省（1287），高丽王兼任行省丞相",
+      "「征东行省」为元朝在半岛的行政机构，但高丽仍保留自己的王统"
+    ],
+    out: "元末红巾军入辽东，高丽趁机北扩；1368年元亡，高丽恢复独立；1392年李成桂建朝鲜王朝。" }
+];
+
+const RULES = [
+  { title: "事大",
+    items: [
+      "「事大交邻」——对中原王朝称臣，保持半独立",
+      "高丽青瓷、大藏经——事大不等于丧失自立",
+      "「征东行省」——元朝的藩属，但王统未断"
+    ] },
+  { title: "海路",
+    items: [
+      "「百济文化圈」——经海路影响日本飞鸟文化",
+      "张保皋「海上贸易」——黄海通道的海上霸主",
+      "对马海峡——与倭国海路的要冲"
+    ] },
+  { title: "三国",
+    items: [
+      "高句丽 · 百济 · 新罗——半岛三国鼎立三百年",
+      "「唐罗联军」——660年灭百济，668年灭高句丽",
+      "「统一新罗」——半岛第一次统一（668—935）"
+    ] }
+];
+
+const CHRONO = [
+  ["约前2333", "檀君建国（传说）"],
+  ["前194", "卫满朝鲜建立"],
+  ["前108", "汉灭卫满朝鲜，设乐浪郡"],
+  ["前37", "朱蒙建高句丽"],
+  ["前18", "温祚建百济"],
+  ["前57", "朴赫居世建新罗"],
+  ["313", "高句丽灭乐浪郡"],
+  ["427", "高句丽迁都平壤"],
+  ["528", "佛教传入新罗"],
+  ["538", "百济迁都泗沘"],
+  ["660", "唐罗联军灭百济"],
+  ["668", "唐罗联军灭高句丽"],
+  ["918", "王建建高丽"],
+  ["1231", "蒙古东征高丽"],
+  ["1287", "元设征东行省"],
+  ["1392", "李成桂建朝鲜王朝"]
+].map(([y, t]) => ({ y, t }));
+
+const PEOPLE = [
+  ["檀君", "传说时代", "檀君神话中的建国者，都王俭城——传说时代，非信史。"],
+  ["箕子", "商末周初", "商朝遗民，受封于朝鲜，带去礼乐与农耕——「箕子朝鲜」。"],
+  ["卫满", "前2世纪", "燕人，推翻箕子朝鲜，自立为王——「卫满朝鲜」。"],
+  ["汉武帝", "前156—前87", "灭卫满朝鲜设乐浪郡，半岛北部进入汉郡县时代。"],
+  ["朱蒙", "前37—前19", "高句丽开国国王，「朱蒙」意为「善射者」。"],
+  ["温祚", "前18—后28", "百济开国国王，都慰礼城（汉阳）。"],
+  ["朴赫居世", "前57—后4", "新罗开国国王，都月城（庆州）。"],
+  ["广开土王", "374—413", "高句丽鼎盛期国王，好太王碑的主角。"],
+  ["好太王", "374—413", "即广开土王，好太王碑为其功绩碑。"],
+  ["真兴王", "500—575", "新罗鼎盛期国王，佛教正式传入新罗。"],
+  ["文武王", "626—681", "新罗统一新罗的完成者，联唐灭高句丽。"],
+  ["张保皋", "9世纪", "新罗海上贸易家，黄海通道的海上霸主。"],
+  ["王建", "877—943", "高丽开国国王，统一后三国。"],
+  ["忽必烈", "1215—1294", "元世祖，东征高丽，设征东行省。"],
+  ["李成桂", "1335—1408", "朝鲜王朝开国国王，1392年建朝鲜，迁都汉阳。"]
+];
+
+const PLACES = [
+  ["平壤", "王俭城 / 乐浪郡 / 平壤", "古朝鲜、高句丽都城，今朝鲜首都。"],
+  ["开城", "开京 / 松岳", "高丽都城三百年。"],
+  ["首尔", "慰礼城 / 汉城 / 汉阳", "百济发祥地，朝鲜王朝都城。"],
+  ["庆州", "月城 / 骨陵", "新罗都城九百年。"],
+  ["扶余", "泗沘 / 百济", "百济后期都城。"],
+  ["公州", "熊津 / 百济", "百济前期都城。"],
+  ["全州", "完山 / 后百济", "后三国时期甄萱都城。"],
+  ["金海", "大伽倻 / 弁韩", "铁器文化中心。"],
+  ["咸兴", "德源 / 高句丽", "半岛东北部重镇。"],
+  ["安州", "安北府 / 高句丽", "半岛北部边防重镇。"],
+  ["江界", "江界府 / 鸭绿江", "鸭绿江渡口。"],
+  ["安东", "义兴 / 高丽", "士林派中心。"]
+];
+
+const ROUTES = [
+  ["辽东道", "中国辽东经清川江入高句丽——隋唐征高句丽之路。"],
+  ["乐浪道", "乐浪郡（平壤）与中原的陆路通道。"],
+  ["海路（百济—倭）", "百济经对马海峡至倭国——佛教东传之路。"],
+  ["黄海道", "新罗张保皋的海上贸易通道。"],
+  ["临津江道", "汉阳北上的天然防线——临津关。"],
+  ["洛东江道", "新罗东南的水路通道——庆州至釜山。"]
+];
+
+const gatesG = $("gates");
+GATES.forEach(g => {
+  gatesG.appendChild(el("rect", { x: g.x - 6.5, y: g.y - 6.5, width: 13, height: 13, fill: "#8a6f45", transform: `rotate(45 ${g.x} ${g.y})` }));
+  gatesG.appendChild(el("text", { x: g.x, y: g.y + g.dy }, g.label));
+});
+
+const statesG = $("states");
+const stateNodes = {};
+CITIES.forEach(s => {
+  const g = el("g", { class: "state", tabindex: 0, role: "button", "aria-label": `${s.name}，${s.today}，${s.band}`, "aria-pressed": "false", "data-id": s.id });
+  g.appendChild(el("title", {}, `${s.name}（${s.today}）`));
+  g.appendChild(el("circle", { class: "hit", cx: s.x, cy: s.y, r: 30 }));
+  g.appendChild(el("circle", { class: "halo", cx: s.x, cy: s.y, r: s.r + 7 }));
+  g.appendChild(el("circle", { class: "ring", cx: s.x, cy: s.y, r: s.r + 7 }));
+  g.appendChild(el("circle", { class: "dot", cx: s.x, cy: s.y, r: s.r }));
+  g.appendChild(el("text", { x: s.x, y: s.y + s.ly }, s.short));
+  g.addEventListener("click", () => selectCity(s.id));
+  g.addEventListener("keydown", e => {
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); selectCity(s.id); }
+  });
+  statesG.appendChild(g);
+  stateNodes[s.id] = g;
+});
+/* 移动端横滑提示 */
+const mwHint = document.createElement("div");
+mwHint.className = "pan-hint";
+mwHint.textContent = "\u25c2 \u53ef\u5de6\u53f3\u6ed1\u52a8\u67e5\u770b\u5168\u56fe \u25b8";
+document.querySelector(".map-wrap").appendChild(mwHint);
+document.querySelector(".map-wrap").addEventListener("scroll", () => { mwHint.style.opacity = "0"; }, { once: true });
+
+
+const panelDefault = $("panel-default"), panelDetail = $("panel-detail");
+
+function selectCity(id) {
+  const s = CITIES.find(x => x.id === id);
+  if (!s) return;
+  Object.values(stateNodes).forEach(n => { n.classList.remove("selected"); n.setAttribute("aria-pressed", "false"); });
+  stateNodes[id].classList.add("selected");
+  stateNodes[id].setAttribute("aria-pressed", "true");
+  $("d-name").textContent = s.name;
+  $("d-today").textContent = s.today;
+  const ul = $("d-points");
+  ul.replaceChildren(...s.points.map(p => { const li = document.createElement("li"); li.textContent = p; return li; }));
+  const fate = $("d-fate");
+  const b = document.createElement("b");
+  b.textContent = "结局：";
+  fate.replaceChildren(b, document.createTextNode(s.fate));
+  const xl = $("d-link");
+  if (s.link) { xl.textContent = s.link.text + " →"; xl.hidden = false; xl.onclick = () => selectCity(s.link.target); }
+  else { xl.hidden = true; xl.onclick = null; }
+  panelDefault.hidden = true;
+  panelDetail.hidden = false;
+  const st = panelDetail.querySelector(".stagger");
+  st.classList.remove("stagger");
+  void st.offsetHeight;
+  st.classList.add("stagger");
+  document.querySelector("aside").scrollTop = 0;
+  history.replaceState(null, "", "#map:" + id);
+  stateNodes[id].scrollIntoView({ block: "nearest", inline: "nearest", behavior: REDUCED ? "auto" : "smooth" });
+}
+
+const timeline = $("timeline");
+const cards = {};
+POLITIES.forEach((p, i) => {
+  const li = document.createElement("li");
+  li.className = "card";
+  li.dataset.id = p.id;
+  li.style.setProperty("--i", i);
+  const det = document.createElement("details");
+  const sum = document.createElement("summary");
+  const name = document.createElement("span"); name.className = "name"; name.textContent = p.name;
+  const yrs = document.createElement("span"); yrs.className = "years"; yrs.textContent = p.years;
+  const tag = document.createElement("span"); tag.className = "lang"; tag.textContent = p.tag;
+  sum.append(name, yrs, tag);
+  const body = document.createElement("div"); body.className = "body";
+  const ul = document.createElement("ul");
+  p.points.forEach(t => { const x = document.createElement("li"); x.textContent = t; ul.appendChild(x); });
+  const out = document.createElement("div"); out.className = "out";
+  const ob = document.createElement("b"); ob.textContent = "此后：";
+  out.append(ob, document.createTextNode(p.out));
+  body.append(ul, out);
+  det.append(sum, body);
+  li.appendChild(det);
+  sum.addEventListener("click", () => {
+    if (!det.open) history.replaceState(null, "", "#time:" + p.id);
+  });
+  timeline.appendChild(li);
+  cards[p.id] = { li, det };
+});
+
+const toolbar = $("toolbar");
+toolbar.appendChild(Object.assign(document.createElement("span"), { textContent: "按时代筛选：" }));
+const chips = ERAS.map(e => {
+  const b = document.createElement("button");
+  b.className = "chip"; b.textContent = e;
+  b.setAttribute("aria-pressed", e === "全部" ? "true" : "false");
+  b.addEventListener("click", () => applyFilter(e));
+  toolbar.appendChild(b);
+  return b;
+});
+const toggleAll = document.createElement("button");
+toggleAll.className = "tool"; toggleAll.textContent = "全部展开";
+let allOpen = false;
+toggleAll.addEventListener("click", () => {
+  allOpen = !allOpen;
+  Object.values(cards).forEach(c => { c.det.open = allOpen; });
+  toggleAll.textContent = allOpen ? "全部收起" : "全部展开";
+});
+toolbar.appendChild(toggleAll);
+
+function applyFilter(e) {
+  chips.forEach(c => c.setAttribute("aria-pressed", String(c.textContent === e)));
+  POLITIES.forEach(p => cards[p.id].li.classList.toggle("dim", e !== "全部" && p.era !== e));
+}
+
+const rulesEl = $("rules");
+RULES.forEach((r, i) => {
+  const box = document.createElement("div");
+  box.className = "rule";
+  box.style.setProperty("--i", i);
+  const h = document.createElement("h3"); h.textContent = r.title;
+  const ul = document.createElement("ul");
+  r.items.forEach(t => { const li = document.createElement("li"); li.textContent = t; ul.appendChild(li); });
+  box.append(h, ul);
+  rulesEl.appendChild(box);
+});
+
+const detailRoot = $("detail-root");
+(function renderDetail() {
+  const sec = (h, sub, inner) => {
+    const s = document.createElement("section");
+    s.className = "sec";
+    const h3 = document.createElement("h3");
+    h3.textContent = h;
+    if (sub) h3.appendChild(Object.assign(document.createElement("span"), { textContent: sub }));
+    s.appendChild(h3);
+    const box = document.createElement("div");
+    box.innerHTML = inner;
+    s.appendChild(box);
+    detailRoot.appendChild(s);
+  };
+  sec("大事年表", "从古朝鲜到朝鲜王朝 · 选择性列大事",
+    '<ul class="chrono">' + CHRONO.map(c => `<li><span class="y">${c.y}</span><span>${c.t}</span></li>`).join("") + "</ul>");
+  sec("人物志", "与半岛有关的人物 · 简考",
+    '<div class="people">' + PEOPLE.map(p => `<div class="person"><b>${p[0]}</b><span class="d">${p[1]}</span><p>${p[2]}</p></div>`).join("") + "</div>");
+  sec("地名沿革", "古今对照",
+    '<div class="two-col"><table class="plain"><thead><tr><th>今地</th><th>古名</th><th>说明</th></tr></thead><tbody>'
+    + PLACES.map(p => `<tr><td>${p[0]}</td><td>${p[1]}</td><td>${p[2]}</td></tr>`).join("") + "</tbody></table></div>");
+  sec("古道与关隘", "通道体系",
+    '<div class="two-col"><table class="plain"><thead><tr><th>古道</th><th>走向及故事</th></tr></thead><tbody>'
+    + ROUTES.map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join("") + "</tbody></table></div>");
+})();
+
+function openCard(id) {
+  const c = cards[id];
+  if (!c) return;
+  c.det.open = true;
+  history.replaceState(null, "", "#time:" + id);
+  c.li.scrollIntoView({ behavior: REDUCED ? "auto" : "smooth", block: "center" });
+  c.det.querySelector("summary").focus({ preventScroll: true });
+}
+
+const tabs = { map: $("tab-map"), time: $("tab-time"), detail: $("tab-detail") };
+const views = { map: $("view-map"), time: $("view-time"), detail: $("view-detail") };
+const pill = document.querySelector("nav .pill");
+
+function movePill() {
+  const active = Object.values(tabs).find(t => t.getAttribute("aria-selected") === "true");
+  if (!active || !pill) return;
+  pill.style.width = active.offsetWidth + "px";
+  pill.style.transform = `translateX(${active.offsetLeft}px)`;
+}
+function showView(name) {
+  Object.keys(tabs).forEach(k => {
+    const on = k === name;
+    tabs[k].setAttribute("aria-selected", String(on));
+    tabs[k].tabIndex = on ? 0 : -1;
+    views[k].hidden = !on;
+    views[k].style.animation = "none";
+    void views[k].offsetHeight;
+    views[k].style.animation = "";
+  });
+  movePill();
+  history.replaceState(null, "", "#" + name);
+}
+const tabKeys = Object.keys(tabs);
+tabKeys.forEach(k => tabs[k].addEventListener("click", () => showView(k)));
+addEventListener("keydown", e => {
+  const i = tabKeys.findIndex(k => tabs[k] === document.activeElement);
+  if (i < 0) return;
+  const j = e.key === "ArrowRight" ? i + 1 : e.key === "ArrowLeft" ? i - 1
+    : e.key === "Home" ? 0 : e.key === "End" ? tabKeys.length - 1 : -1;
+  if (j < 0) return;
+  e.preventDefault();
+  const k = tabKeys[(j + tabKeys.length) % tabKeys.length];
+  tabs[k].focus();
+  showView(k);
+});
+addEventListener("resize", movePill);
+addEventListener("load", movePill);
+addEventListener("beforeprint", () => Object.values(cards).forEach(c => { c.det.open = true; }));
+function initFromHash() {
+  const [v, id] = location.hash.slice(1).split(":");
+  showView(["time", "detail"].includes(v) ? v : "map");
+  if (id) {
+    if (v === "map") selectCity(id);
+    else if (v === "time") openCard(id);
+  }
+}
+initFromHash();
+addEventListener("hashchange", initFromHash);
+requestAnimationFrame(movePill);
+</script>
+</body>
+</html>

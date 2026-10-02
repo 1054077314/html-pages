@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="草原与丝路 · 草原霸权接力 × 西域诸国 — 互动历史演进图鉴：方位地图、朝代年表、大事详考（离线单文件）">
+<title>草原与丝路 · 草原霸权接力 × 西域诸国</title>
+<style>
+  * { box-sizing: border-box; margin: 0; }
+  :root {
+    --ink: #241d14; --ink-2: #4a3b26; --ink-3: #6d5f43; --ink-4: #9a8a6a;
+    --paper: #f7f1e3; --paper-2: #fffdf7; --paper-3: #efe4cd;
+    --line: #dcccaa; --line-2: #c9b68d;
+    --cinnabar: #c0392b; --cinnabar-2: #e2604a;
+    --jade: #1f7a63; --gold: #b08a3e;
+    --north: #16697a; --south: #c0392b; --wusun: #7b6a9a;
+    --shadow-s: 0 1px 2px rgba(60,44,20,.06), 0 2px 8px rgba(60,44,20,.07);
+    --shadow-m: 0 6px 18px rgba(60,44,20,.11), 0 1px 3px rgba(60,44,20,.07);
+    --shadow-l: 0 22px 48px -14px rgba(60,44,20,.30);
+    --ease: cubic-bezier(.22,.61,.36,1);
+    --serif: "Source Han Serif SC", "Noto Serif SC", "Songti SC", "STSong", "SimSun", serif;
+  }
+  html, body { height: 100%; }
+  body {
+    font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans SC", sans-serif;
+    color: var(--ink); display: flex; flex-direction: column; height: 100dvh; overflow: hidden;
+    background:
+      radial-gradient(1200px 700px at 10% -12%, #fffcf4 0%, transparent 62%),
+      radial-gradient(900px 620px at 102% 112%, #efe0c0 0%, transparent 58%),
+      var(--paper);
+    -webkit-font-smoothing: antialiased;
+  }
+  button { font-family: inherit; }
+  button:focus-visible, .state:focus-visible, summary:focus-visible { outline: 2.5px solid #2b6cb0; outline-offset: 3px; border-radius: 6px; }
+  [hidden] { display: none !important; }
+
+  /* ============ 顶栏 ============ */
+  header {
+    position: relative; display: flex; align-items: center; gap: 26px; padding: 0 26px;
+    height: 64px; flex-shrink: 0; z-index: 5;
+    background: linear-gradient(180deg, #fffdf7, #f4ebd7);
+    border-bottom: 1px solid var(--line);
+    box-shadow: inset 0 1px 0 #fff, 0 10px 24px -18px rgba(60,44,20,.55);
+  }
+  header::after {
+    content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold) 30%, var(--gold) 70%, transparent);
+    opacity: .45;
+  }
+  .brand {
+    font-family: var(--serif); font-size: 21px; letter-spacing: .18em; color: var(--ink);
+    display: flex; align-items: center; gap: 11px; white-space: nowrap;
+  }
+  .brand::before {
+    content: ""; width: 10px; height: 10px; border-radius: 1.5px; background: var(--cinnabar);
+    transform: rotate(45deg); box-shadow: 0 0 0 3px rgba(192,57,43,.14);
+    animation: sealIn .8s var(--ease) both;
+  }
+  @keyframes sealIn { from { transform: rotate(45deg) scale(0); } }
+
+  nav { position: relative; display: flex; gap: 3px; padding: 4px; border-radius: 999px; background: #ece0c6; box-shadow: inset 0 1px 3px rgba(60,44,20,.15); }
+  nav .pill {
+    position: absolute; top: 4px; left: 0; height: calc(100% - 8px); border-radius: 999px;
+    background: linear-gradient(180deg, #3e3221, #241d14);
+    box-shadow: 0 2px 10px rgba(36,29,20,.38);
+    transition: transform .42s var(--ease), width .42s var(--ease);
+  }
+  nav button {
+    position: relative; z-index: 1; font-size: 13.5px; letter-spacing: .08em; padding: 7px 19px;
+    border: 0; background: none; color: var(--ink-3); cursor: pointer; border-radius: 999px;
+    transition: color .3s var(--ease);
+  }
+  nav button[aria-selected="true"] { color: #fdf6e6; }
+  .hint { margin-left: auto; font-size: 12px; color: var(--ink-4); letter-spacing: .08em; }
+  .nav-home { margin-left: 12px; font-size: 12.5px; color: var(--ink-3); text-decoration: none; letter-spacing: .1em; white-space: nowrap; border: 1px solid var(--line-2); border-radius: 999px; padding: 4px 12px; transition: background .25s, color .25s, border-color .25s; }
+  .nav-home:hover { background: #3e3221; color: #fdf6e6; border-color: transparent; }
+
+  main { flex: 1; min-height: 0; display: flex; }
+  [role="tabpanel"] { animation: viewIn .5s var(--ease) both; }
+  @keyframes viewIn { from { opacity: 0; transform: translateY(10px); } }
+
+  /* ============ 丝路地图 ============ */
+  #view-map { flex: 1; display: flex; min-width: 0; }
+  .map-wrap {
+    flex: 1; position: relative; min-width: 0; overflow: auto;
+    background: radial-gradient(1100px 640px at 34% 18%, #fffdf6 0%, transparent 64%), linear-gradient(180deg, #f8f2e4, #f0e7d2);
+  }
+  .map-wrap svg { width: 100%; height: 100%; display: block; }
+  .title-block { position: absolute; top: 20px; left: 28px; pointer-events: none; animation: titleIn 1s var(--ease) .35s both; }
+  @keyframes titleIn { from { opacity: 0; transform: translateX(-14px); } }
+  .title-block h2 { font-family: var(--serif); font-size: 30px; letter-spacing: .3em; color: var(--ink); text-shadow: 0 1px 0 #fff; }
+  .title-block p { font-size: 13px; color: var(--ink-3); margin-top: 8px; letter-spacing: .14em; }
+  .title-block .title-rule { width: 46px; height: 2px; background: var(--cinnabar); margin-top: 11px; border-radius: 2px; }
+
+  .state { cursor: pointer; }
+  .state .hit { fill: transparent; }
+  .state .dot {
+    fill: #fffdf6; stroke: #7a6547; stroke-width: 2.2;
+    transform-box: fill-box; transform-origin: center;
+    transition: transform .3s var(--ease), fill .3s var(--ease), stroke .3s var(--ease);
+    filter: drop-shadow(0 1px 2px rgba(60,44,20,.28));
+  }
+  .state .ring, .state .halo {
+    fill: none; stroke: var(--cinnabar); stroke-width: 1.6;
+    transform-box: fill-box; transform-origin: center; opacity: 0;
+    transition: opacity .3s var(--ease), transform .3s var(--ease);
+  }
+  .state .ring { transform: scale(.82); }
+  .state:hover .dot, .state:focus-visible .dot { transform: scale(1.3); fill: #ffe4ab; stroke: #6b5836; }
+  .state:hover .ring, .state:focus-visible .ring { opacity: .55; transform: scale(1); }
+  .state.selected .dot { fill: var(--cinnabar); stroke: #7d2419; transform: scale(1.36); }
+  .state.selected .ring { opacity: 1; transform: scale(1.14); }
+  .state.selected .halo { animation: pulse 2.6s ease-out infinite; }
+  @keyframes pulse {
+    0% { transform: scale(1); opacity: .75; }
+    70% { transform: scale(1.85); opacity: 0; }
+    100% { transform: scale(1.85); opacity: 0; }
+  }
+  .state text {
+    font-family: var(--serif); font-size: 17px; font-weight: 700; fill: var(--ink-2);
+    paint-order: stroke; stroke: #f7f1e3; stroke-width: 4px; text-anchor: middle;
+    transition: fill .3s var(--ease), transform .3s var(--ease);
+  }
+  .state.selected text { fill: #8c2f14; }
+
+  .marker text { font-size: 12.5px; fill: var(--ink-3); paint-order: stroke; stroke: #f7f1e3; stroke-width: 3px; text-anchor: middle; letter-spacing: .04em; }
+  .geo-label { fill: #8c7d5a; paint-order: stroke; stroke: #f7f1e3; stroke-width: 5px; letter-spacing: .1em; }
+  .route { fill: none; stroke-width: 3.4; stroke-linecap: round; }
+  .route-north { stroke: var(--north); }
+  .route-south { stroke: var(--south); stroke-dasharray: 15 7; }
+  .route-wusun { stroke: var(--wusun); stroke-width: 2.6; stroke-dasharray: 1 8; stroke-linecap: round; }
+  .caravan { fill: var(--gold); filter: drop-shadow(0 0 5px rgba(176,138,62,.85)); }
+
+  aside {
+    width: 372px; flex-shrink: 0; border-left: 1px solid var(--line); overflow-y: auto;
+    padding: 26px 24px 40px;
+    background: linear-gradient(180deg, #fffdf7, #f8f1e2);
+    box-shadow: -14px 0 30px -24px rgba(60,44,20,.5);
+  }
+  aside h3 { font-family: var(--serif); font-size: 26px; color: var(--ink); letter-spacing: .1em; }
+  .today {
+    display: inline-block; margin: 11px 0 16px; padding: 4px 12px; border-radius: 999px;
+    background: linear-gradient(180deg, #f3e8cd, #ece0c2); border: 1px solid var(--line);
+    font-size: 12.5px; color: var(--ink-3); letter-spacing: .04em;
+  }
+  aside ul { list-style: none; padding: 0; }
+  aside li {
+    font-size: 14.5px; line-height: 1.75; margin-bottom: 11px; padding-left: 17px; position: relative;
+    color: var(--ink-2);
+  }
+  aside li::before {
+    content: ""; position: absolute; left: 0; top: 10px; width: 6px; height: 6px;
+    border-radius: 50%; background: var(--cinnabar-2); box-shadow: 0 0 0 3px rgba(226,96,74,.14);
+  }
+  .fate {
+    margin-top: 18px; padding: 13px 15px; border-radius: 3px 8px 8px 3px;
+    background: linear-gradient(100deg, #f4e8ce, #fbf4e4);
+    border-left: 4px solid var(--gold); font-size: 13.5px; line-height: 1.75; color: var(--ink-3);
+    box-shadow: var(--shadow-s);
+  }
+  .fate b { color: var(--ink); }
+  .xlink {
+    display: inline-flex; align-items: center; gap: 6px; margin-top: 16px; font-size: 13.5px;
+    color: var(--cinnabar); background: none; border: 0; padding: 0; cursor: pointer;
+    border-bottom: 1px dashed rgba(192,57,43,.5); transition: gap .25s var(--ease), color .25s;
+  }
+  .xlink:hover { gap: 11px; color: #7d2419; }
+  .default-tip { color: var(--ink-3); font-size: 14.5px; line-height: 2; margin: 10px 0 6px; text-align: center; }
+  .legend {
+    margin-top: 26px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 10px;
+    font-size: 13.5px; color: var(--ink-3); background: rgba(255,253,247,.75); box-shadow: var(--shadow-s);
+  }
+  .legend div { display: flex; align-items: center; gap: 11px; margin: 7px 0; }
+  .legend svg { width: 44px; height: 10px; flex-shrink: 0; }
+  .panel-foot { margin-top: 20px; font-size: 12px; color: var(--ink-4); line-height: 1.8; border-top: 1px solid var(--line); padding-top: 14px; }
+
+  /* 面板内容错落入场 */
+  .stagger > * { animation: itemIn .5s var(--ease) both; }
+  .stagger > *:nth-child(1) { animation-delay: .02s; }
+  .stagger > *:nth-child(2) { animation-delay: .07s; }
+  .stagger > *:nth-child(3) { animation-delay: .12s; }
+  .stagger > *:nth-child(4) { animation-delay: .17s; }
+  .stagger > *:nth-child(5) { animation-delay: .22s; }
+  .stagger > *:nth-child(6) { animation-delay: .27s; }
+  @keyframes itemIn { from { opacity: 0; transform: translateX(9px); } }
+
+  /* ============ 草原接力 ============ */
+  #view-steppe { flex: 1; overflow-y: auto; padding: 34px 26px 60px; }
+  .steppe-inner { max-width: 900px; margin: 0 auto; }
+  .steppe-inner h2 { font-family: var(--serif); font-size: 30px; letter-spacing: .18em; color: var(--ink); }
+  .lead { font-size: 14px; color: var(--ink-3); margin: 10px 0 20px; line-height: 1.85; max-width: 62ch; }
+  .toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 22px; font-size: 13px; color: var(--ink-4); }
+  .chip {
+    font-size: 13px; padding: 5px 14px; border-radius: 999px; border: 1px solid var(--line);
+    background: linear-gradient(180deg, #fffdf7, #f4ebd8); color: var(--ink-3); cursor: pointer;
+    transition: transform .22s var(--ease), box-shadow .22s var(--ease), background .22s, color .22s, border-color .22s;
+  }
+  .chip:hover { transform: translateY(-1px); box-shadow: var(--shadow-s); }
+  .chip[aria-pressed="true"] { background: linear-gradient(180deg, #3e3221, #241d14); color: #fdf6e6; border-color: transparent; box-shadow: 0 3px 12px rgba(36,29,20,.3); }
+  .tool { margin-left: auto; font-size: 13px; padding: 5px 15px; border-radius: 999px; border: 1px dashed var(--line-2); background: none; color: var(--ink-3); cursor: pointer; transition: background .22s, color .22s; }
+  .tool:hover { background: rgba(255,253,247,.9); color: var(--ink); }
+
+  .timeline { list-style: none; padding: 0 0 0 26px; position: relative; }
+  .timeline::before {
+    content: ""; position: absolute; left: 6px; top: 6px; bottom: 26px; width: 2px;
+    background: linear-gradient(180deg, rgba(201,182,141,0), var(--line-2) 8%, var(--line-2) 92%, rgba(201,182,141,0));
+    transform-origin: top; animation: growLine 1.1s var(--ease) .1s both;
+  }
+  @keyframes growLine { from { transform: scaleY(0); } }
+
+  .card {
+    position: relative; margin: 0 0 12px; border-radius: 10px; border: 1px solid var(--line);
+    background: linear-gradient(180deg, #fffdf8, #faf4e7);
+    box-shadow: var(--shadow-s);
+    transition: transform .3s var(--ease), box-shadow .3s var(--ease), opacity .35s var(--ease), border-color .3s;
+    animation: cardIn .6s var(--ease) both;
+    animation-delay: calc(var(--i) * 55ms);
+  }
+  @keyframes cardIn { from { opacity: 0; transform: translateY(16px) scale(.985); } }
+  .card::before {
+    content: ""; position: absolute; left: -26px; top: 21px; width: 11px; height: 11px; border-radius: 50%;
+    background: #fffdf6; border: 2.5px solid var(--cinnabar-2);
+    box-shadow: 0 0 0 4px var(--paper);
+    transition: transform .3s var(--ease), background .3s, border-color .3s;
+  }
+  .card:hover { transform: translateY(-2px); box-shadow: var(--shadow-m); border-color: var(--line-2); }
+  .card:hover::before { transform: scale(1.25); border-color: var(--cinnabar); }
+  .card:has(> details[open]) {
+    box-shadow: var(--shadow-m); border-color: var(--line-2);
+    background: linear-gradient(180deg, #fffefa, #fbf6ea);
+  }
+  .card:has(> details[open])::before { background: var(--cinnabar); border-color: var(--cinnabar); }
+  .card.dim { opacity: .26; filter: saturate(.35); }
+  .card summary {
+    list-style: none; cursor: pointer; padding: 13px 17px; display: flex; flex-wrap: wrap;
+    align-items: baseline; gap: 5px 12px;
+  }
+  .card summary::-webkit-details-marker { display: none; }
+  .card summary::after {
+    content: "＋"; margin-left: auto; color: var(--ink-4); font-size: 15px;
+    transition: transform .35s var(--ease), color .25s;
+  }
+  .card:has(> details[open]) summary::after { content: "－"; color: var(--cinnabar); }
+  .card .name { font-family: var(--serif); font-size: 19px; font-weight: 700; color: var(--ink); letter-spacing: .06em; }
+  .card .years { font-size: 12.5px; color: var(--ink-3); letter-spacing: .04em; }
+  .card .lang {
+    font-size: 11.5px; padding: 2px 9px; border-radius: 999px; background: #efe4cd;
+    color: var(--ink-3); border: 1px solid rgba(201,182,141,.7);
+  }
+  .card .body { padding: 0 17px 15px; animation: bodyIn .45s var(--ease) both; }
+  @keyframes bodyIn { from { opacity: 0; transform: translateY(-6px); } }
+  .card ul { list-style: none; padding: 0; }
+  .card li { font-size: 14.5px; line-height: 1.8; padding-left: 17px; position: relative; margin-bottom: 5px; color: var(--ink-2); }
+  .card li::before { content: ""; position: absolute; left: 1px; top: 11px; width: 5px; height: 5px; border-radius: 50%; background: var(--gold); }
+  .card .out {
+    margin-top: 11px; padding: 10px 14px; border-radius: 3px 8px 8px 3px;
+    background: linear-gradient(100deg, #f4e8ce, #fbf4e4); border-left: 4px solid var(--gold);
+    font-size: 13.5px; line-height: 1.8; color: var(--ink-3);
+  }
+  .card .out b { color: var(--ink); }
+
+  .rules { margin-top: 30px; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; }
+  .rule {
+    border-radius: 12px; padding: 17px 18px; border: 1px solid var(--line);
+    background: linear-gradient(160deg, #fffdf8, #f6eddb); box-shadow: var(--shadow-s);
+    transition: transform .3s var(--ease), box-shadow .3s var(--ease);
+    animation: cardIn .6s var(--ease) both; animation-delay: calc(430ms + var(--i) * 70ms);
+  }
+  .rule:hover { transform: translateY(-3px); box-shadow: var(--shadow-m); }
+  .rule h3 {
+    font-family: var(--serif); font-size: 17px; color: var(--ink); margin-bottom: 11px;
+    letter-spacing: .08em; padding-bottom: 9px; border-bottom: 1px solid var(--line);
+  }
+  .rule ul { padding: 0; }
+  .rule li { font-size: 14px; line-height: 1.8; margin-bottom: 6px; list-style: none; padding-left: 15px; position: relative; color: var(--ink-2); }
+  .rule li::before { content: ""; position: absolute; left: 2px; top: 11px; width: 5px; height: 5px; background: var(--cinnabar-2); transform: rotate(45deg); }
+  .caveat { margin: 22px 0 0; font-size: 12px; color: var(--ink-4); line-height: 1.9; border-top: 1px solid var(--line); padding-top: 14px; }
+
+  noscript { padding: 26px; display: block; }
+
+  .pan-hint { display: none; }
+  @media (max-width: 880px) {
+    .pan-hint { display: block; position: sticky; left: 50%; bottom: 10px; transform: translateX(-50%); width: max-content; height: 30px; margin-top: -34px; padding: 0 14px; border-radius: 999px; background: rgba(36,29,20,.75); color: #f7f1e3; font-size: 11.5px; letter-spacing: .08em; line-height: 30px; pointer-events: none; transition: opacity .4s; }
+    header { padding: 0 14px; gap: 12px; }
+    .brand { font-size: 17px; letter-spacing: .1em; }
+    .hint { display: none; }
+    #view-map { flex-direction: column; }
+    .map-wrap { flex: none; height: 54dvh; }
+    .map-wrap svg { min-width: 900px; }
+    .title-block { top: 14px; left: 18px; }
+    .title-block h2 { font-size: 22px; }
+    aside { width: 100%; border-left: 0; border-top: 1px solid var(--line); flex: 1; min-height: 0; padding: 18px 16px 30px; box-shadow: none; }
+    #view-steppe { padding: 22px 15px 46px; }
+    .timeline { padding-left: 22px; }
+    .card::before { left: -22px; }
+  }
+
+  .plink { color: var(--cinnabar); text-decoration: none; border-bottom: 1px dashed rgba(192,57,43,.5); }
+  @media print {
+    body { height: auto; overflow: visible; }
+    header, .hint, .pan-hint { display: none; }
+    main { overflow: visible; }
+    #view-map[hidden], #view-time[hidden], #view-detail[hidden], #view-steppe[hidden] { display: block !important; }
+    #view-map { display: block; overflow: visible; }
+    .map-wrap { height: auto; overflow: visible; }
+    .map-wrap svg { min-width: 0; width: 100%; height: auto; }
+    aside { width: auto; border: 0; overflow: visible; }
+    #view-time, #view-detail, .steppe-inner { overflow: visible; padding: 10mm 0; }
+    .card, .rule, .sec, .person { break-inside: avoid; box-shadow: none; }
+    .toolbar, .chip, .tool, .xlink { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition-duration: .01ms !important; }
+    .caravan { display: none; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">草原与丝路</div>
+  <nav role="tablist" aria-label="切换视图">
+    <span class="pill" aria-hidden="true"></span>
+    <button role="tab" id="tab-map" aria-selected="true" aria-controls="view-map">丝路地图</button>
+    <button role="tab" id="tab-steppe" aria-selected="false" aria-controls="view-steppe">草原接力</button>
+  </nav>
+  <a class="nav-home" href="历史总览.html">总览</a> <span class="hint">点击节点 · 键盘可操作 · 全部离线</span>
+</header>
+
+<main>
+  <section id="view-map" role="tabpanel" aria-labelledby="tab-map">
+    <div class="map-wrap">
+      <svg id="map" viewBox="0 0 1400 920" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="group" aria-label="西域丝绸之路方位示意图">
+        <defs>
+          <radialGradient id="desertGlow" cx="50%" cy="46%" r="62%">
+            <stop offset="0%" stop-color="#eedfae"/>
+            <stop offset="62%" stop-color="#e8d49f"/>
+            <stop offset="100%" stop-color="#e3cd93" stop-opacity="0"/>
+          </radialGradient>
+          <linearGradient id="rangeFar" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#cab894"/>
+            <stop offset="100%" stop-color="#c0ac85"/>
+          </linearGradient>
+          <linearGradient id="rangeNear" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#b7a37a"/>
+            <stop offset="100%" stop-color="#a8946c"/>
+          </linearGradient>
+          <linearGradient id="lakeGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#bcdbe6"/>
+            <stop offset="100%" stop-color="#8fbfd2"/>
+          </linearGradient>
+        </defs>
+
+        <rect width="1400" height="920" fill="none"/>
+        <g opacity=".5">
+          <rect x="16" y="16" width="1368" height="888" fill="none" stroke="#c9b68d" stroke-width="1"/>
+          <rect x="24" y="24" width="1352" height="872" fill="none" stroke="#dcccaa" stroke-width=".6"/>
+          <g stroke="#b08a3e" stroke-width="1.6" fill="none" opacity=".72">
+            <path d="M16,58 L16,16 L58,16"/><path d="M1384,16 L1342,16 L1342,58"/>
+            <path d="M16,862 L16,904 L58,904"/><path d="M1384,904 L1342,904 L1342,862"/>
+          </g>
+        </g>
+
+        <!-- 远山：天山（北）、昆仑山（南），双层皴
+             注：折线是山形装饰，不是精确山脊线 -->
+        <g class="ranges">
+          <polyline fill="none" stroke="url(#rangeFar)" stroke-width="2" opacity=".55" points="110,196 180,146 230,186 300,136 370,181 440,141 510,181 580,146 650,186 720,151 790,186 860,146 930,181 1000,141 1070,176 1140,136 1210,171 1280,141 1330,166"/>
+          <polyline fill="none" stroke="url(#rangeNear)" stroke-width="3.4" points="110,215 180,165 230,205 300,155 370,200 440,160 510,200 580,165 650,205 720,170 790,205 860,165 930,200 1000,160 1070,195 1140,155 1210,190 1280,160 1330,185"/>
+          <polyline fill="none" stroke="url(#rangeNear)" stroke-width="3.4" points="80,855 160,815 230,850 310,805 390,845 470,800 550,840 630,795 710,835 790,790 870,830 950,785 1030,825 1110,780 1190,820 1270,785 1340,815"/>
+        </g>
+        <text x="700" y="118" class="geo-label" font-size="22" text-anchor="middle">天　山</text>
+        <text x="700" y="890" class="geo-label" font-size="22" text-anchor="middle">昆　仑　山</text>
+
+        <!-- 帕米尔高原 -->
+        <polyline fill="none" stroke="url(#rangeNear)" stroke-width="2.4" points="30,330 70,370 45,430 90,480 55,545 95,600 60,665"/>
+        <text x="42" y="300" class="geo-label" font-size="17" text-anchor="middle">帕米尔</text>
+
+        <!-- 塔克拉玛干沙漠 -->
+        <ellipse cx="650" cy="560" rx="440" ry="132" fill="url(#desertGlow)"/>
+        <g fill="none" stroke="#d3b87c" stroke-width="2" stroke-dasharray="2 6" opacity=".85">
+          <path d="M320,570 Q420,545 520,568"/>
+          <path d="M560,600 Q680,578 800,600"/>
+          <path d="M480,530 Q590,512 700,530"/>
+          <path d="M700,615 Q800,600 905,616"/>
+        </g>
+        <text x="650" y="567" class="geo-label" font-size="21" text-anchor="middle" fill="#a08b56">塔克拉玛干沙漠</text>
+
+        <!-- 罗布泊 -->
+        <ellipse cx="1180" cy="610" rx="46" ry="20" fill="url(#lakeGrad)" stroke="#7fb2c9" stroke-width="1" opacity=".9"/>
+        <text x="1180" y="650" class="geo-label" font-size="14" text-anchor="middle">罗布泊（已干涸）</text>
+
+        <!-- 塔里木河 -->
+        <path d="M430,470 Q620,505 800,485 Q990,465 1140,598" fill="none" stroke="#7fb2c9" stroke-width="2" opacity=".85"/>
+        <text x="620" y="492" class="geo-label" font-size="13">塔里木河</text>
+
+        <!-- 丝路三道 -->
+        <g id="routes"></g>
+        <g class="marker" id="marks"></g>
+
+        <!-- 驼队（沿路线缓慢行进） -->
+        <g id="caravans"></g>
+
+        <!-- 指北针 -->
+        <g transform="translate(1318,96)" opacity=".9">
+          <circle cx="0" cy="2" r="26" fill="#fffdf7" opacity=".65" stroke="#dcccaa" stroke-width="1"/>
+          <path d="M0,-24 L6,-8 L-6,-8 Z" fill="#c0392b"/>
+          <line x1="0" y1="22" x2="0" y2="-6" stroke="#8c7d5a" stroke-width="1.8"/>
+          <line x1="-7" y1="22" x2="7" y2="22" stroke="#8c7d5a" stroke-width="1.8"/>
+          <line x1="-4" y1="15" x2="4" y2="15" stroke="#8c7d5a" stroke-width="1.4"/>
+          <text x="0" y="45" font-size="14" fill="#6d5f43" text-anchor="middle" letter-spacing=".1em">北</text>
+        </g>
+
+        <g id="states"></g>
+      </svg>
+
+      <div class="title-block">
+        <h2>西域诸国</h2>
+        <p>丝绸之路两道与绿洲城邦 · 方位示意图</p>
+        <span class="title-rule"></span>
+      </div>
+    </div>
+
+    <aside aria-live="polite">
+      <div id="panel-default"><p class="default-tip">点击（或 Tab + 回车）地图上的圆点<br>看这个国家的故事</p></div>
+      <div id="panel-detail" hidden>
+        <div class="stagger">
+          <h3 id="d-name"></h3>
+          <div class="today" id="d-today"></div>
+          <ul id="d-points"></ul>
+          <div class="fate" id="d-fate"></div>
+        </div>
+        <button class="xlink" id="d-link" hidden></button>
+      </div>
+      <div class="legend" aria-label="图例">
+        <div><svg viewBox="0 0 44 10"><line x1="2" y1="5" x2="42" y2="5" class="route route-north"/></svg>北道（天山南麓）</div>
+        <div><svg viewBox="0 0 44 10"><line x1="2" y1="5" x2="42" y2="5" class="route route-south"/></svg>南道（昆仑山北麓）</div>
+        <div><svg viewBox="0 0 44 10"><line x1="2" y1="5" x2="42" y2="5" class="route route-wusun"/></svg>翻越天山的草原通道</div>
+        <div><svg viewBox="0 0 44 10"><circle cx="22" cy="5" r="4" fill="#fffdf6" stroke="#7a6547" stroke-width="2"/></svg>绿洲城邦 · 可点击</div>
+      </div>
+      <p class="panel-foot">方位示意图，非精确比例；楼兰、于阗等位置与真实经纬度有出入。乌孙在天山以北，是西域诸国中最大的游牧政权之一。史实以《史记》《汉书》《后汉书》及考古报告为准，争议处标注「一说」。<br><a href="陕西-历史演进.html" class="plink">→ 同时期内陆：《陕西 · 历史演进》</a><br><a href="东北-历史演进.html" class="plink">→ 同时期东北：《东北 · 历史演进》（接力表中契丹·女真的故乡）</a><br><a href="山西-历史演进.html" class="plink">→ 同期山西：《山西 · 历史演进》（鲜卑·沙陀·驼道三次握手）</a><br><a href="河北-历史演进.html" class="plink">→ 同期河北：《河北 · 历史演进》（燕云与张库大道）</a></p>
+    </aside>
+  </section>
+
+  <section id="view-steppe" role="tabpanel" aria-labelledby="tab-steppe" hidden>
+    <div class="steppe-inner">
+      <h2>草原霸权接力</h2>
+      <p class="lead">从匈奴到蒙古，千年间北方草原的霸权一棒接一棒——而成吉思汗的先祖，正是被匈奴打败的东胡遗民。点击卡片展开；按语族筛选可看谁与谁同源。</p>
+      <div class="toolbar" id="toolbar"></div>
+      <ol class="timeline" id="timeline"></ol>
+      <div class="rules" id="rules"></div>
+      <p class="caveat">说明：各政权的族源、语言归属学界多有争议，标「一说」者为主流假说而非定论；年代取通行说法。时间上这些政权常有重叠，并非严格线性接棒。</p>
+    </div>
+  </section>
+</main>
+<noscript>本页需要启用 JavaScript 才能显示地图与时间轴。</noscript>
+
+<script>
+const SVGNS = "http://www.w3.org/2000/svg";
+const el = (tag, attrs = {}, text) => {
+  const n = document.createElementNS(SVGNS, tag);
+  for (const k in attrs) n.setAttribute(k, attrs[k]);
+  if (text !== undefined) n.textContent = text;
+  return n;
+};
+const $ = id => document.getElementById(id);
+const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* ---------------- 数据：丝路节点 ---------------- */
+const ROUTES = [
+  { id: "route-south", cls: "route route-south", d: "M1258,560 Q1160,600 1097,585 Q930,640 802,658 Q660,672 577,688 Q380,690 227,543" },
+  { id: "route-north", cls: "route route-north", d: "M1258,362 Q1150,330 1087,322 Q940,355 842,372 Q680,398 577,407 Q460,420 402,432 Q290,480 227,530" },
+  { id: "route-wusun", cls: "route route-wusun", d: "M395,425 Q330,300 262,150" }
+];
+const GATES = [
+  { x: 1258, y: 362, label: "玉门关（北道起点）" },
+  { x: 1258, y: 560, label: "阳关（南道起点）" }
+];
+
+const STATES = [
+  { id: "wusun", x: 255, y: 128, ly: -30, short: "乌孙", r: 11,
+    name: "乌孙", today: "今 · 伊犁河谷至伊塞克湖一带",
+    points: [
+      "西域最大的游牧政权之一，都赤谷城，史载「控弦者十余万」（《汉书》，数字为史书估计）",
+      "汉武帝两度和亲：细君公主、解忧公主",
+      "解忧公主的侍女冯嫽，史载首位持节出使的女外交家",
+      "与汉结盟夹击匈奴，改变草原格局"
+    ],
+    fate: "南北朝时受柔然挤压，部分西迁葱岭一带，逐渐融入中亚各民族。",
+    link: { text: "看柔然如何挤压草原西部", target: "rouran" } },
+  { id: "shule", x: 218, y: 535, ly: -30, short: "疏勒", r: 11,
+    name: "疏勒", today: "今 · 喀什",
+    points: [
+      "南、北两道在西端的交汇点，翻越帕米尔前最后的补给站",
+      "班超经营西域的大本营，史载驻盘橐城",
+      "唐安西四镇之一，今天南疆重要城市"
+    ],
+    fate: "10世纪后成为喀喇汗王朝中心之一，伊斯兰文化东传的桥头堡。",
+    link: { text: "看喀喇汗王朝与回鹘西迁", target: "huihu" } },
+  { id: "shache", x: 391, y: 653, ly: 36, short: "莎车", r: 10,
+    name: "莎车", today: "今 · 莎车县",
+    points: [
+      "南道西段大国，位于于阗与疏勒之间",
+      "东汉初莎车王贤一度称雄南道，兼并周边诸国",
+      "后被于阗击灭，南道重归于阗主导"
+    ],
+    fate: "后世为叶尔羌河绿洲重镇，叶尔羌汗国（16世纪）的都城即在此。" },
+  { id: "gumo", x: 396, y: 430, ly: 36, short: "姑墨", r: 10,
+    name: "姑墨", today: "今 · 阿克苏",
+    points: [
+      "北道中型绿洲，史载产铜、铁、雌黄",
+      "长期依附强邻，先属龟兹，后归汉"
+    ],
+    fate: "唐代归入龟兹都督府体系，今为阿克苏地区。" },
+  { id: "qiuci", x: 570, y: 405, ly: -30, short: "龟兹", r: 11,
+    name: "龟兹", today: "今 · 库车市",
+    points: [
+      "西域佛教中心，克孜尔石窟是新疆现存最早的大型石窟群之一，开凿年代早于敦煌莫高窟",
+      "高僧鸠摩罗什的故乡，译经深刻影响汉地佛教",
+      "龟兹乐舞影响隋唐宫廷燕乐",
+      "唐安西都护府一度驻此，安西四镇之首"
+    ],
+    fate: "9世纪后随回鹘西迁与伊斯兰化逐渐衰落，石窟艺术为其留影。",
+    link: { text: "看回鹘西迁", target: "huihu" } },
+  { id: "yanqi", x: 836, y: 370, ly: -30, short: "焉耆", r: 10,
+    name: "焉耆", today: "今 · 焉耆回族自治县，博斯腾湖畔",
+    points: [
+      "北道重镇，临博斯腾湖，盛产鱼盐蒲苇",
+      "七个星佛寺遗址见证昔日香火",
+      "唐设焉耆都督府，安西四镇之一"
+    ],
+    fate: "唐末后先后受吐蕃、回鹘控制，最终并入高昌回鹘。" },
+  { id: "gaochang", x: 1080, y: 320, ly: -30, short: "车师·高昌", r: 11,
+    name: "车师 → 高昌", today: "今 · 吐鲁番（交河、高昌故城）",
+    points: [
+      "北道门户，汉与匈奴「五争车师」",
+      "车师后演变为汉人为主体的高昌国（麴氏）",
+      "玄奘西行曾在此讲经月余，与高昌王麴文泰结为兄弟",
+      "640年唐灭高昌，设西州",
+      "「火州」酷热，坎儿井与葡萄闻名"
+    ],
+    fate: "840年后回鹘西迁，在此建高昌回鹘；13世纪后战乱衰落，交河、高昌故城留存至今。",
+    link: { text: "看回鹘西迁", target: "huihu" } },
+  { id: "loulan", x: 1090, y: 580, ly: -30, short: "楼兰", r: 11,
+    name: "楼兰（后改鄯善）", today: "今 · 若羌县境内，罗布泊西北岸",
+    points: [
+      "丝路南、北道在东端的咽喉，汉匈必争之地",
+      "傅介子刺杀楼兰王，汉改国名为鄯善",
+      "「不破楼兰终不还」是唐诗中的借指，泛指边患劲敌",
+      "「楼兰美女」干尸出自小河墓地一带，属青铜时代，早于楼兰国，并非楼兰人"
+    ],
+    fate: "约4世纪后逐渐废弃，随罗布泊水系变迁被流沙吞没，成为最著名的失落古国。" },
+  { id: "qiemo", x: 940, y: 631, ly: -30, short: "且末", r: 10,
+    name: "且末", today: "今 · 且末县",
+    points: [
+      "南道上楼兰（鄯善）与精绝之间的小国",
+      "依托车尔臣河绿洲，沙漠边缘的补给点"
+    ],
+    fate: "先后附属鄯善，后世仍为南道要站。" },
+  { id: "jingjue", x: 798, y: 655, ly: -30, short: "精绝", r: 10,
+    name: "精绝", today: "今 · 民丰县尼雅遗址",
+    points: [
+      "深居沙漠腹地的小绿洲，南道上的补给点",
+      "尼雅遗址出土织锦「五星出东方利中国」",
+      "佉卢文木简记录了土地、诉讼与日常生活"
+    ],
+    fate: "约4世纪前后废弃，被称「东方庞贝」，1901年由斯坦因发现。" },
+  { id: "yutian", x: 570, y: 688, ly: 36, short: "于阗", r: 11,
+    name: "于阗", today: "今 · 和田地区",
+    points: [
+      "玉石之乡，和田玉经此输入中原数千年",
+      "佛教东传重镇，尉迟氏王族统治长达数百年",
+      "唐安西四镇之一，设毗沙都督府"
+    ],
+    fate: "1006年前后被喀喇汗王朝攻灭，西域南部由佛教转入伊斯兰时代。",
+    link: { text: "看喀喇汗王朝与回鹘西迁", target: "huihu" } }
+];
+
+/* ---------------- 数据：草原接力 ---------------- */
+const POLITIES = [
+  { id: "xiongnu", name: "匈奴", years: "约前3世纪—5世纪", lang: "语言归属不明",
+    points: ["冒顿单于统一草原", "白登之围 → 汉初和亲", "汉武帝反击：卫青、霍去病", "约前3世纪破东胡（一说）", "东汉时分裂为南、北匈奴"],
+    out: "南匈奴内附，刘渊建汉赵（五胡十六国开端）；北匈奴西迁，是否即欧洲的匈人（一说）尚有争议。" },
+  { id: "donghu", name: "东胡", years: "约前3世纪—3世纪", lang: "东胡系 · 鲜卑与乌桓的先祖",
+    points: ["与匈奴同时代的东北部族联盟", "约前3世纪为匈奴冒顿单于所破（一说）", "余部分为乌桓与鲜卑两支"],
+    out: "东胡虽亡，其后裔鲜卑、契丹、蒙古相继称雄草原——这是个完美的闭环：打败东胡的匈奴退出了历史舞台，而东胡的后裔蒙古最终终结了草原的旧秩序。" },
+  { id: "xianbei", name: "鲜卑", years: "1—6世纪（继匈奴而起）", lang: "多说：东胡系，语言归属有争议",
+    points: ["拓跋部 → 北魏统一北方，孝文帝汉化改革", "慕容部 → 前燕、后燕等", "宇文部 → 一说为契丹先祖之一", "室韦（北支）→ 一说为蒙古先祖"],
+    out: "大部融入汉地；留在草原的各部与其他部族混合，形成柔然。" },
+  { id: "rouran", name: "柔然", years: "4—6世纪", lang: "一说为蒙古语族",
+    points: ["由留守草原的鲜卑各部与其他部落混成（一说）", "与北魏长期交战", "《木兰辞》中的「胡骑」，一般认为指柔然", "挤压乌孙等西域势力西迁"],
+    out: "552年被原属部突厥推翻——锻铁属部反杀主子。" },
+  { id: "tujue", name: "突厥", years: "6—8世纪", lang: "突厥语族",
+    points: ["灭柔然，建横跨中亚的大汗国", "分裂为东、西突厥", "630年唐灭东突厥，657年灭西突厥；唐太宗被尊「天可汗」", "682年后突厥复国"],
+    out: "744年被属部回鹘联合葛逻禄等推翻；西部突厥诸部西迁，后来影响了中亚和西亚（如塞尔柱、奥斯曼）。" },
+  { id: "huihu", name: "回鹘", years: "744—840", lang: "突厥语族",
+    points: ["出自铁勒，原为突厥属部", "安史之乱时助唐收复两京", "840年被黠戛斯攻灭，部众西迁"],
+    out: "分三支：高昌回鹘（吐鲁番）、甘州回鹘（与今裕固族有渊源）、喀喇汗王朝（喀什，1006年前后灭于阗）；与今维吾尔族的形成有密切关系，但维吾尔族是多源融合。" },
+  { id: "jiegasi", name: "黠戛斯", years: "9世纪", lang: "突厥语族",
+    points: ["原为回鹘属部，居叶尼塞河上游", "840年攻灭回鹘汗国"],
+    out: "未能占据草原中心，而是退回北方；草原由此进入多方争夺的真空期——契丹趁势崛起。" },
+  { id: "qidan", name: "契丹（辽）", years: "907—1125", lang: "一般认为是蒙古语族",
+    points: ["耶律阿保机建国，后称辽", "「Cathay」成为西方对中国的称呼"],
+    out: "1125年被属部女真灭；耶律大石西迁建西辽（喀喇契丹），统治中亚近百年。" },
+  { id: "nuzhen", name: "女真（金）", years: "1115—1234", lang: "通古斯语族",
+    points: ["完颜阿骨打建金", "十年灭辽", "靖康之变掳走徽钦二帝"],
+    out: "1234年被蒙古与南宋联手灭亡；后裔建州女真发展为满族，建立清朝。" },
+  { id: "menggu", name: "蒙古", years: "1206—", lang: "蒙古语族",
+    points: ["出自蒙兀室韦，铁木真统一诸部", "灭西夏、灭金、灭南宋", "建立元朝；1368年退回草原"],
+    out: "明代分为东部鞑靼与西部瓦剌，后各自发展。" }
+];
+
+const RULES = [
+  { title: "属部反杀主子",
+    items: ["突厥灭柔然（552）", "回鹘灭突厥（744）", "黠戛斯灭回鹘（840）", "女真灭契丹（1125）", "蒙古灭金（1234）——蒙古原本也是金的属部"] },
+  { title: "战败者西迁，影响世界",
+    items: ["北匈奴 → 欧洲（一说匈人）", "突厥西部诸部 → 西亚、小亚细亚", "回鹘 → 西域，改变塔里木盆地的宗教与人口", "西辽 → 中亚"] },
+  { title: "语族与源流",
+    items: ["东胡（一说）→ 鲜卑、乌桓 → 契丹、蒙古", "突厥语族：突厥、回鹘、黠戛斯", "通古斯语族：女真 → 满族", "匈奴、鲜卑语言归属尚无定论"] }
+];
+
+/* ---------------- 渲染地图 ---------------- */
+const routesG = $("routes");
+const routePaths = [];
+ROUTES.forEach(r => {
+  const p = el("path", { id: r.id, class: r.cls, d: r.d });
+  routesG.appendChild(p);
+  routePaths.push({ node: p, spec: r });
+});
+
+ROUTES.forEach((r, i) => {
+  const p = routePaths[i].node;
+  const len = p.getTotalLength ? p.getTotalLength() : 0;
+  if (!len) return;
+  if (!REDUCED) {
+    const dur = i === 2 ? 900 : 1700, delay = 220 + i * 260;
+    p.style.strokeDasharray = `${len} ${len}`;
+    p.style.strokeDashoffset = len;
+    const clear = () => { p.style.strokeDasharray = ""; p.style.strokeDashoffset = ""; };
+    const a = p.animate(
+      [{ strokeDashoffset: len }, { strokeDashoffset: 0 }],
+      { duration: dur, delay, easing: "cubic-bezier(.4,.1,.25,1)", fill: "forwards" }
+    );
+    if (a) a.onfinish = clear;
+    setTimeout(clear, dur + delay + 400);
+  }
+});
+
+const marksG = $("marks");
+GATES.forEach(g => {
+  marksG.appendChild(el("rect", { x: g.x - 6.5, y: g.y - 6.5, width: 13, height: 13, fill: "#8a6f45", transform: `rotate(45 ${g.x} ${g.y})` }));
+  marksG.appendChild(el("text", { x: g.x, y: g.y - 22 }, g.label));
+});
+marksG.appendChild(el("circle", { cx: 1330, cy: 455, r: 7, fill: "#8a7a5c" }));
+marksG.appendChild(el("text", { x: 1330, y: 437 }, "敦煌"));
+marksG.appendChild(el("text", { x: 1300, y: 418, "font-size": 12, fill: "#8c7d5a" }, "河西走廊"));
+
+const statesG = $("states");
+const stateNodes = {};
+STATES.forEach(s => {
+  const g = el("g", { class: "state", tabindex: 0, role: "button", "aria-label": `${s.name}，${s.today}`, "aria-pressed": "false", "data-id": s.id });
+  g.appendChild(el("title", {}, `${s.name}（${s.today}）`));
+  g.appendChild(el("circle", { class: "hit", cx: s.x, cy: s.y, r: 30 }));
+  g.appendChild(el("circle", { class: "halo", cx: s.x, cy: s.y, r: s.r + 7 }));
+  g.appendChild(el("circle", { class: "ring", cx: s.x, cy: s.y, r: s.r + 7 }));
+  g.appendChild(el("circle", { class: "dot", cx: s.x, cy: s.y, r: s.r }));
+  g.appendChild(el("text", { x: s.x, y: s.y + s.ly }, s.short));
+  g.addEventListener("click", () => selectState(s.id));
+  g.addEventListener("keydown", e => {
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); selectState(s.id); }
+  });
+  statesG.appendChild(g);
+  stateNodes[s.id] = g;
+});
+/* 移动端横滑提示 */
+const mwHint = document.createElement("div");
+mwHint.className = "pan-hint";
+mwHint.textContent = "\u25c2 \u53ef\u5de6\u53f3\u6ed1\u52a8\u67e5\u770b\u5168\u56fe \u25b8";
+document.querySelector(".map-wrap").appendChild(mwHint);
+document.querySelector(".map-wrap").addEventListener("scroll", () => { mwHint.style.opacity = "0"; }, { once: true });
+
+
+/* 驼队：沿三道缓慢行进 */
+(function caravans() {
+  if (REDUCED) return;
+  const g = $("caravans");
+  const DOT = 2.6, GAP = 0.008;
+  const wagons = routePaths.map((rp, i) => {
+    const len = rp.node.getTotalLength();
+    const grp = el("g", { class: "caravan-group" });
+    const dots = [0, 1, 2, 3].map(() => el("circle", { class: "caravan", r: DOT }));
+    dots.forEach(d => grp.appendChild(d));
+    g.appendChild(grp);
+    const dur = [34, 30, 24][i];
+    return { node: rp.node, len, grp, dots, dur, offset: [0, 0.35, 0.7][i] };
+  });
+  const reduced = matchMedia("(prefers-reduced-motion: reduce)");
+  const t0 = performance.now();
+  let hidden = false;
+  document.addEventListener("visibilitychange", () => { hidden = document.hidden; });
+  (function tick(now) {
+    if (!reduced.matches && !hidden) {
+      const t = (now - t0) / 1000;
+      wagons.forEach(w => {
+        const head = (w.offset + t / w.dur) % 1;
+        w.dots.forEach((d, k) => {
+          const p = w.node.getPointAtLength(((head - k * GAP + 1) % 1) * w.len);
+          d.setAttribute("cx", p.x);
+          d.setAttribute("cy", p.y);
+          d.setAttribute("opacity", String(1 - k * 0.22));
+          d.setAttribute("r", String(DOT - k * 0.45));
+        });
+      });
+    }
+    requestAnimationFrame(tick);
+  })(t0);
+})();
+
+/* ---------------- 侧栏详情 ---------------- */
+const panelDefault = $("panel-default"), panelDetail = $("panel-detail"), dLink = $("d-link");
+let currentLinkTarget = null;
+
+function selectState(id) {
+  const s = STATES.find(x => x.id === id);
+  if (!s) return;
+  Object.values(stateNodes).forEach(n => { n.classList.remove("selected"); n.setAttribute("aria-pressed", "false"); });
+  stateNodes[id].classList.add("selected");
+  stateNodes[id].setAttribute("aria-pressed", "true");
+  $("d-name").textContent = s.name;
+  $("d-today").textContent = s.today;
+  const ul = $("d-points");
+  ul.replaceChildren(...s.points.map(p => { const li = document.createElement("li"); li.textContent = p; return li; }));
+  const fate = $("d-fate");
+  const b = document.createElement("b");
+  b.textContent = "结局：";
+  fate.replaceChildren(b, document.createTextNode(s.fate));
+  if (s.link) { dLink.textContent = s.link.text + " →"; currentLinkTarget = s.link.target; dLink.hidden = false; }
+  else { dLink.hidden = true; currentLinkTarget = null; }
+  panelDefault.hidden = true;
+  panelDetail.hidden = false;
+  const st = panelDetail.querySelector(".stagger");
+  st.classList.remove("stagger");
+  void st.offsetHeight;
+  st.classList.add("stagger");
+  document.querySelector("aside").scrollTop = 0;
+  history.replaceState(null, "", "#map:" + id);
+  stateNodes[id].scrollIntoView({ block: "nearest", inline: "nearest", behavior: REDUCED ? "auto" : "smooth" });
+}
+dLink.addEventListener("click", () => { if (currentLinkTarget) openSteppe(currentLinkTarget); });
+
+/* ---------------- 渲染时间轴 ---------------- */
+const FAMILY = { tujue: "突厥语族", huihu: "突厥语族", jiegasi: "突厥语族", rouran: "蒙古语族", qidan: "蒙古语族", menggu: "蒙古语族", nuzhen: "通古斯语族" };
+const FILTERS = ["全部", "突厥语族", "蒙古语族", "通古斯语族"];
+const timeline = $("timeline");
+const cards = {};
+
+POLITIES.forEach((p, i) => {
+  const li = document.createElement("li");
+  li.className = "card";
+  li.dataset.id = p.id;
+  li.style.setProperty("--i", i);
+  const det = document.createElement("details");
+  const sum = document.createElement("summary");
+  const name = document.createElement("span"); name.className = "name"; name.textContent = p.name;
+  const yrs = document.createElement("span"); yrs.className = "years"; yrs.textContent = p.years;
+  const lang = document.createElement("span"); lang.className = "lang"; lang.textContent = p.lang;
+  sum.append(name, yrs, lang);
+  const body = document.createElement("div"); body.className = "body";
+  const ul = document.createElement("ul");
+  p.points.forEach(t => { const x = document.createElement("li"); x.textContent = t; ul.appendChild(x); });
+  const out = document.createElement("div"); out.className = "out";
+  const ob = document.createElement("b"); ob.textContent = "去向：";
+  out.append(ob, document.createTextNode(p.out));
+  body.append(ul, out);
+  det.append(sum, body);
+  li.appendChild(det);
+  sum.addEventListener("click", () => {
+    if (!det.open) history.replaceState(null, "", "#steppe:" + p.id);
+  });
+  timeline.appendChild(li);
+  cards[p.id] = { li, det };
+});
+
+const toolbar = $("toolbar");
+toolbar.appendChild(Object.assign(document.createElement("span"), { textContent: "按语族筛选：" }));
+const chips = FILTERS.map(f => {
+  const b = document.createElement("button");
+  b.className = "chip"; b.textContent = f;
+  b.setAttribute("aria-pressed", f === "全部" ? "true" : "false");
+  b.addEventListener("click", () => applyFilter(f));
+  toolbar.appendChild(b);
+  return b;
+});
+const toggleAll = document.createElement("button");
+toggleAll.className = "tool"; toggleAll.textContent = "全部展开";
+let allOpen = false;
+toggleAll.addEventListener("click", () => {
+  allOpen = !allOpen;
+  Object.values(cards).forEach(c => { c.det.open = allOpen; });
+  toggleAll.textContent = allOpen ? "全部收起" : "全部展开";
+});
+toolbar.appendChild(toggleAll);
+
+function applyFilter(f) {
+  chips.forEach(c => c.setAttribute("aria-pressed", String(c.textContent === f)));
+  POLITIES.forEach(p => cards[p.id].li.classList.toggle("dim", f !== "全部" && FAMILY[p.id] !== f));
+}
+
+const rulesEl = $("rules");
+RULES.forEach((r, i) => {
+  const box = document.createElement("div");
+  box.className = "rule";
+  box.style.setProperty("--i", i);
+  const h = document.createElement("h3"); h.textContent = r.title;
+  const ul = document.createElement("ul");
+  r.items.forEach(t => { const li = document.createElement("li"); li.textContent = t; ul.appendChild(li); });
+  box.append(h, ul);
+  rulesEl.appendChild(box);
+});
+
+/* ---------------- 视图切换 + 滑动指示器 ---------------- */
+const tabs = { map: $("tab-map"), steppe: $("tab-steppe") };
+const views = { map: $("view-map"), steppe: $("view-steppe") };
+const pill = document.querySelector("nav .pill");
+
+function movePill() {
+  const active = Object.values(tabs).find(t => t.getAttribute("aria-selected") === "true");
+  if (!active || !pill) return;
+  pill.style.width = active.offsetWidth + "px";
+  pill.style.transform = `translateX(${active.offsetLeft}px)`;
+}
+
+function showView(name) {
+  Object.keys(tabs).forEach(k => {
+    const on = k === name;
+    tabs[k].setAttribute("aria-selected", String(on));
+    tabs[k].tabIndex = on ? 0 : -1;
+    views[k].hidden = !on;
+    views[k].style.animation = "none";
+    void views[k].offsetHeight;
+    views[k].style.animation = "";
+  });
+  movePill();
+  history.replaceState(null, "", "#" + name);
+}
+
+function openSteppe(id) {
+  showView("steppe");
+  const c = cards[id];
+  if (!c) return;
+  c.det.open = true;
+  history.replaceState(null, "", "#steppe:" + id);
+  c.li.scrollIntoView({ behavior: REDUCED ? "auto" : "smooth", block: "center" });
+  c.det.querySelector("summary").focus({ preventScroll: true });
+}
+
+const tabKeys = Object.keys(tabs);
+tabKeys.forEach(k => tabs[k].addEventListener("click", () => showView(k)));
+addEventListener("keydown", e => {
+  const i = tabKeys.findIndex(k => tabs[k] === document.activeElement);
+  if (i < 0) return;
+  const j = e.key === "ArrowRight" ? i + 1 : e.key === "ArrowLeft" ? i - 1
+    : e.key === "Home" ? 0 : e.key === "End" ? tabKeys.length - 1 : -1;
+  if (j < 0) return;
+  e.preventDefault();
+  const k = tabKeys[(j + tabKeys.length) % tabKeys.length];
+  tabs[k].focus();
+  showView(k);
+});
+addEventListener("resize", movePill);
+addEventListener("load", movePill);
+addEventListener("beforeprint", () => Object.values(cards).forEach(c => { c.det.open = true; }));
+function initFromHash() {
+  const [v, id] = location.hash.slice(1).split(":");
+  showView(v === "steppe" ? "steppe" : "map");
+  if (id) {
+    if (v === "map") selectState(id);
+    else if (v === "steppe") openSteppe(id);
+  }
+}
+initFromHash();
+addEventListener("hashchange", initFromHash);
+requestAnimationFrame(movePill);
+</script>
+
+
+</body>
+</html>

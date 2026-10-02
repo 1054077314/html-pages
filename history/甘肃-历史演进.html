@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="甘肃 · 河西陇右的两千年 — 互动历史演进图鉴：方位地图、朝代年表、大事详考（离线单文件）">
+<title>甘肃 · 河西陇右的两千年</title>
+<style>
+  * { box-sizing: border-box; margin: 0; }
+  :root {
+    --ink: #241d14; --ink-2: #4a3b26; --ink-3: #6d5f43; --ink-4: #9a8a6a;
+    --paper: #f7f1e3; --paper-2: #fffdf7; --paper-3: #efe4cd;
+    --line: #dcccaa; --line-2: #c9b68d;
+    --cinnabar: #c0392b; --cinnabar-2: #e2604a;
+    --jade: #1f7a63; --gold: #b08a3e;
+    --river: #4f92b0; --wall: #8a7a5c;
+    --shadow-s: 0 1px 2px rgba(60,44,20,.06), 0 2px 8px rgba(60,44,20,.07);
+    --shadow-m: 0 6px 18px rgba(60,44,20,.11), 0 1px 3px rgba(60,44,20,.07);
+    --ease: cubic-bezier(.22,.61,.36,1);
+    --serif: "Source Han Serif SC", "Noto Serif SC", "Songti SC", "STSong", "SimSun", serif;
+  }
+  html, body { height: 100%; }
+  body {
+    font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans SC", sans-serif;
+    color: var(--ink); display: flex; flex-direction: column; height: 100dvh; overflow: hidden;
+    background:
+      radial-gradient(1200px 700px at 10% -12%, #fffcf4 0%, transparent 62%),
+      radial-gradient(900px 620px at 102% 112%, #efe0c0 0%, transparent 58%),
+      var(--paper);
+    -webkit-font-smoothing: antialiased;
+  }
+  button { font-family: inherit; }
+  button:focus-visible, .state:focus-visible, summary:focus-visible { outline: 2.5px solid #2b6cb0; outline-offset: 3px; border-radius: 6px; }
+  [hidden] { display: none !important; }
+
+  header {
+    position: relative; display: flex; align-items: center; gap: 26px; padding: 0 26px;
+    height: 64px; flex-shrink: 0; z-index: 5;
+    background: linear-gradient(180deg, #fffdf7, #f4ebd7);
+    border-bottom: 1px solid var(--line);
+    box-shadow: inset 0 1px 0 #fff, 0 10px 24px -18px rgba(60,44,20,.55);
+  }
+  header::after {
+    content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold) 30%, var(--gold) 70%, transparent);
+    opacity: .45;
+  }
+  .brand {
+    font-family: var(--serif); font-size: 21px; letter-spacing: .18em; color: var(--ink);
+    display: flex; align-items: center; gap: 11px; white-space: nowrap;
+  }
+  .brand::before {
+    content: ""; width: 10px; height: 10px; border-radius: 1.5px; background: var(--cinnabar);
+    transform: rotate(45deg); box-shadow: 0 0 0 3px rgba(192,57,43,.14);
+    animation: sealIn .8s var(--ease) both;
+  }
+  @keyframes sealIn { from { transform: rotate(45deg) scale(0); } }
+  nav { position: relative; display: flex; gap: 3px; padding: 4px; border-radius: 999px; background: #ece0c6; box-shadow: inset 0 1px 3px rgba(60,44,20,.15); }
+  nav .pill {
+    position: absolute; top: 4px; left: 0; height: calc(100% - 8px); border-radius: 999px;
+    background: linear-gradient(180deg, #3e3221, #241d14);
+    box-shadow: 0 2px 10px rgba(36,29,20,.38);
+    transition: transform .42s var(--ease), width .42s var(--ease);
+  }
+  nav button {
+    position: relative; z-index: 1; font-size: 13.5px; letter-spacing: .08em; padding: 7px 19px;
+    border: 0; background: none; color: var(--ink-3); cursor: pointer; border-radius: 999px;
+    transition: color .3s var(--ease);
+  }
+  nav button[aria-selected="true"] { color: #fdf6e6; }
+  .hint { margin-left: auto; font-size: 12px; color: var(--ink-4); letter-spacing: .08em; }
+  .nav-home { margin-left: 12px; font-size: 12.5px; color: var(--ink-3); text-decoration: none; letter-spacing: .1em; white-space: nowrap; border: 1px solid var(--line-2); border-radius: 999px; padding: 4px 12px; transition: background .25s, color .25s, border-color .25s; }
+  .nav-home:hover { background: #3e3221; color: #fdf6e6; border-color: transparent; }
+
+  main { flex: 1; min-height: 0; display: flex; }
+  [role="tabpanel"] { animation: viewIn .5s var(--ease) both; }
+  @keyframes viewIn { from { opacity: 0; transform: translateY(10px); } }
+
+  /* ===== 地图 ===== */
+  #view-map { flex: 1; display: flex; min-width: 0; }
+  .map-wrap {
+    flex: 1; position: relative; min-width: 0; overflow: auto;
+    background: radial-gradient(1100px 640px at 34% 18%, #fffdf6 0%, transparent 64%), linear-gradient(180deg, #f8f2e4, #f0e7d2);
+  }
+  .map-wrap svg { width: 100%; height: 100%; display: block; }
+  .title-block { position: absolute; top: 20px; left: 28px; pointer-events: none; animation: titleIn 1s var(--ease) .35s both; }
+  @keyframes titleIn { from { opacity: 0; transform: translateX(-14px); } }
+  .title-block h2 { font-family: var(--serif); font-size: 30px; letter-spacing: .3em; color: var(--ink); text-shadow: 0 1px 0 #fff; }
+  .title-block p { font-size: 13px; color: var(--ink-3); margin-top: 8px; letter-spacing: .14em; }
+  .title-block .title-rule { width: 46px; height: 2px; background: var(--cinnabar); margin-top: 11px; border-radius: 2px; }
+
+  .band-label { font-family: var(--serif); font-size: 17px; fill: #a08b56; letter-spacing: .28em; text-anchor: middle; paint-order: stroke; stroke: #f7f1e3; stroke-width: 5px; }
+  .geo-label { fill: #8c7d5a; paint-order: stroke; stroke: #f7f1e3; stroke-width: 5px; letter-spacing: .1em; }
+
+  .state { cursor: pointer; }
+  .state .hit { fill: transparent; }
+  .state .dot {
+    fill: #fffdf6; stroke: #7a6547; stroke-width: 2.2;
+    transform-box: fill-box; transform-origin: center;
+    transition: transform .3s var(--ease), fill .3s var(--ease), stroke .3s var(--ease);
+    filter: drop-shadow(0 1px 2px rgba(60,44,20,.28));
+  }
+  .state .ring, .state .halo {
+    fill: none; stroke: var(--cinnabar); stroke-width: 1.6;
+    transform-box: fill-box; transform-origin: center; opacity: 0;
+    transition: opacity .3s var(--ease), transform .3s var(--ease);
+  }
+  .state .ring { transform: scale(.82); }
+  .state:hover .dot, .state:focus-visible .dot { transform: scale(1.3); fill: #ffe4ab; stroke: #6b5836; }
+  .state:hover .ring, .state:focus-visible .ring { opacity: .55; transform: scale(1); }
+  .state.selected .dot { fill: var(--cinnabar); stroke: #7d2419; transform: scale(1.36); }
+  .state.selected .ring { opacity: 1; transform: scale(1.14); }
+  .state.selected .halo { animation: pulse 2.6s ease-out infinite; }
+  @keyframes pulse { 0% { transform: scale(1); opacity: .75; } 70%,100% { transform: scale(1.85); opacity: 0; } }
+  .state text {
+    font-family: var(--serif); font-size: 16px; font-weight: 700; fill: var(--ink-2);
+    paint-order: stroke; stroke: #f7f1e3; stroke-width: 4px; text-anchor: middle;
+    transition: fill .3s var(--ease);
+  }
+  .state.selected text { fill: #8c2f14; }
+  .marker text { font-size: 12.5px; fill: var(--ink-3); paint-order: stroke; stroke: #f7f1e3; stroke-width: 3px; text-anchor: middle; letter-spacing: .04em; }
+
+  aside {
+    width: 372px; flex-shrink: 0; border-left: 1px solid var(--line); overflow-y: auto;
+    padding: 26px 24px 40px;
+    background: linear-gradient(180deg, #fffdf7, #f8f1e2);
+    box-shadow: -14px 0 30px -24px rgba(60,44,20,.5);
+  }
+  aside h3 { font-family: var(--serif); font-size: 26px; color: var(--ink); letter-spacing: .1em; }
+  .today {
+    display: inline-block; margin: 11px 0 16px; padding: 4px 12px; border-radius: 999px;
+    background: linear-gradient(180deg, #f3e8cd, #ece0c2); border: 1px solid var(--line);
+    font-size: 12.5px; color: var(--ink-3);
+  }
+  aside ul { list-style: none; padding: 0; }
+  aside li { font-size: 14.5px; line-height: 1.75; margin-bottom: 11px; padding-left: 17px; position: relative; color: var(--ink-2); }
+  aside li::before {
+    content: ""; position: absolute; left: 0; top: 10px; width: 6px; height: 6px;
+    border-radius: 50%; background: var(--cinnabar-2); box-shadow: 0 0 0 3px rgba(226,96,74,.14);
+  }
+  .fate {
+    margin-top: 18px; padding: 13px 15px; border-radius: 3px 8px 8px 3px;
+    background: linear-gradient(100deg, #f4e8ce, #fbf4e4);
+    border-left: 4px solid var(--gold); font-size: 13.5px; line-height: 1.75; color: var(--ink-3); box-shadow: var(--shadow-s);
+  }
+  .fate b { color: var(--ink); }
+  .xlink {
+    display: inline-flex; align-items: center; gap: 6px; margin-top: 16px; font-size: 13.5px;
+    color: var(--cinnabar); background: none; border: 0; padding: 0; cursor: pointer;
+    border-bottom: 1px dashed rgba(192,57,43,.5); transition: gap .25s var(--ease), color .25s;
+  }
+  .xlink:hover { gap: 11px; color: #7d2419; }
+  .default-tip { color: var(--ink-3); font-size: 14.5px; line-height: 2; margin: 10px 0 6px; text-align: center; }
+  .legend {
+    margin-top: 26px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 10px;
+    font-size: 13.5px; color: var(--ink-3); background: rgba(255,253,247,.75); box-shadow: var(--shadow-s);
+  }
+  .legend div { display: flex; align-items: center; gap: 11px; margin: 8px 0; }
+  .legend i { width: 44px; height: 10px; flex-shrink: 0; display: block; position: relative; }
+  .panel-foot { margin-top: 20px; font-size: 12px; color: var(--ink-4); line-height: 1.8; border-top: 1px solid var(--line); padding-top: 14px; }
+
+  .stagger > * { animation: itemIn .5s var(--ease) both; }
+  .stagger > *:nth-child(1) { animation-delay: .02s; }
+  .stagger > *:nth-child(2) { animation-delay: .07s; }
+  .stagger > *:nth-child(3) { animation-delay: .12s; }
+  .stagger > *:nth-child(4) { animation-delay: .17s; }
+  @keyframes itemIn { from { opacity: 0; transform: translateX(9px); } }
+
+  /* ===== 时间轴 ===== */
+  #view-time { flex: 1; overflow-y: auto; padding: 34px 26px 60px; }
+  .time-inner { max-width: 900px; margin: 0 auto; }
+  .time-inner h2 { font-family: var(--serif); font-size: 30px; letter-spacing: .18em; color: var(--ink); }
+  .lead { font-size: 14px; color: var(--ink-3); margin: 10px 0 20px; line-height: 1.85; max-width: 64ch; }
+  .toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 22px; font-size: 13px; color: var(--ink-4); }
+  .chip {
+    font-size: 13px; padding: 5px 14px; border-radius: 999px; border: 1px solid var(--line);
+    background: linear-gradient(180deg, #fffdf7, #f4ebd8); color: var(--ink-3); cursor: pointer;
+    transition: transform .22s var(--ease), box-shadow .22s var(--ease), background .22s, color .22s, border-color .22s;
+  }
+  .chip:hover { transform: translateY(-1px); box-shadow: var(--shadow-s); }
+  .chip[aria-pressed="true"] { background: linear-gradient(180deg, #3e3221, #241d14); color: #fdf6e6; border-color: transparent; box-shadow: 0 3px 12px rgba(36,29,20,.3); }
+  .tool { margin-left: auto; font-size: 13px; padding: 5px 15px; border-radius: 999px; border: 1px dashed var(--line-2); background: none; color: var(--ink-3); cursor: pointer; transition: background .22s, color .22s; }
+  .tool:hover { background: rgba(255,253,247,.9); color: var(--ink); }
+
+  .timeline { list-style: none; padding: 0 0 0 26px; position: relative; }
+  .timeline::before {
+    content: ""; position: absolute; left: 6px; top: 6px; bottom: 26px; width: 2px;
+    background: linear-gradient(180deg, rgba(201,182,141,0), var(--line-2) 8%, var(--line-2) 92%, rgba(201,182,141,0));
+    transform-origin: top; animation: growLine 1.1s var(--ease) .1s both;
+  }
+  @keyframes growLine { from { transform: scaleY(0); } }
+
+  .card {
+    position: relative; margin: 0 0 12px; border-radius: 10px; border: 1px solid var(--line);
+    background: linear-gradient(180deg, #fffdf8, #faf4e7); box-shadow: var(--shadow-s);
+    transition: transform .3s var(--ease), box-shadow .3s var(--ease), opacity .35s var(--ease), border-color .3s;
+    animation: cardIn .6s var(--ease) both; animation-delay: calc(var(--i) * 55ms);
+  }
+  @keyframes cardIn { from { opacity: 0; transform: translateY(16px) scale(.985); } }
+  .card::before {
+    content: ""; position: absolute; left: -26px; top: 21px; width: 11px; height: 11px; border-radius: 50%;
+    background: #fffdf6; border: 2.5px solid var(--cinnabar-2); box-shadow: 0 0 0 4px var(--paper);
+    transition: transform .3s var(--ease), background .3s, border-color .3s;
+  }
+  .card:hover { transform: translateY(-2px); box-shadow: var(--shadow-m); border-color: var(--line-2); }
+  .card:hover::before { transform: scale(1.25); border-color: var(--cinnabar); }
+  .card:has(> details[open]) { box-shadow: var(--shadow-m); border-color: var(--line-2); background: linear-gradient(180deg, #fffefa, #fbf6ea); }
+  .card:has(> details[open])::before { background: var(--cinnabar); border-color: var(--cinnabar); }
+  .card.dim { opacity: .26; filter: saturate(.35); }
+  .card summary { list-style: none; cursor: pointer; padding: 13px 17px; display: flex; flex-wrap: wrap; align-items: baseline; gap: 5px 12px; }
+  .card summary::-webkit-details-marker { display: none; }
+  .card summary::after { content: "＋"; margin-left: auto; color: var(--ink-4); font-size: 15px; transition: transform .35s var(--ease), color .25s; }
+  .card:has(> details[open]) summary::after { content: "－"; color: var(--cinnabar); }
+  .card .name { font-family: var(--serif); font-size: 19px; font-weight: 700; color: var(--ink); letter-spacing: .06em; }
+  .card .years { font-size: 12.5px; color: var(--ink-3); }
+  .card .lang { font-size: 11.5px; padding: 2px 9px; border-radius: 999px; background: #efe4cd; color: var(--ink-3); border: 1px solid rgba(201,182,141,.7); }
+  .card .body { padding: 0 17px 15px; animation: bodyIn .45s var(--ease) both; }
+  @keyframes bodyIn { from { opacity: 0; transform: translateY(-6px); } }
+  .card ul { list-style: none; padding: 0; }
+  .card li { font-size: 14.5px; line-height: 1.8; padding-left: 17px; position: relative; margin-bottom: 5px; color: var(--ink-2); }
+  .card li::before { content: ""; position: absolute; left: 1px; top: 11px; width: 5px; height: 5px; border-radius: 50%; background: var(--gold); }
+  .card .out {
+    margin-top: 11px; padding: 10px 14px; border-radius: 3px 8px 8px 3px;
+    background: linear-gradient(100deg, #f4e8ce, #fbf4e4); border-left: 4px solid var(--gold);
+    font-size: 13.5px; line-height: 1.8; color: var(--ink-3);
+  }
+  .card .out b { color: var(--ink); }
+
+  .rules { margin-top: 30px; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; }
+  .rule {
+    border-radius: 12px; padding: 17px 18px; border: 1px solid var(--line);
+    background: linear-gradient(160deg, #fffdf8, #f6eddb); box-shadow: var(--shadow-s);
+    transition: transform .3s var(--ease), box-shadow .3s var(--ease);
+    animation: cardIn .6s var(--ease) both; animation-delay: calc(430ms + var(--i) * 70ms);
+  }
+  .rule:hover { transform: translateY(-3px); box-shadow: var(--shadow-m); }
+  .rule h3 { font-family: var(--serif); font-size: 17px; color: var(--ink); margin-bottom: 11px; letter-spacing: .08em; padding-bottom: 9px; border-bottom: 1px solid var(--line); }
+  .rule ul { padding: 0; }
+  .rule li { font-size: 14px; line-height: 1.8; margin-bottom: 6px; list-style: none; padding-left: 15px; position: relative; color: var(--ink-2); }
+  .rule li::before { content: ""; position: absolute; left: 2px; top: 11px; width: 5px; height: 5px; background: var(--cinnabar-2); transform: rotate(45deg); }
+  .caveat { margin: 22px 0 0; font-size: 12px; color: var(--ink-4); line-height: 1.9; border-top: 1px solid var(--line); padding-top: 14px; }
+
+  /* ===== 详考 ===== */
+  #view-detail { flex: 1; overflow-y: auto; padding: 34px 26px 60px; }
+  .detail-inner { max-width: 1000px; margin: 0 auto; }
+  .detail-inner h2 { font-family: var(--serif); font-size: 30px; letter-spacing: .18em; color: var(--ink); }
+  .sec { margin-top: 34px; animation: cardIn .6s var(--ease) both; }
+  .sec > h3 {
+    font-family: var(--serif); font-size: 20px; color: var(--ink); letter-spacing: .1em;
+    padding-bottom: 10px; border-bottom: 2px solid var(--line-2); margin-bottom: 16px;
+    display: flex; align-items: baseline; gap: 12px;
+  }
+  .sec > h3 span { font-family: inherit; font-size: 12px; color: var(--ink-4); letter-spacing: .04em; font-weight: 400; }
+  .chrono { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(330px, 1fr)); gap: 0 30px; }
+  .chrono li {
+    display: grid; grid-template-columns: 86px 1fr; gap: 12px; font-size: 13.5px; line-height: 1.7;
+    padding: 6px 0; border-bottom: 1px dashed rgba(201,182,141,.5); color: var(--ink-2);
+  }
+  .chrono .y { font-family: var(--serif); font-weight: 700; color: var(--cinnabar); font-size: 13px; white-space: nowrap; }
+  .people { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 11px; }
+  .person {
+    padding: 12px 15px; border: 1px solid var(--line); border-radius: 9px;
+    background: linear-gradient(180deg, #fffdf8, #faf4e7); box-shadow: var(--shadow-s);
+    transition: transform .25s var(--ease), box-shadow .25s var(--ease);
+  }
+  .person:hover { transform: translateY(-2px); box-shadow: var(--shadow-m); }
+  .person b { font-family: var(--serif); font-size: 16px; color: var(--ink); }
+  .person .d { font-size: 11.5px; color: var(--ink-4); margin-left: 8px; }
+  .person p { font-size: 13.5px; line-height: 1.72; color: var(--ink-3); margin-top: 6px; }
+  table.plain { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  table.plain th { text-align: left; font-weight: 400; color: var(--ink-4); font-size: 12px; padding: 8px 12px; border-bottom: 1px solid var(--line-2); letter-spacing: .06em; }
+  table.plain td { padding: 9px 12px; border-bottom: 1px dashed rgba(201,182,141,.5); line-height: 1.75; vertical-align: top; color: var(--ink-3); }
+  table.plain td:first-child { font-family: var(--serif); font-weight: 700; color: var(--ink); white-space: nowrap; }
+  .two-col { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 0 34px; }
+
+  noscript { padding: 26px; display: block; }
+
+  .pan-hint { display: none; }
+  @media (max-width: 880px) {
+    .pan-hint { display: block; position: sticky; left: 50%; bottom: 10px; transform: translateX(-50%); width: max-content; height: 30px; margin-top: -34px; padding: 0 14px; border-radius: 999px; background: rgba(36,29,20,.75); color: #f7f1e3; font-size: 11.5px; letter-spacing: .08em; line-height: 30px; pointer-events: none; transition: opacity .4s; }
+    header { padding: 0 14px; gap: 12px; }
+    .brand { font-size: 17px; letter-spacing: .1em; }
+    .hint { display: none; }
+    #view-map { flex-direction: column; }
+    .map-wrap { flex: none; height: 54dvh; }
+    .map-wrap svg { min-width: 900px; }
+    .title-block { top: 14px; left: 18px; }
+    .title-block h2 { font-size: 22px; }
+    aside { width: 100%; border-left: 0; border-top: 1px solid var(--line); flex: 1; min-height: 0; padding: 18px 16px 30px; box-shadow: none; }
+    #view-time { padding: 22px 15px 46px; }
+    .timeline { padding-left: 22px; }
+    .card::before { left: -22px; }
+  }
+
+  .plink { color: var(--cinnabar); text-decoration: none; border-bottom: 1px dashed rgba(192,57,43,.5); }
+  @media print {
+    body { height: auto; overflow: visible; }
+    header, .hint, .pan-hint { display: none; }
+    main { overflow: visible; }
+    #view-map[hidden], #view-time[hidden], #view-detail[hidden], #view-steppe[hidden] { display: block !important; }
+    #view-map { display: block; overflow: visible; }
+    .map-wrap { height: auto; overflow: visible; }
+    .map-wrap svg { min-width: 0; width: 100%; height: auto; }
+    aside { width: auto; border: 0; overflow: visible; }
+    #view-time, #view-detail, .steppe-inner { overflow: visible; padding: 10mm 0; }
+    .card, .rule, .sec, .person { break-inside: avoid; box-shadow: none; }
+    .toolbar, .chip, .tool, .xlink { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition-duration: .01ms !important; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">甘肃 · 两千年</div>
+  <nav role="tablist" aria-label="切换视图">
+    <span class="pill" aria-hidden="true"></span>
+    <button role="tab" id="tab-map" aria-selected="true" aria-controls="view-map">甘肃地图</button>
+    <button role="tab" id="tab-time" aria-selected="false" aria-controls="view-time">历史演进</button>
+    <button role="tab" id="tab-detail" aria-selected="false" aria-controls="view-detail">详考</button>
+  </nav>
+  <a class="nav-home" href="历史总览.html">总览</a> <span class="hint">周秦至元 · 河西 / 陇右 / 陇南甘南 · 全部离线</span>
+</header>
+
+<main>
+  <section id="view-map" role="tabpanel" aria-labelledby="tab-map">
+    <div class="map-wrap">
+      <svg id="map" viewBox="50 60 910 570" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="group" aria-label="甘肃省历史地理示意图">
+        <defs>
+          <linearGradient id="bandHexi" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#e6d3a8" stop-opacity=".55"/>
+            <stop offset="100%" stop-color="#ead9b2" stop-opacity=".18"/>
+          </linearGradient>
+          <linearGradient id="bandLoess" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#cfe0c2" stop-opacity=".5"/>
+            <stop offset="100%" stop-color="#dfe8d2" stop-opacity=".22"/>
+          </linearGradient>
+          <linearGradient id="bandSouth" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#c7dbd0" stop-opacity=".42"/>
+            <stop offset="100%" stop-color="#d6e4dc" stop-opacity=".18"/>
+          </linearGradient>
+          <linearGradient id="riverGrad" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#8fc0d6"/>
+            <stop offset="100%" stop-color="#4f92b0"/>
+          </linearGradient>
+        </defs>
+
+        <g opacity=".45">
+          <rect x="60" y="72" width="890" height="546" fill="none" stroke="#dcccaa" stroke-width=".8" display="none"/>
+        </g>
+
+        <!-- 三大地理带 -->
+        <path d="M104,152 L172,122 L260,108 L360,112 L448,126 L514,182 L514,246 L450,222 L352,212 L252,202 L184,194 L126,202 Z" fill="url(#bandHexi)"/>
+        <path d="M518,184 L560,172 L640,154 L758,146 L855,176 L892,234 L878,300 L900,360 L877,417 L826,468 L818,542 L742,556 L662,537 L562,554 L472,538 L400,500 L384,454 L422,398 L454,362 L498,332 L514,248 Z" fill="url(#bandLoess)"/>
+        <path d="M388,455 L455,394 L532,422 L612,432 L692,450 L772,480 L818,540 L742,556 L662,537 L562,554 L472,538 L400,500 Z" fill="url(#bandSouth)"/>
+
+        <!-- 省界 -->
+        <path d="M100,150 L170,118 L260,104 L360,108 L450,124 L516,180 L560,168 L640,150 L760,142 L858,172 L896,232 L882,300 L904,362 L880,420 L830,470 L822,546 L740,560 L660,540 L560,558 L470,542 L398,502 L380,452 L420,398 L452,362 L500,330 L516,250 L452,224 L352,214 L252,204 L182,196 L122,206 Z"
+          fill="none" stroke="#9a8a6a" stroke-width="2.6" stroke-linejoin="round"/>
+        <path d="M100,150 L170,118 L260,104 L360,108 L450,124 L516,180 L560,168 L640,150 L760,142 L858,172 L896,232 L882,300 L904,362 L880,420 L830,470 L822,546 L740,560 L660,540 L560,558 L470,542 L398,502 L380,452 L420,398 L452,362 L500,330 L516,250 L452,224 L352,214 L252,204 L182,196 L122,206 Z"
+          fill="none" stroke="#fffdf7" stroke-width="1" stroke-dasharray="6 7" opacity=".7"/>
+
+        <!-- 黄河：穿陇中而过 -->
+        <path d="M420,470 Q470,440 505,395 Q540,355 572,330 Q605,305 625,270 Q648,230 652,180 Q655,165 660,152"
+          fill="none" stroke="url(#riverGrad)" stroke-width="3.6" stroke-linecap="round" opacity=".9"/>
+        <text x="462" y="462" class="geo-label" font-size="15">黄　河</text>
+
+        <!-- 内陆河：疏勒河 / 黑河 / 石羊河 -->
+        <path d="M245,212 Q205,196 170,182 Q140,170 112,162" fill="none" stroke="url(#riverGrad)" stroke-width="2.8" stroke-linecap="round" opacity=".85"/>
+        <text x="200" y="192" class="geo-label" font-size="11">疏勒河</text>
+        <path d="M332,242 Q322,205 308,172 Q296,138 284,104" fill="none" stroke="url(#riverGrad)" stroke-width="2.8" stroke-linecap="round" opacity=".85"/>
+        <text x="270" y="158" class="geo-label" font-size="11">黑　河</text>
+        <path d="M452,238 Q448,205 442,175 Q437,148 432,122" fill="none" stroke="url(#riverGrad)" stroke-width="2.8" stroke-linecap="round" opacity=".85"/>
+        <text x="464" y="130" class="geo-label" font-size="11">石羊河</text>
+
+        <!-- 渭河 / 泾河 / 白龙江 -->
+        <path d="M645,398 Q710,418 770,428 Q830,436 872,444" fill="none" stroke="url(#riverGrad)" stroke-width="3" stroke-linecap="round" opacity=".85"/>
+        <text x="740" y="416" class="geo-label" font-size="12">渭河</text>
+        <path d="M828,262 Q852,300 872,338 Q882,342 890,340" fill="none" stroke="url(#riverGrad)" stroke-width="2.8" stroke-linecap="round" opacity=".85"/>
+        <text x="872" y="282" class="geo-label" font-size="11">泾河</text>
+        <path d="M640,505 Q700,522 760,528 Q800,534 820,548" fill="none" stroke="url(#riverGrad)" stroke-width="2.8" stroke-linecap="round" opacity=".85"/>
+        <text x="700" y="543" class="geo-label" font-size="11">白龙江</text>
+
+        <!-- 祁连山 / 北山 / 陇山 / 岷山 -->
+        <path d="M115,224 Q230,236 330,234 Q430,230 505,246" fill="none" stroke="#8a9a72" stroke-width="4" opacity=".65" stroke-linecap="round"/>
+        <path d="M158,124 Q290,106 428,116" fill="none" stroke="#b09c6b" stroke-width="3" opacity=".6" stroke-linecap="round"/>
+        <path d="M872,248 Q884,310 866,392" fill="none" stroke="#8a9a72" stroke-width="3.4" opacity=".6" stroke-linecap="round"/>
+        <path d="M662,528 Q740,548 818,552" fill="none" stroke="#8a9a72" stroke-width="3" opacity=".5" stroke-linecap="round"/>
+
+        <text x="250" y="250" class="geo-label" font-size="15">祁连山</text>
+        <text x="336" y="98" class="geo-label" font-size="13">北　山</text>
+        <text x="836" y="352" class="geo-label" font-size="12">陇山（六盘山）</text>
+        <text x="738" y="568" class="geo-label" font-size="12">岷山 · 秦岭西延</text>
+
+        <!-- 长城（河西汉塞与明边墙） -->
+        <path d="M96,132 Q250,104 424,112 Q492,126 516,178 Q540,232 578,258 Q612,240 640,208" fill="none" stroke="var(--wall)" stroke-width="3" stroke-dasharray="11 6" opacity=".75"/>
+        <text x="150" y="102" class="geo-label" font-size="13">长　城</text>
+
+        <!-- 三带名称 -->
+        <text x="390" y="186" class="band-label">河西走廊</text>
+        <text x="700" y="300" class="band-label">陇右黄土高原</text>
+        <text x="560" y="505" class="band-label" font-size="15">陇南 · 甘南山地</text>
+
+        <!-- 关塞 -->
+        <g class="marker" id="gates"></g>
+        <!-- 城邑 -->
+        <g id="states"></g>
+
+        <!-- 指北针 -->
+        <g transform="translate(928,112)" opacity=".9">
+          <circle cx="0" cy="2" r="26" fill="#fffdf7" opacity=".7" stroke="#dcccaa" stroke-width="1"/>
+          <path d="M0,-24 L6,-8 L-6,-8 Z" fill="#c0392b"/>
+          <line x1="0" y1="22" x2="0" y2="-6" stroke="#8c7d5a" stroke-width="1.8"/>
+          <line x1="-7" y1="22" x2="7" y2="22" stroke="#8c7d5a" stroke-width="1.8"/>
+          <text x="0" y="45" font-size="14" fill="#6d5f43" text-anchor="middle">北</text>
+        </g>
+      </svg>
+
+      <div class="title-block">
+        <h2>甘肃</h2>
+        <p>河西走廊 · 陇右 · 陇南甘南 三大地理带</p>
+        <span class="title-rule"></span>
+      </div>
+    </div>
+
+    <aside aria-live="polite">
+      <div id="panel-default"><p class="default-tip">点击（或 Tab + 回车）地图上的圆点<br>看这座城邑在同时期的角色</p></div>
+      <div id="panel-detail" hidden>
+        <div class="stagger">
+          <h3 id="d-name"></h3>
+          <div class="today" id="d-today"></div>
+          <ul id="d-points"></ul>
+          <div class="fate" id="d-fate"></div>
+        </div>
+        <button class="xlink" id="d-link" hidden></button>
+      </div>
+      <div class="legend" aria-label="图例">
+        <div><i style="background:linear-gradient(90deg,transparent,#d9c79c,transparent);border-radius:2px"></i>河西走廊</div>
+        <div><i style="background:linear-gradient(90deg,transparent,#b9cf9f,transparent);border-radius:2px"></i>陇右黄土高原（陇中·陇东）</div>
+        <div><i style="background:linear-gradient(90deg,transparent,#a9c9b8,transparent);border-radius:2px"></i>陇南 · 甘南山地</div>
+        <div><i style="height:4px;margin-top:3px;background:#4f92b0;border-radius:2px"></i>黄河 · 疏勒河 · 黑河 · 石羊河</div>
+        <div><i style="height:4px;margin-top:3px;background:repeating-linear-gradient(90deg,#8a7a5c 0 7px,transparent 7px 12px)"></i>长城（汉塞 · 明边墙）</div>
+        <div><i style="height:9px;margin-top:1px;background:linear-gradient(135deg,transparent 44%,#a2905f 44% 56%,transparent 56%)"></i>关塞（玉门 · 阳关 · 乌鞘 · 大震）</div>
+      </div>
+      <p class="panel-foot">省界与山川为示意走势，非精确测绘；三带划分按地貌简化。史实以《史记》《汉书》及历代地理志为准，争议处标注「一说」。<br><a href="陕西-历史演进.html" style="color:var(--cinnabar);text-decoration:none;border-bottom:1px dashed rgba(192,57,43,.5)">← 对照《陕西-历史演进》，看河西与关中如何互为表里</a><br><a href="东北-历史演进.html" style="color:var(--cinnabar);text-decoration:none;border-bottom:1px dashed rgba(192,57,43,.5)">← 对照《东北-历史演进》，看辽金清的东北视角</a><br><a href="四川-历史演进.html" style="color:var(--cinnabar);text-decoration:none;border-bottom:1px dashed rgba(192,57,43,.5)">← 对照《四川-历史演进》，看阴平道入蜀与茶马互市</a></p>
+    </aside>
+  </section>
+
+  <section id="view-time" role="tabpanel" aria-labelledby="tab-time" hidden>
+    <div class="time-inner">
+      <h2>甘肃历史演进</h2>
+      <p class="lead">从西周的非子牧马到元代的甘肃行省——与「陕西」一样，「甘肃」这个名字也是在同一时期最后诞生的。点击卡片展开；按时代筛选可看某一阶段。</p>
+      <div class="toolbar" id="toolbar"></div>
+      <ol class="timeline" id="timeline"></ol>
+      <div class="rules" id="rules"></div>
+      <p class="caveat">说明：年代取通行说法。河西是丝路命脉，陇右是农牧攻守的棋眼，陇南甘南则是民族走廊——三片的历史节奏并不一致，时间轴以王朝为纲，细节见各卡片。</p>
+    </div>
+  </section>
+
+  <section id="view-detail" role="tabpanel" aria-labelledby="tab-detail" hidden>
+    <div class="detail-inner">
+      <h2>详考</h2>
+      <p class="lead">年表、人物、地名沿革与关隘古道。年表按时代分组，可作前两页的注脚。</p>
+      <div id="detail-root"></div>
+      <p class="caveat">说明：大事年表取通行说法，部分年代学界有异说；人物生卒与任职年份多据正史本传，个别取约数。地名沿革一栏，「今地」按现行行政区划对应，古今辖境并不等同。</p>
+    </div>
+  </section>
+</main>
+<noscript>本页需要启用 JavaScript 才能显示地图与时间轴。</noscript>
+
+<script>
+const SVGNS = "http://www.w3.org/2000/svg";
+const el = (tag, attrs = {}, text) => {
+  const n = document.createElementNS(SVGNS, tag);
+  for (const k in attrs) n.setAttribute(k, attrs[k]);
+  if (text !== undefined) n.textContent = text;
+  return n;
+};
+const $ = id => document.getElementById(id);
+const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* ---------------- 地图数据 ---------------- */
+const GATES = [
+  { x: 92, y: 148, label: "玉门关", dy: -22 },
+  { x: 98, y: 198, label: "阳关", dy: 26 },
+  { x: 518, y: 214, label: "乌鞘岭", dy: -22 },
+  { x: 864, y: 404, label: "大震关", dy: 26 }
+];
+
+const CITIES = [
+  { id: "dunHuang", x: 135, y: 172, ly: 30, short: "敦煌", r: 12, band: "河西",
+    name: "敦煌 / 沙州", today: "今 · 敦煌市",
+    points: [
+      "「敦，大也；煌，盛也。」河西走廊最西端，丝路入西域前最后的绿洲大站",
+      "366年乐僔于鸣沙山开凿莫高窟第一窟，历代营建千年不绝，现存洞窟735个、壁画4.5万平方米",
+      "玉门关、阳关在其境，「列四郡、据两关」的西端锁钥",
+      "《汉书》称敦煌「华戎所交，一都会也」；归义军藏经洞文献更成敦煌学之源"
+    ],
+    fate: "元代敦煌仍是驿路重镇，明初闭嘉峪关后渐成塞外废垒；今莫高窟为世界文化遗产。" },
+  { id: "jiaYuGuan", x: 172, y: 148, ly: -26, short: "嘉峪关", r: 9, band: "河西", tag: "长城",
+    name: "嘉峪关", today: "今 · 嘉峪关市",
+    points: [
+      "明洪武五年（1372）冯胜筑关，为明长城最西端，「天下第一雄关」",
+      "汉唐时此处已是酒泉以西的塞防孔道，汉塞烽燧沿讨赖河一线分布",
+      "关城、悬壁长城与长城第一墩构成完整防御体系",
+      "魏晋墓砖壁画墓群在关东北，被称为「地下画廊」"
+    ],
+    fate: "清代仍为进出新疆的税卡驿道；今为因酒钢而兴的工业城市，关城为世界遗产点。" },
+  { id: "jiuQuan", x: 215, y: 172, ly: -30, short: "酒泉", r: 9, band: "河西", tag: "四郡",
+    name: "酒泉 / 肃州", today: "今 · 酒泉市",
+    points: [
+      "汉元狩二年（前121）置郡，河西四郡之一；相传霍去病倾御酒入泉与将士共饮，酒泉由此得名",
+      "「甘肃」之「肃」即取自肃州",
+      "西凉李暠一度迁都酒泉，营建宫室、兴办学校",
+      "扼走廊西段咽喉，北通居延，西出玉门"
+    ],
+    fate: "明代为肃州卫，属关内第一重镇；今为酒泉市，邻近酒泉卫星发射中心。" },
+  { id: "zhangYe", x: 302, y: 172, ly: -30, short: "张掖", r: 10, band: "河西", tag: "四郡",
+    name: "张掖 / 甘州", today: "今 · 张掖市",
+    points: [
+      "汉置张掖郡，取「张国臂掖，以通西域」之意；「甘肃」之「甘」即取自甘州",
+      "黑河（弱水）贯穿全境，绿洲丰饶，谚称「金张掖」",
+      "609年隋炀帝西巡，焉支山下二十七国使者相会——中国最早的「万国博览会」",
+      "西夏崇宗永安元年（1098）建大佛寺，卧佛长34.5米，为现存最大室内泥塑卧佛；元代甘肃行省即治甘州路"
+    ],
+    fate: "元为甘肃行省省会，明清改甘州府；今为张掖市，丹霞与湿地并举。" },
+  { id: "shanDan", x: 352, y: 158, ly: -26, short: "山丹", r: 8, band: "河西", tag: "焉支山",
+    name: "山丹 / 删丹", today: "今 · 张掖市山丹县",
+    points: [
+      "焉支山在其境，霍去病破匈奴后，留下「失我焉支山，令我妇女无颜色」的悲歌",
+      "汉代起即为皇家马场，山丹军马场沿用两千余年",
+      "汉塞与明边墙在此并行绵延，被称「露天长城博物馆」",
+      "隋炀帝西巡登焉支山张设帷帐，宴二十七国使者即在此地"
+    ],
+    fate: "今为山丹县，长城遗址与军马场为主要文化地标。" },
+  { id: "wuWei", x: 438, y: 182, ly: -30, short: "武威", r: 11, band: "河西", tag: "五凉古都",
+    name: "武威 / 凉州", today: "今 · 武威市",
+    points: [
+      "汉置武威郡，以纪「武功军威」；姑臧城为河西第一大都会",
+      "前凉、后凉、南凉、北凉相继建都，号「五凉古都」，中原士人避乱于此，文脉不坠",
+      "1969年雷台汉墓出土铜奔马（马踏飞燕），为中国旅游标志",
+      "1247年萨班与阔端在凉州会盟，武威白塔寺为会盟故地"
+    ],
+    fate: "明代为凉州卫，清代凉州府；今为武威市，文庙与白塔寺并峙。" },
+  { id: "lanZhou", x: 584, y: 310, ly: 36, short: "兰州", r: 12, band: "陇中",
+    name: "兰州 / 金城", today: "今 · 兰州市",
+    points: [
+      "汉昭帝始元六年（前81）置金城郡，取「金城汤池」之意，控黄河渡口",
+      "黄河穿城而过，金城渡是丝路南北两道与唐蕃古道的交汇点",
+      "隋开皇元年（581）置兰州总管府，「兰州」之名始于此",
+      "北宋元丰四年（1081）李宪自吐蕃手中夺回兰州，筑城置帅府防西夏"
+    ],
+    fate: "明设兰州卫、肃王府驻此；清康熙五年（1666）陕甘分治，兰州成为甘肃省会至今。" },
+  { id: "bingLingSi", x: 528, y: 370, ly: -28, short: "炳灵寺", r: 8, band: "陇中", tag: "石窟",
+    name: "炳灵寺石窟", today: "今 · 临夏州永靖县",
+    points: [
+      "西秦建弘元年（420）造像题记，是中国石窟现存最早的纪年题记",
+      "丝绸之路与唐蕃古道在此交汇渡黄河（凤林渡），石窟兼有两种文化的影响",
+      "169窟「凉州模式」造像与后秦、西秦题记为十六国佛教史关键实证",
+      "「炳灵」为藏语「十万佛」之意，唐代称灵岩寺"
+    ],
+    fate: "刘家峡水库建成后依崖临水；2014年作为丝路廊道遗产点列入世界遗产。" },
+  { id: "linXia", x: 522, y: 415, ly: 34, short: "临夏", r: 9, band: "陇中", tag: "河州",
+    name: "临夏 / 河州", today: "今 · 临夏回族自治州",
+    points: [
+      "汉置枹罕县，唐置河州，为陇右西南重镇、入河湟的门户",
+      "齐家文化命名地广河齐家坪、马家窑类型彩陶皆在这一带——「彩陶之乡」",
+      "唐蕃古道出兰州经河州入青海，文成公主入藏走此一线",
+      "宋明在河州设茶马司，茶马互市延续数百年"
+    ],
+    fate: "元设河州路，明置河州卫；今为临夏回族自治州首府，以砖雕、彩陶与民族风情著称。" },
+  { id: "longXi", x: 700, y: 398, ly: -30, short: "陇西", r: 9, band: "陇中", tag: "李氏",
+    name: "陇西 / 巩昌", today: "今 · 定西市陇西县",
+    points: [
+      "秦置陇西郡（治狄道，今临洮），为中原王朝在甘肃设郡之始，「陇右」由此得名",
+      "汉陇西郡辖今天水、定西一带，李广、姜维皆出其境",
+      "「天下李氏出陇西」——李唐以陇西为郡望，陇西李氏遂为天下著姓之首",
+      "元设巩昌都总帅府，明清为巩昌府，渭水上游的政治中心"
+    ],
+    fate: "民国废府，巩昌故地分属定西、天水；今陇西县存威远楼与李氏祠堂。",
+    link: { text: "看秦人自陇右东进 →", target: "tianShui" } },
+  { id: "tianShui", x: 790, y: 432, ly: -30, short: "天水", r: 11, band: "陇中", tag: "秦源",
+    name: "天水 / 秦州", today: "今 · 天水市",
+    points: [
+      "秦人发祥地：非子为周孝王牧马于汧渭之间受封「秦」邑，礼县大堡子山为秦公陵园（西犬丘）",
+      "麦积山石窟始建于十六国后秦，被誉为「东方雕塑陈列馆」，与敦煌、龙门、云冈并称",
+      "李广、赵充国皆陇西成纪人；李白亦自称陇西成纪人",
+      "759年杜甫流寓秦州、同谷，作《秦州杂诗》二十首"
+    ],
+    fate: "明清为秦州；今天水市为陇东南中心城市，伏羲庙祭祀绵延不绝。" },
+  { id: "pingLiang", x: 838, y: 292, ly: -28, short: "平凉", r: 10, band: "陇东", tag: "关塞",
+    name: "平凉 / 渭州", today: "今 · 平凉市",
+    points: [
+      "《庄子》载黄帝问道广成子于崆峒山，崆峒即在此地，「道源圣地」",
+      "前秦、北朝时为陇山东麓重镇，萧关道之后勤基地",
+      "787年唐蕃「平凉劫盟」：会盟坛上吐蕃伏兵劫持唐使，陇右局势为之再变",
+      "泾川回山王母宫为西王母信仰祖庙之一"
+    ],
+    fate: "明为平凉府、韩王封地；清左宗棠西征大营驻平凉，经略西北由此起步。" },
+  { id: "qingYang", x: 858, y: 212, ly: -26, short: "庆阳", r: 10, band: "陇东", tag: "周祖",
+    name: "庆阳 / 庆州", today: "今 · 庆阳市",
+    points: [
+      "周先祖不窋失官后「奔戎狄之间」，在庆城一带教民稼穑，周人农业由此发端",
+      "义渠戎建国于此，前272年秦宣太后灭义渠置北地郡",
+      "陇东黄土塬区为「陇东粮仓」，窑居文化绵延至今",
+      "北宋范仲淹知庆州筑大顺城御西夏，「军中有一范，西贼闻之惊破胆」"
+    ],
+    fate: "明清为庆阳府；今为庆阳市，长庆油田总部曾设于此。" },
+  { id: "chengXian", x: 798, y: 490, ly: 26, short: "成县", r: 8, band: "陇南", tag: "汉隶",
+    name: "成县 / 同谷", today: "今 · 陇南市成县",
+    points: [
+      "东汉建宁四年（171）《西狭颂》摩崖刻于鱼窍峡，为「汉三颂」中保存最完好者",
+      "汉置下辨道，为入蜀故道上的要县",
+      "759年杜甫流寓同谷，作《同谷七歌》，穷愁至极而诗艺益工",
+      "青泥岭栈道在其东南，李白《蜀道难》所咏即这一带险途"
+    ],
+    fate: "明清为成县；今属陇南市，西狭颂景区为国家级文保单位。" },
+  { id: "wenXian", x: 775, y: 522, ly: 26, short: "文县", r: 9, band: "陇南", tag: "阴平",
+    name: "文县 / 阴平", today: "今 · 陇南市文县",
+    points: [
+      "古阴平道所在：263年魏将邓艾自阴平「行无人之地七百余里」，偷渡摩天岭灭蜀汉",
+      "阴平桥头为陇入蜀的咽喉，姜维与魏军在此反复争夺",
+      "白水江流域今为大熊猫保护区，陇南因此有「陇上江南」之称",
+      "氐人杨氏曾建仇池国于附近山中，绵延三百年"
+    ],
+    fate: "明清为文县；今属陇南市，为甘肃入川门户与生态屏障。" },
+];
+
+/* ---------------- 时间轴数据 ---------------- */
+const ERAS = ["全部", "周秦", "汉魏", "隋唐", "宋元"];
+const POLITIES = [
+  { id: "xizhou", name: "西周", years: "前11世纪—前771", era: "周秦", tag: "牧马西陲",
+    points: [
+      "甘肃东部为西戎诸部之地，义渠、犬戎等与周时战时和",
+      "周先祖不窋失官，「自窜于戎狄之间」（今庆阳），教民稼穑",
+      "非子为周孝王牧马于汧渭之间，受封秦邑（今天水清水一带）——「秦」由此得名"
+    ],
+    out: "前771年犬戎（活跃于陇山东西）攻破镐京，西周亡；秦襄公勤王受封诸侯，甘肃开始进入中原史册。" },
+  { id: "qin", name: "秦", years: "前770—前206", era: "周秦", tag: "秦人发祥",
+    points: [
+      "秦人以陇右为根据地东进关中：西犬丘（礼县）、秦亭、雍、咸阳一线迁都",
+      "礼县大堡子山秦公陵园，为秦早期都邑「西垂」的核心实证",
+      "前272年灭义渠置北地郡，连同陇西郡，甘肃东部首次纳入郡县制"
+    ],
+    out: "前221年秦统一，甘肃东部属陇西、北地二郡；河西走廊此时尚在匈奴浑邪王、休屠王手中。" },
+  { id: "xihan", name: "西汉", years: "前202—8", era: "汉魏", tag: "河西四郡",
+    points: [
+      "前121年霍去病两次河西之战，浑邪王杀休屠王降汉，河西走廊纳入版图",
+      "「列四郡、据两关」：武威、酒泉、张掖、敦煌，阳关、玉门关",
+      "移民实边、屯田修塞，汉长城烽燧沿疏勒河直抵盐泽",
+      "张骞凿空之后，使者商队「相望于道」，河西成为丝路主道"
+    ],
+    out: "王莽之后中原动荡，窦融保据河西五郡，「晏然富殖」；东汉设凉州刺史部。" },
+  { id: "donghan", name: "东汉 · 三国", years: "25—265", era: "汉魏", tag: "凉州羌乱",
+    points: [
+      "羌乱绵延百年，朝廷几度议弃凉州——「凉州既弃，三辅为塞」",
+      "董卓、韩遂、马腾皆出凉州军阀，汉末乱局由此放大",
+      "武威雷台汉墓出土铜奔马（马踏飞燕），成为后世中国旅游标志",
+      "曹魏复置凉州，徐邈治凉，政绩称最；蜀汉姜维屡出陇右，天水成魏蜀拉锯前线"
+    ],
+    out: "265年司马炎代魏；凉州入西晋版图，陇右经数十年战乱方得喘息。" },
+  { id: "shiliuguo", name: "两晋 · 十六国", years: "301—439", era: "汉魏", tag: "五凉更替",
+    points: [
+      "301年张轨出牧凉州建前凉，都姑臧；中原板荡而河西独安，民谣「秦中川，血没腕，惟有凉州倚柱观」",
+      "后凉吕光、南凉秃发、西凉李暠、北凉沮渠相继，史称「五凉」",
+      "佛教大盛：鸠摩罗什滞留凉州十七年，北凉沮渠蒙逊开凿天梯山石窟",
+      "「凉州模式」石窟艺术自河西向东传播，敦煌在此前后同步营建"
+    ],
+    out: "439年北魏灭北凉统一北方；凉州僧匠东迁平城，云冈石窟由此发端。" },
+  { id: "beichao", name: "北朝", years: "386—581", era: "汉魏", tag: "商路复通",
+    points: [
+      "北魏置河西诸镇，丝路复通，粟特商队往来于姑臧、敦煌之间",
+      "敦煌北朝窟续凿，河西佛教艺术经平城影响云冈、龙门",
+      "西魏、北周经营陇右，为隋唐大一统预铺河西与河湟"
+    ],
+    out: "581年杨坚建隋，河西与陇右重归一统政区。" },
+  { id: "sui", name: "隋", years: "581—618", era: "隋唐", tag: "万国博览会",
+    points: [
+      "隋文帝置兰州总管府，「兰州」之名始于此",
+      "609年隋炀帝西巡河右，登焉支山会见高昌、伊吾及二十七国使者，史家称最早的「万国博览会」",
+      "裴矩据商胡口述撰《西域图记》，记三道赴西域「总凑敦煌，是其咽喉之地」"
+    ],
+    out: "隋末李轨据凉州自立，619年归唐；河西转入唐版图。" },
+  { id: "tang", name: "唐", years: "618—907", era: "隋唐", tag: "丝路盛世",
+    points: [
+      "河西节度使驻凉州、陇右节度使驻鄯州，「天下称富庶者无如陇右」",
+      "莫高窟营造进入鼎盛，现存唐窟占比最高；玄奘629年出凉州、偷渡瓜州玉门关西行",
+      "755年安史之乱后吐蕃趁虚东进：763年陇右陷，河西诸州次第沦陷——「平时安西万里疆，今日边防在凤翔」",
+      "848年沙州人张议潮起义逐吐蕃，奉河西十一州图籍归唐，置归义军"
+    ],
+    out: "唐亡后归义军衰微，甘州回鹘继起；河西自此脱离中原政权数百年。" },
+  { id: "wudai", name: "五代 · 北宋", years: "907—1127", era: "宋元", tag: "熙河开边",
+    points: [
+      "河西为甘州回鹘、瓜沙归义军分据，中原与西域的使旅商队仍以「进奉」之名往来",
+      "陇右东部：吐蕃唃厮啰据湟水，宋夏在陇山两侧反复争夺",
+      "1072年王韶「熙河开边」，收复熙州（今临洮）拓地二千里，为北宋经营陇右最远一次"
+    ],
+    out: "1127年靖康之变，金人西进；1131年陇右诸州尽降金。" },
+  { id: "xixia", name: "西夏 · 金", years: "1038—1227", era: "宋元", tag: "西夏右臂",
+    points: [
+      "1036年西夏连取甘、肃、瓜、沙，河西为其「右臂」近两百年，敦煌续有西夏窟与西夏文文献",
+      "西夏升凉州为西凉府、甘州为镇夷郡，河西绿洲农业得以维持",
+      "金据陇右与南宋以秦岭一线为界，陇右成为金夏、金宋交争之地"
+    ],
+    out: "1226—1227年成吉思汗亲征灭西夏，甘、肃二州陷落，河西入蒙古。" },
+  { id: "yuan", name: "元", years: "1271—1368", era: "宋元", tag: "甘肃行省",
+    points: [
+      "1247年萨班与阔端凉州会盟，西藏地方自此纳入中央政权治理，白塔寺为会盟故地",
+      "至元十八年（1281）设甘肃等处行中书省，治甘州——「甘肃」首为省名，取甘州、肃州首字",
+      "马可·波罗经行甘州、肃州、敦煌，盛称甘州城市之盛",
+      "站赤（驿站）贯通全境，河西绿洲农业与商路同步复苏"
+    ],
+    out: "明初弃河西、闭嘉峪关，甘肃一度并入陕西；清康熙五年（1666）陕甘分治，甘肃省恢复——今日甘肃版图在元代首先成形。" }
+];
+
+const RULES = [
+  { title: "为什么是河西走廊",
+    items: [
+      "祁连雪水滋养绿洲链，武威、张掖、酒泉、敦煌一线串珠",
+      "北有北山与大漠，南有祁连与青藏——中原通西域唯一的连续天然通道",
+      "汉唐经营西域以河西为命脉：「欲通西域，先固河西」",
+      "中原一乱，河西往往割据自立（五凉），却因远离战火而保存汉文化"
+    ] },
+  { title: "陇山两侧：农牧攻守",
+    items: [
+      "陇山（六盘山）以东是关中，以西即「陇右」——甘肃与陕西互为表里",
+      "秦人自陇右牧马起家，终并六国；汉唐以陇右控驭西域与河湟",
+      "吐蕃一旦得陇右，关中便无宁日；宋夏金在此反复拉锯三百年",
+      "「得陇望蜀」典出光武帝，而甘肃在战略上望的，常常是关中"
+    ] },
+  { title: "陇南甘南：民族的十字路口",
+    items: [
+      "白龙江、嘉陵江上游，阴平道直入蜀地——「陇上江南」实为入蜀捷径",
+      "唐蕃古道、茶马古道穿行河州、洮州，以茶易马延续数百年",
+      "吐蕃占据陇右河西三百余年，甘南至今属安多藏区",
+      "陇南则近巴蜀风物，秦陇与巴蜀在此换装"
+    ] }
+];
+
+/* ---------------- 渲染地图 ---------------- */
+const gatesG = $("gates");
+GATES.forEach(g => {
+  gatesG.appendChild(el("rect", { x: g.x - 6.5, y: g.y - 6.5, width: 13, height: 13, fill: "#8a6f45", transform: `rotate(45 ${g.x} ${g.y})` }));
+  gatesG.appendChild(el("text", { x: g.x, y: g.y + g.dy }, g.label));
+});
+
+const statesG = $("states");
+const stateNodes = {};
+CITIES.forEach(s => {
+  const g = el("g", { class: "state", tabindex: 0, role: "button", "aria-label": `${s.name}，${s.today}，${s.band}`, "aria-pressed": "false", "data-id": s.id });
+  g.appendChild(el("title", {}, `${s.name}（${s.today}）`));
+  g.appendChild(el("circle", { class: "hit", cx: s.x, cy: s.y, r: 30 }));
+  g.appendChild(el("circle", { class: "halo", cx: s.x, cy: s.y, r: s.r + 7 }));
+  g.appendChild(el("circle", { class: "ring", cx: s.x, cy: s.y, r: s.r + 7 }));
+  g.appendChild(el("circle", { class: "dot", cx: s.x, cy: s.y, r: s.r }));
+  g.appendChild(el("text", { x: s.x, y: s.y + s.ly }, s.short));
+  g.addEventListener("click", () => selectCity(s.id));
+  g.addEventListener("keydown", e => {
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); selectCity(s.id); }
+  });
+  statesG.appendChild(g);
+  stateNodes[s.id] = g;
+});
+/* 移动端横滑提示 */
+const mwHint = document.createElement("div");
+mwHint.className = "pan-hint";
+mwHint.textContent = "\u25c2 \u53ef\u5de6\u53f3\u6ed1\u52a8\u67e5\u770b\u5168\u56fe \u25b8";
+document.querySelector(".map-wrap").appendChild(mwHint);
+document.querySelector(".map-wrap").addEventListener("scroll", () => { mwHint.style.opacity = "0"; }, { once: true });
+
+
+const panelDefault = $("panel-default"), panelDetail = $("panel-detail");
+
+function selectCity(id) {
+  const s = CITIES.find(x => x.id === id);
+  if (!s) return;
+  Object.values(stateNodes).forEach(n => { n.classList.remove("selected"); n.setAttribute("aria-pressed", "false"); });
+  stateNodes[id].classList.add("selected");
+  stateNodes[id].setAttribute("aria-pressed", "true");
+  $("d-name").textContent = s.name;
+  $("d-today").textContent = s.today;
+  const ul = $("d-points");
+  ul.replaceChildren(...s.points.map(p => { const li = document.createElement("li"); li.textContent = p; return li; }));
+  const fate = $("d-fate");
+  const b = document.createElement("b");
+  b.textContent = "结局：";
+  fate.replaceChildren(b, document.createTextNode(s.fate));
+  const xl = $("d-link");
+  if (s.link) { xl.textContent = s.link.text + " →"; xl.hidden = false; xl.onclick = () => selectCity(s.link.target); }
+  else { xl.hidden = true; xl.onclick = null; }
+  panelDefault.hidden = true;
+  panelDetail.hidden = false;
+  const st = panelDetail.querySelector(".stagger");
+  st.classList.remove("stagger");
+  void st.offsetHeight;
+  st.classList.add("stagger");
+  document.querySelector("aside").scrollTop = 0;
+  history.replaceState(null, "", "#map:" + id);
+  stateNodes[id].scrollIntoView({ block: "nearest", inline: "nearest", behavior: REDUCED ? "auto" : "smooth" });
+}
+
+/* ---------------- 渲染时间轴 ---------------- */
+const timeline = $("timeline");
+const cards = {};
+POLITIES.forEach((p, i) => {
+  const li = document.createElement("li");
+  li.className = "card";
+  li.dataset.id = p.id;
+  li.style.setProperty("--i", i);
+  const det = document.createElement("details");
+  const sum = document.createElement("summary");
+  const name = document.createElement("span"); name.className = "name"; name.textContent = p.name;
+  const yrs = document.createElement("span"); yrs.className = "years"; yrs.textContent = p.years;
+  const tag = document.createElement("span"); tag.className = "lang"; tag.textContent = p.tag;
+  sum.append(name, yrs, tag);
+  const body = document.createElement("div"); body.className = "body";
+  const ul = document.createElement("ul");
+  p.points.forEach(t => { const x = document.createElement("li"); x.textContent = t; ul.appendChild(x); });
+  const out = document.createElement("div"); out.className = "out";
+  const ob = document.createElement("b"); ob.textContent = "此后：";
+  out.append(ob, document.createTextNode(p.out));
+  body.append(ul, out);
+  det.append(sum, body);
+  li.appendChild(det);
+  sum.addEventListener("click", () => {
+    if (!det.open) history.replaceState(null, "", "#time:" + p.id);
+  });
+  timeline.appendChild(li);
+  cards[p.id] = { li, det };
+});
+
+const toolbar = $("toolbar");
+toolbar.appendChild(Object.assign(document.createElement("span"), { textContent: "按时代筛选：" }));
+const chips = ERAS.map(e => {
+  const b = document.createElement("button");
+  b.className = "chip"; b.textContent = e;
+  b.setAttribute("aria-pressed", e === "全部" ? "true" : "false");
+  b.addEventListener("click", () => applyFilter(e));
+  toolbar.appendChild(b);
+  return b;
+});
+const toggleAll = document.createElement("button");
+toggleAll.className = "tool"; toggleAll.textContent = "全部展开";
+let allOpen = false;
+toggleAll.addEventListener("click", () => {
+  allOpen = !allOpen;
+  Object.values(cards).forEach(c => { c.det.open = allOpen; });
+  toggleAll.textContent = allOpen ? "全部收起" : "全部展开";
+});
+toolbar.appendChild(toggleAll);
+
+function applyFilter(e) {
+  chips.forEach(c => c.setAttribute("aria-pressed", String(c.textContent === e)));
+  POLITIES.forEach(p => cards[p.id].li.classList.toggle("dim", e !== "全部" && p.era !== e));
+}
+
+const rulesEl = $("rules");
+RULES.forEach((r, i) => {
+  const box = document.createElement("div");
+  box.className = "rule";
+  box.style.setProperty("--i", i);
+  const h = document.createElement("h3"); h.textContent = r.title;
+  const ul = document.createElement("ul");
+  r.items.forEach(t => { const li = document.createElement("li"); li.textContent = t; ul.appendChild(li); });
+  box.append(h, ul);
+  rulesEl.appendChild(box);
+});
+
+/* ---------------- 详考数据 + 渲染 ---------------- */
+const CHRONO = [
+  ["前11世纪", "不窋奔戎狄之间（今庆阳），周人先祖居陇东教民稼穑"],
+  ["约前890", "非子为周孝王牧马，受封秦邑——「秦」始有其名"],
+  ["前771", "犬戎破镐京，秦襄公始为诸侯，秦人居西犬丘（今礼县）"],
+  ["前272", "秦灭义渠置北地郡；连同陇西郡，甘肃东部首次纳入郡县制"],
+  ["前121", "霍去病两征河西，浑邪王降，河西走廊入汉"],
+  ["前111", "置张掖、敦煌二郡，河西四郡与阳关、玉门关成型"],
+  ["366", "乐僔于鸣沙山开凿莫高窟第一窟"],
+  ["301", "张轨出牧凉州建前凉，五凉更替自此始"],
+  ["386", "吕光据姑臧建后凉；鸠摩罗什滞留凉州"],
+  ["412", "北凉沮渠蒙逊迁都姑臧，天梯山石窟开凿"],
+  ["420", "炳灵寺169窟建弘元年题记——现存最早石窟纪年"],
+  ["439", "北魏灭北凉统一北方，凉州工匠东开云冈"],
+  ["609", "隋炀帝西巡，焉支山下会二十七国使者"],
+  ["629", "玄奘西行，出凉州、偷渡瓜州玉门关"],
+  ["763", "吐蕃大举入陇右，此后河西诸州次第陷蕃"],
+  ["848", "张议潮沙州起义，归义军收复河西"],
+  ["1036", "西夏取河西，敦煌入夏，河西为西夏「右臂」"],
+  ["1072", "王韶熙河开边，宋复熙州（今临洮）"],
+  ["1131", "金尽取陇右诸州"],
+  ["1227", "蒙古灭西夏，取甘州、肃州"],
+  ["1247", "凉州会盟：萨班与阔端定西藏归附之约"],
+  ["1281", "元设甘肃行中书省，治甘州——「甘肃」首为省名"]
+].map(([y, t]) => ({ y, t }));
+const PEOPLE = [
+  ["非子", "约前9世纪—前858", "为周孝王牧马于汧渭之间，受封秦邑（今天水清水一带），「秦」由此得名。"],
+  ["霍去病", "前140—前117", "两征河西，破浑邪、休屠二部，奠定河西四郡；焉支山下留下匈奴悲歌。"],
+  ["李广", "?—前119", "陇西成纪（今天水秦安）人，飞将军，久戍陇右，与河西防务渊源极深。"],
+  ["索靖", "239—303", "敦煌人，西晋书法家，「敦煌五龙」之一，章草《出师颂》传为其墨迹。"],
+  ["皇甫谧", "215—282", "安定朝那（今灵台）人，著《针灸甲乙经》，针灸学之祖。"],
+  ["张轨", "255—314", "安定乌氏（今平凉一带）人，出牧凉州建前凉，中原板荡而河西独安。"],
+  ["鸠摩罗什", "344—413", "西域高僧，滞留凉州十七年后入长安译经，武威鸠摩罗什寺为其遗迹。"],
+  ["沮渠蒙逊", "368—433", "北凉王，开凿天梯山石窟，创「凉州模式」，中国石窟营造之源。"],
+  ["李暠", "351—417", "陇西成纪人，建西凉，都敦煌、迁酒泉；唐皇室尊为其先祖。"],
+  ["姜维", "202—264", "天水冀县人，本魏将，归蜀汉后继诸葛亮北伐，「胆如斗大」。"],
+  ["玄奘", "602—664", "629年西行，出凉州、偷渡瓜州玉门关，河西是其九死一生第一程。"],
+  ["张议潮", "799—872", "沙州敦煌人，848年率众逐吐蕃，奉河西十一州图籍归唐。"],
+  ["王韶", "1030—1081", "北宋名将，熙河开边收复熙州（今临洮），北宋经营陇右最远一次。"],
+  ["萨班·贡噶坚赞", "1182—1251", "萨迦派四祖，1247年与阔端凉州会盟，西藏归附之约由此而定。"],
+  ["李白", "701—762", "自称陇西成纪人；「陇西李氏」郡望使甘肃成为唐人最重的祖地之一。"],
+  ["杜甫", "712—770", "759年流寓秦州、同谷，作《秦州杂诗》与《同谷七歌》。"]
+];
+const PLACES = [
+  ["兰州", "金城郡 / 金城县 / 兰州", "汉唐黄河渡口，清为甘肃省会。"],
+  ["天水", "秦亭 / 成纪 / 上邽 / 秦州", "秦人发祥地，麦积山所在。"],
+  ["武威", "姑臧 / 凉州 / 西凉府", "五凉古都，铜奔马出土地。"],
+  ["张掖", "张掖郡 / 甘州 / 甘州路", "元代甘肃行省治所。"],
+  ["酒泉", "酒泉郡 / 肃州", "「甘肃」之「肃」源出此。"],
+  ["敦煌", "敦煌郡 / 沙州", "莫高窟与玉门、阳关所在。"],
+  ["嘉峪关", "酒泉西境 / 嘉峪关", "明长城西端起点。"],
+  ["平凉", "乌氏 / 渭州 / 平凉府", "崆峒山、平凉劫盟之地。"],
+  ["庆阳", "郁郅 / 庆州 / 安化", "周祖不窋故地，义渠旧壤。"],
+  ["临夏", "枹罕 / 河州", "唐蕃古道与茶马互市重镇。"],
+  ["陇西", "襄武 / 巩昌", "「陇西」郡名与李氏郡望系于此。"],
+  ["文县", "阴平 / 文州", "邓艾偷渡阴平灭蜀之路。"],
+  ["成县", "下辨 / 同谷", "《西狭颂》摩崖所在。"],
+  ["山丹", "删丹 / 山丹卫", "焉支山与汉明长城并行之地。"]
+];
+const ROUTES = [
+  ["陇关道（大震关）", "越陇山入陇右，长安至凉州正道，使团商旅皆经此。"],
+  ["乌鞘岭", "陇中入河西之锁钥，汉唐戍卒西出第一岭。"],
+  ["阴平道", "文县入蜀捷径，263年邓艾偷渡灭蜀汉。"],
+  ["唐蕃古道", "长安—兰州—河州—逻些，文成公主入藏之路。"],
+  ["青海道（吐谷浑道）", "经湟水谷地绕行青海的丝路支线，河西不通时商旅走此。"],
+  ["茶马互市道", "宋明以茶易马，河州、洮州为互市中心。"]
+];
+
+const detailRoot = $("detail-root");
+(function renderDetail() {
+  const wrap = detailRoot;
+  const sec = (h, sub, inner) => {
+    const s = document.createElement("section");
+    s.className = "sec";
+    const h3 = document.createElement("h3");
+    h3.textContent = h;
+    if (sub) h3.appendChild(Object.assign(document.createElement("span"), { textContent: sub }));
+    s.appendChild(h3);
+    const box = document.createElement("div");
+    box.innerHTML = inner;
+    s.appendChild(box);
+    wrap.appendChild(s);
+  };
+  sec("大事年表", "从牧马西陲到甘肃行省 · 选择性列举大事",
+    '<ul class="chrono">' + CHRONO.map(c => `<li><span class="y">${c.y}</span><span>${c.t}</span></li>`).join("") + "</ul>");
+  sec("人物志", "与甘肃有关的人物 · 简考",
+    '<div class="people">' + PEOPLE.map(p => `<div class="person"><b>${p[0]}</b><span class="d">${p[1]}</span><p>${p[2]}</p></div>`).join("") + "</div>");
+  sec("地名沿革", "古今对照",
+    '<div class="two-col"><table class="plain"><thead><tr><th>今地</th><th>古名</th><th>说明</th></tr></thead><tbody>'
+    + PLACES.map(p => `<tr><td>${p[0]}</td><td>${p[1]}</td><td>${p[2]}</td></tr>`).join("") + "</tbody></table></div>");
+  sec("关隘与古道", "走廊咽喉 · 入蜀与通藏之路",
+    '<div class="two-col"><table class="plain"><thead><tr><th>古道 / 关隘</th><th>走向及故事</th></tr></thead><tbody>'
+    + ROUTES.map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join("") + "</tbody></table></div>");
+})();
+
+/* ---------------- 视图切换 ---------------- */
+function openCard(id) {
+  const c = cards[id];
+  if (!c) return;
+  c.det.open = true;
+  history.replaceState(null, "", "#time:" + id);
+  c.li.scrollIntoView({ behavior: REDUCED ? "auto" : "smooth", block: "center" });
+  c.det.querySelector("summary").focus({ preventScroll: true });
+}
+
+const tabs = { map: $("tab-map"), time: $("tab-time"), detail: $("tab-detail") };
+const views = { map: $("view-map"), time: $("view-time"), detail: $("view-detail") };
+const pill = document.querySelector("nav .pill");
+
+function movePill() {
+  const active = Object.values(tabs).find(t => t.getAttribute("aria-selected") === "true");
+  if (!active || !pill) return;
+  pill.style.width = active.offsetWidth + "px";
+  pill.style.transform = `translateX(${active.offsetLeft}px)`;
+}
+function showView(name) {
+  Object.keys(tabs).forEach(k => {
+    const on = k === name;
+    tabs[k].setAttribute("aria-selected", String(on));
+    tabs[k].tabIndex = on ? 0 : -1;
+    views[k].hidden = !on;
+    views[k].style.animation = "none";
+    void views[k].offsetHeight;
+    views[k].style.animation = "";
+  });
+  movePill();
+  history.replaceState(null, "", "#" + name);
+}
+const tabKeys = Object.keys(tabs);
+tabKeys.forEach(k => tabs[k].addEventListener("click", () => showView(k)));
+addEventListener("keydown", e => {
+  const i = tabKeys.findIndex(k => tabs[k] === document.activeElement);
+  if (i < 0) return;
+  const j = e.key === "ArrowRight" ? i + 1 : e.key === "ArrowLeft" ? i - 1
+    : e.key === "Home" ? 0 : e.key === "End" ? tabKeys.length - 1 : -1;
+  if (j < 0) return;
+  e.preventDefault();
+  const k = tabKeys[(j + tabKeys.length) % tabKeys.length];
+  tabs[k].focus();
+  showView(k);
+});
+addEventListener("resize", movePill);
+addEventListener("load", movePill);
+addEventListener("beforeprint", () => Object.values(cards).forEach(c => { c.det.open = true; }));
+function initFromHash() {
+  const [v, id] = location.hash.slice(1).split(":");
+  showView(["time", "detail"].includes(v) ? v : "map");
+  if (id) {
+    if (v === "map") selectCity(id);
+    else if (v === "time") openCard(id);
+  }
+}
+initFromHash();
+addEventListener("hashchange", initFromHash);
+requestAnimationFrame(movePill);
+</script>
+</body>
+</html>

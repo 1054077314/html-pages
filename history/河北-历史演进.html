@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="河北 · 燕赵的两千年 — 互动历史演进图鉴：方位地图、朝代年表、大事详考（离线单文件）">
+<title>河北 · 燕赵的两千年</title>
+<style>
+  * { box-sizing: border-box; margin: 0; }
+  :root {
+    --ink: #241d14; --ink-2: #4a3b26; --ink-3: #6d5f43; --ink-4: #9a8a6a;
+    --paper: #f7f1e3; --paper-2: #fffdf7; --paper-3: #efe4cd;
+    --line: #dcccaa; --line-2: #c9b68d;
+    --cinnabar: #c0392b; --cinnabar-2: #e2604a;
+    --jade: #1f7a63; --gold: #b08a3e;
+    --river: #4f92b0; --wall: #8a7a5c;
+    --shadow-s: 0 1px 2px rgba(60,44,20,.06), 0 2px 8px rgba(60,44,20,.07);
+    --shadow-m: 0 6px 18px rgba(60,44,20,.11), 0 1px 3px rgba(60,44,20,.07);
+    --ease: cubic-bezier(.22,.61,.36,1);
+    --serif: "Source Han Serif SC", "Noto Serif SC", "Songti SC", "STSong", "SimSun", serif;
+  }
+  html, body { height: 100%; }
+  body {
+    font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans SC", sans-serif;
+    color: var(--ink); display: flex; flex-direction: column; height: 100dvh; overflow: hidden;
+    background:
+      radial-gradient(1200px 700px at 10% -12%, #fffcf4 0%, transparent 62%),
+      radial-gradient(900px 620px at 102% 112%, #efe0c0 0%, transparent 58%),
+      var(--paper);
+    -webkit-font-smoothing: antialiased;
+  }
+  button { font-family: inherit; }
+  button:focus-visible, .state:focus-visible, summary:focus-visible { outline: 2.5px solid #2b6cb0; outline-offset: 3px; border-radius: 6px; }
+  [hidden] { display: none !important; }
+
+  header {
+    position: relative; display: flex; align-items: center; gap: 26px; padding: 0 26px;
+    height: 64px; flex-shrink: 0; z-index: 5;
+    background: linear-gradient(180deg, #fffdf7, #f4ebd7);
+    border-bottom: 1px solid var(--line);
+    box-shadow: inset 0 1px 0 #fff, 0 10px 24px -18px rgba(60,44,20,.55);
+  }
+  header::after {
+    content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold) 30%, var(--gold) 70%, transparent);
+    opacity: .45;
+  }
+  .brand {
+    font-family: var(--serif); font-size: 21px; letter-spacing: .18em; color: var(--ink);
+    display: flex; align-items: center; gap: 11px; white-space: nowrap;
+  }
+  .brand::before {
+    content: ""; width: 10px; height: 10px; border-radius: 1.5px; background: var(--cinnabar);
+    transform: rotate(45deg); box-shadow: 0 0 0 3px rgba(192,57,43,.14);
+    animation: sealIn .8s var(--ease) both;
+  }
+  @keyframes sealIn { from { transform: rotate(45deg) scale(0); } }
+  nav { position: relative; display: flex; gap: 3px; padding: 4px; border-radius: 999px; background: #ece0c6; box-shadow: inset 0 1px 3px rgba(60,44,20,.15); }
+  nav .pill {
+    position: absolute; top: 4px; left: 0; height: calc(100% - 8px); border-radius: 999px;
+    background: linear-gradient(180deg, #3e3221, #241d14);
+    box-shadow: 0 2px 10px rgba(36,29,20,.38);
+    transition: transform .42s var(--ease), width .42s var(--ease);
+  }
+  nav button {
+    position: relative; z-index: 1; font-size: 13.5px; letter-spacing: .08em; padding: 7px 19px;
+    border: 0; background: none; color: var(--ink-3); cursor: pointer; border-radius: 999px;
+    transition: color .3s var(--ease);
+  }
+  nav button[aria-selected="true"] { color: #fdf6e6; }
+  .hint { margin-left: auto; font-size: 12px; color: var(--ink-4); letter-spacing: .08em; }
+  .nav-home { margin-left: 12px; font-size: 12.5px; color: var(--ink-3); text-decoration: none; letter-spacing: .1em; white-space: nowrap; border: 1px solid var(--line-2); border-radius: 999px; padding: 4px 12px; transition: background .25s, color .25s, border-color .25s; }
+  .nav-home:hover { background: #3e3221; color: #fdf6e6; border-color: transparent; }
+
+  main { flex: 1; min-height: 0; display: flex; }
+  [role="tabpanel"] { animation: viewIn .5s var(--ease) both; }
+  @keyframes viewIn { from { opacity: 0; transform: translateY(10px); } }
+
+  /* ===== 地图 ===== */
+  #view-map { flex: 1; display: flex; min-width: 0; }
+  .map-wrap {
+    flex: 1; position: relative; min-width: 0; overflow: auto;
+    background: radial-gradient(1100px 640px at 34% 18%, #fffdf6 0%, transparent 64%), linear-gradient(180deg, #f8f2e4, #f0e7d2);
+  }
+  .map-wrap svg { width: 100%; height: 100%; display: block; }
+  .title-block { position: absolute; top: 20px; left: 28px; pointer-events: none; animation: titleIn 1s var(--ease) .35s both; }
+  @keyframes titleIn { from { opacity: 0; transform: translateX(-14px); } }
+  .title-block h2 { font-family: var(--serif); font-size: 30px; letter-spacing: .3em; color: var(--ink); text-shadow: 0 1px 0 #fff; }
+  .title-block p { font-size: 13px; color: var(--ink-3); margin-top: 8px; letter-spacing: .14em; }
+  .title-block .title-rule { width: 46px; height: 2px; background: var(--cinnabar); margin-top: 11px; border-radius: 2px; }
+
+  .band-label { font-family: var(--serif); font-size: 17px; fill: #a08b56; letter-spacing: .28em; text-anchor: middle; paint-order: stroke; stroke: #f7f1e3; stroke-width: 5px; }
+  .geo-label { fill: #8c7d5a; paint-order: stroke; stroke: #f7f1e3; stroke-width: 5px; letter-spacing: .1em; }
+
+  .state { cursor: pointer; }
+  .state .hit { fill: transparent; }
+  .state .dot {
+    fill: #fffdf6; stroke: #7a6547; stroke-width: 2.2;
+    transform-box: fill-box; transform-origin: center;
+    transition: transform .3s var(--ease), fill .3s var(--ease), stroke .3s var(--ease);
+    filter: drop-shadow(0 1px 2px rgba(60,44,20,.28));
+  }
+  .state .ring, .state .halo {
+    fill: none; stroke: var(--cinnabar); stroke-width: 1.6;
+    transform-box: fill-box; transform-origin: center; opacity: 0;
+    transition: opacity .3s var(--ease), transform .3s var(--ease);
+  }
+  .state .ring { transform: scale(.82); }
+  .state:hover .dot, .state:focus-visible .dot { transform: scale(1.3); fill: #ffe4ab; stroke: #6b5836; }
+  .state:hover .ring, .state:focus-visible .ring { opacity: .55; transform: scale(1); }
+  .state.selected .dot { fill: var(--cinnabar); stroke: #7d2419; transform: scale(1.36); }
+  .state.selected .ring { opacity: 1; transform: scale(1.14); }
+  .state.selected .halo { animation: pulse 2.6s ease-out infinite; }
+  @keyframes pulse { 0% { transform: scale(1); opacity: .75; } 70%,100% { transform: scale(1.85); opacity: 0; } }
+  .state text {
+    font-family: var(--serif); font-size: 16px; font-weight: 700; fill: var(--ink-2);
+    paint-order: stroke; stroke: #f7f1e3; stroke-width: 4px; text-anchor: middle;
+    transition: fill .3s var(--ease);
+  }
+  .state.selected text { fill: #8c2f14; }
+  .marker text { font-size: 12.5px; fill: var(--ink-3); paint-order: stroke; stroke: #f7f1e3; stroke-width: 3px; text-anchor: middle; letter-spacing: .04em; }
+
+  aside {
+    width: 372px; flex-shrink: 0; border-left: 1px solid var(--line); overflow-y: auto;
+    padding: 26px 24px 40px;
+    background: linear-gradient(180deg, #fffdf7, #f8f1e2);
+    box-shadow: -14px 0 30px -24px rgba(60,44,20,.5);
+  }
+  aside h3 { font-family: var(--serif); font-size: 26px; color: var(--ink); letter-spacing: .1em; }
+  .today {
+    display: inline-block; margin: 11px 0 16px; padding: 4px 12px; border-radius: 999px;
+    background: linear-gradient(180deg, #f3e8cd, #ece0c2); border: 1px solid var(--line);
+    font-size: 12.5px; color: var(--ink-3);
+  }
+  aside ul { list-style: none; padding: 0; }
+  aside li { font-size: 14.5px; line-height: 1.75; margin-bottom: 11px; padding-left: 17px; position: relative; color: var(--ink-2); }
+  aside li::before {
+    content: ""; position: absolute; left: 0; top: 10px; width: 6px; height: 6px;
+    border-radius: 50%; background: var(--cinnabar-2); box-shadow: 0 0 0 3px rgba(226,96,74,.14);
+  }
+  .fate {
+    margin-top: 18px; padding: 13px 15px; border-radius: 3px 8px 8px 3px;
+    background: linear-gradient(100deg, #f4e8ce, #fbf4e4);
+    border-left: 4px solid var(--gold); font-size: 13.5px; line-height: 1.75; color: var(--ink-3); box-shadow: var(--shadow-s);
+  }
+  .fate b { color: var(--ink); }
+  .xlink {
+    display: inline-flex; align-items: center; gap: 6px; margin-top: 16px; font-size: 13.5px;
+    color: var(--cinnabar); background: none; border: 0; padding: 0; cursor: pointer;
+    border-bottom: 1px dashed rgba(192,57,43,.5); transition: gap .25s var(--ease), color .25s;
+  }
+  .xlink:hover { gap: 11px; color: #7d2419; }
+  .default-tip { color: var(--ink-3); font-size: 14.5px; line-height: 2; margin: 10px 0 6px; text-align: center; }
+  .legend {
+    margin-top: 26px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 10px;
+    font-size: 13.5px; color: var(--ink-3); background: rgba(255,253,247,.75); box-shadow: var(--shadow-s);
+  }
+  .legend div { display: flex; align-items: center; gap: 11px; margin: 8px 0; }
+  .legend i { width: 44px; height: 10px; flex-shrink: 0; display: block; position: relative; }
+  .panel-foot { margin-top: 20px; font-size: 12px; color: var(--ink-4); line-height: 1.8; border-top: 1px solid var(--line); padding-top: 14px; }
+  .panel-foot a { color: var(--cinnabar); text-decoration: none; border-bottom: 1px dashed rgba(192,57,43,.5); }
+
+  .stagger > * { animation: itemIn .5s var(--ease) both; }
+  .stagger > *:nth-child(1) { animation-delay: .02s; }
+  .stagger > *:nth-child(2) { animation-delay: .07s; }
+  .stagger > *:nth-child(3) { animation-delay: .12s; }
+  .stagger > *:nth-child(4) { animation-delay: .17s; }
+  @keyframes itemIn { from { opacity: 0; transform: translateX(9px); } }
+
+  /* ===== 时间轴 ===== */
+  #view-time { flex: 1; overflow-y: auto; padding: 34px 26px 60px; }
+  .time-inner { max-width: 900px; margin: 0 auto; }
+  .time-inner h2 { font-family: var(--serif); font-size: 30px; letter-spacing: .18em; color: var(--ink); }
+  .lead { font-size: 14px; color: var(--ink-3); margin: 10px 0 20px; line-height: 1.85; max-width: 64ch; }
+  .toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 22px; font-size: 13px; color: var(--ink-4); }
+  .chip {
+    font-size: 13px; padding: 5px 14px; border-radius: 999px; border: 1px solid var(--line);
+    background: linear-gradient(180deg, #fffdf7, #f4ebd8); color: var(--ink-3); cursor: pointer;
+    transition: transform .22s var(--ease), box-shadow .22s var(--ease), background .22s, color .22s, border-color .22s;
+  }
+  .chip:hover { transform: translateY(-1px); box-shadow: var(--shadow-s); }
+  .chip[aria-pressed="true"] { background: linear-gradient(180deg, #3e3221, #241d14); color: #fdf6e6; border-color: transparent; box-shadow: 0 3px 12px rgba(36,29,20,.3); }
+  .tool { margin-left: auto; font-size: 13px; padding: 5px 15px; border-radius: 999px; border: 1px dashed var(--line-2); background: none; color: var(--ink-3); cursor: pointer; transition: background .22s, color .22s; }
+  .tool:hover { background: rgba(255,253,247,.9); color: var(--ink); }
+
+  .timeline { list-style: none; padding: 0 0 0 26px; position: relative; }
+  .timeline::before {
+    content: ""; position: absolute; left: 6px; top: 6px; bottom: 26px; width: 2px;
+    background: linear-gradient(180deg, rgba(201,182,141,0), var(--line-2) 8%, var(--line-2) 92%, rgba(201,182,141,0));
+    transform-origin: top; animation: growLine 1.1s var(--ease) .1s both;
+  }
+  @keyframes growLine { from { transform: scaleY(0); } }
+
+  .card {
+    position: relative; margin: 0 0 12px; border-radius: 10px; border: 1px solid var(--line);
+    background: linear-gradient(180deg, #fffdf8, #faf4e7); box-shadow: var(--shadow-s);
+    transition: transform .3s var(--ease), box-shadow .3s var(--ease), opacity .35s var(--ease), border-color .3s;
+    animation: cardIn .6s var(--ease) both; animation-delay: calc(var(--i) * 55ms);
+  }
+  @keyframes cardIn { from { opacity: 0; transform: translateY(16px) scale(.985); } }
+  .card::before {
+    content: ""; position: absolute; left: -26px; top: 21px; width: 11px; height: 11px; border-radius: 50%;
+    background: #fffdf6; border: 2.5px solid var(--cinnabar-2); box-shadow: 0 0 0 4px var(--paper);
+    transition: transform .3s var(--ease), background .3s, border-color .3s;
+  }
+  .card:hover { transform: translateY(-2px); box-shadow: var(--shadow-m); border-color: var(--line-2); }
+  .card:hover::before { transform: scale(1.25); border-color: var(--cinnabar); }
+  .card:has(> details[open]) { box-shadow: var(--shadow-m); border-color: var(--line-2); background: linear-gradient(180deg, #fffefa, #fbf6ea); }
+  .card:has(> details[open])::before { background: var(--cinnabar); border-color: var(--cinnabar); }
+  .card.dim { opacity: .26; filter: saturate(.35); }
+  .card summary { list-style: none; cursor: pointer; padding: 13px 17px; display: flex; flex-wrap: wrap; align-items: baseline; gap: 5px 12px; }
+  .card summary::-webkit-details-marker { display: none; }
+  .card summary::after { content: "＋"; margin-left: auto; color: var(--ink-4); font-size: 15px; transition: transform .35s var(--ease), color .25s; }
+  .card:has(> details[open]) summary::after { content: "－"; color: var(--cinnabar); }
+  .card .name { font-family: var(--serif); font-size: 19px; font-weight: 700; color: var(--ink); letter-spacing: .06em; }
+  .card .years { font-size: 12.5px; color: var(--ink-3); }
+  .card .lang { font-size: 11.5px; padding: 2px 9px; border-radius: 999px; background: #efe4cd; color: var(--ink-3); border: 1px solid rgba(201,182,141,.7); }
+  .card .body { padding: 0 17px 15px; animation: bodyIn .45s var(--ease) both; }
+  @keyframes bodyIn { from { opacity: 0; transform: translateY(-6px); } }
+  .card ul { list-style: none; padding: 0; }
+  .card li { font-size: 14.5px; line-height: 1.8; padding-left: 17px; position: relative; margin-bottom: 5px; color: var(--ink-2); }
+  .card li::before { content: ""; position: absolute; left: 1px; top: 11px; width: 5px; height: 5px; border-radius: 50%; background: var(--gold); }
+  .card .out {
+    margin-top: 11px; padding: 10px 14px; border-radius: 3px 8px 8px 3px;
+    background: linear-gradient(100deg, #f4e8ce, #fbf4e4); border-left: 4px solid var(--gold);
+    font-size: 13.5px; line-height: 1.8; color: var(--ink-3);
+  }
+  .card .out b { color: var(--ink); }
+
+  .rules { margin-top: 30px; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; }
+  .rule {
+    border-radius: 12px; padding: 17px 18px; border: 1px solid var(--line);
+    background: linear-gradient(160deg, #fffdf8, #f6eddb); box-shadow: var(--shadow-s);
+    transition: transform .3s var(--ease), box-shadow .3s var(--ease);
+    animation: cardIn .6s var(--ease) both; animation-delay: calc(430ms + var(--i) * 70ms);
+  }
+  .rule:hover { transform: translateY(-3px); box-shadow: var(--shadow-m); }
+  .rule h3 { font-family: var(--serif); font-size: 17px; color: var(--ink); margin-bottom: 11px; letter-spacing: .08em; padding-bottom: 9px; border-bottom: 1px solid var(--line); }
+  .rule ul { padding: 0; }
+  .rule li { font-size: 14px; line-height: 1.8; margin-bottom: 6px; list-style: none; padding-left: 15px; position: relative; color: var(--ink-2); }
+  .rule li::before { content: ""; position: absolute; left: 2px; top: 11px; width: 5px; height: 5px; background: var(--cinnabar-2); transform: rotate(45deg); }
+  .caveat { margin: 22px 0 0; font-size: 12px; color: var(--ink-4); line-height: 1.9; border-top: 1px solid var(--line); padding-top: 14px; }
+
+  /* ===== 详考 ===== */
+  #view-detail { flex: 1; overflow-y: auto; padding: 34px 26px 60px; }
+  .detail-inner { max-width: 1000px; margin: 0 auto; }
+  .detail-inner h2 { font-family: var(--serif); font-size: 30px; letter-spacing: .18em; color: var(--ink); }
+  .sec { margin-top: 34px; animation: cardIn .6s var(--ease) both; }
+  .sec > h3 {
+    font-family: var(--serif); font-size: 20px; color: var(--ink); letter-spacing: .1em;
+    padding-bottom: 10px; border-bottom: 2px solid var(--line-2); margin-bottom: 16px;
+    display: flex; align-items: baseline; gap: 12px;
+  }
+  .sec > h3 span { font-family: inherit; font-size: 12px; color: var(--ink-4); letter-spacing: .04em; font-weight: 400; }
+  .chrono { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(330px, 1fr)); gap: 0 30px; }
+  .chrono li {
+    display: grid; grid-template-columns: 86px 1fr; gap: 12px; font-size: 13.5px; line-height: 1.7;
+    padding: 6px 0; border-bottom: 1px dashed rgba(201,182,141,.5); color: var(--ink-2);
+  }
+  .chrono .y { font-family: var(--serif); font-weight: 700; color: var(--cinnabar); font-size: 13px; white-space: nowrap; }
+  .people { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 11px; }
+  .person {
+    padding: 12px 15px; border: 1px solid var(--line); border-radius: 9px;
+    background: linear-gradient(180deg, #fffdf8, #faf4e7); box-shadow: var(--shadow-s);
+    transition: transform .25s var(--ease), box-shadow .25s var(--ease);
+  }
+  .person:hover { transform: translateY(-2px); box-shadow: var(--shadow-m); }
+  .person b { font-family: var(--serif); font-size: 16px; color: var(--ink); }
+  .person .d { font-size: 11.5px; color: var(--ink-4); margin-left: 8px; }
+  .person p { font-size: 13.5px; line-height: 1.72; color: var(--ink-3); margin-top: 6px; }
+  table.plain { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  table.plain th { text-align: left; font-weight: 400; color: var(--ink-4); font-size: 12px; padding: 8px 12px; border-bottom: 1px solid var(--line-2); letter-spacing: .06em; }
+  table.plain td { padding: 9px 12px; border-bottom: 1px dashed rgba(201,182,141,.5); line-height: 1.75; vertical-align: top; color: var(--ink-3); }
+  table.plain td:first-child { font-family: var(--serif); font-weight: 700; color: var(--ink); white-space: nowrap; }
+  .two-col { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 0 34px; }
+
+  noscript { padding: 26px; display: block; }
+
+  .pan-hint { display: none; }
+  @media (max-width: 880px) {
+    .pan-hint { display: block; position: sticky; left: 50%; bottom: 10px; transform: translateX(-50%); width: max-content; height: 30px; margin-top: -34px; padding: 0 14px; border-radius: 999px; background: rgba(36,29,20,.75); color: #f7f1e3; font-size: 11.5px; letter-spacing: .08em; line-height: 30px; pointer-events: none; transition: opacity .4s; }
+    header { padding: 0 14px; gap: 12px; }
+    .brand { font-size: 17px; letter-spacing: .1em; }
+    .hint { display: none; }
+    #view-map { flex-direction: column; }
+    .map-wrap { flex: none; height: 54dvh; }
+    .map-wrap svg { min-width: 900px; }
+    .title-block { top: 14px; left: 18px; }
+    .title-block h2 { font-size: 22px; }
+    aside { width: 100%; border-left: 0; border-top: 1px solid var(--line); flex: 1; min-height: 0; padding: 18px 16px 30px; box-shadow: none; }
+    #view-time { padding: 22px 15px 46px; }
+    .timeline { padding-left: 22px; }
+    .card::before { left: -22px; }
+  }
+
+  .plink { color: var(--cinnabar); text-decoration: none; border-bottom: 1px dashed rgba(192,57,43,.5); }
+  @media print {
+    body { height: auto; overflow: visible; }
+    header, .hint, .pan-hint { display: none; }
+    main { overflow: visible; }
+    #view-map[hidden], #view-time[hidden], #view-detail[hidden], #view-steppe[hidden] { display: block !important; }
+    #view-map { display: block; overflow: visible; }
+    .map-wrap { height: auto; overflow: visible; }
+    .map-wrap svg { min-width: 0; width: 100%; height: auto; }
+    aside { width: auto; border: 0; overflow: visible; }
+    #view-time, #view-detail, .steppe-inner { overflow: visible; padding: 10mm 0; }
+    .card, .rule, .sec, .person { break-inside: avoid; box-shadow: none; }
+    .toolbar, .chip, .tool, .xlink { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition-duration: .01ms !important; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">河北 · 两千年</div>
+  <nav role="tablist" aria-label="切换视图">
+    <span class="pill" aria-hidden="true"></span>
+    <button role="tab" id="tab-map" aria-selected="true" aria-controls="view-map">河北地图</button>
+    <button role="tab" id="tab-time" aria-selected="false" aria-controls="view-time">历史演进</button>
+    <button role="tab" id="tab-detail" aria-selected="false" aria-controls="view-detail">详考</button>
+  </nav>
+  <a class="nav-home" href="历史总览.html">总览</a> <span class="hint">先秦至清 · 口北 / 燕山 / 太行 / 冀中南 · 全部离线</span>
+</header>
+
+<main>
+  <section id="view-map" role="tabpanel" aria-labelledby="tab-map">
+    <div class="map-wrap">
+      <svg id="map" viewBox="160 40 660 660" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="group" aria-label="河北省历史地理示意图">
+        <defs>
+          <linearGradient id="bandKoubei" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#e6d3a8" stop-opacity=".55"/>
+            <stop offset="100%" stop-color="#ead9b2" stop-opacity=".18"/>
+          </linearGradient>
+          <linearGradient id="bandYanshan" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#c7dbd0" stop-opacity=".42"/>
+            <stop offset="100%" stop-color="#d6e4dc" stop-opacity=".18"/>
+          </linearGradient>
+          <linearGradient id="bandTaihang" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#cfe0c2" stop-opacity=".5"/>
+            <stop offset="100%" stop-color="#dfe8d2" stop-opacity=".22"/>
+          </linearGradient>
+          <linearGradient id="bandJizhong" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#e6d8c0" stop-opacity=".45"/>
+            <stop offset="100%" stop-color="#eddcc4" stop-opacity=".2"/>
+          </linearGradient>
+          <linearGradient id="riverGrad" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#8fc0d6"/>
+            <stop offset="100%" stop-color="#4f92b0"/>
+          </linearGradient>
+        </defs>
+
+        <!-- 四大地理带 -->
+        <path d="M320,70 L420,60 L520,75 L610,95 L690,140 L660,170 Q560,150 460,155 Q380,160 310,175 Q280,130 320,70 Z" fill="url(#bandKoubei)"/>
+        <path d="M310,175 Q380,160 460,155 Q560,150 660,170 L690,140 L720,200 L710,250 Q660,290 620,330 Q580,300 560,270 Q520,240 480,230 Q420,220 360,230 Q320,220 300,200 Z" fill="url(#bandYanshan)"/>
+        <path d="M290,190 Q270,280 245,370 Q232,460 258,540 L290,600 Q270,530 262,460 Q258,380 275,300 Q288,240 290,190 Z" fill="url(#bandTaihang)"/>
+        <path d="M300,200 Q320,220 360,230 Q420,220 480,230 Q520,240 560,270 Q580,300 620,330 Q590,380 570,430 Q560,480 540,530 L500,590 L430,620 L360,630 L300,600 Q270,530 258,540 Q232,460 245,370 Q270,280 300,200 Z" fill="url(#bandJizhong)"/>
+
+        <!-- 省界 -->
+        <path d="M320,70 L420,60 L520,75 L610,95 L690,140 L720,200 L710,250 Q660,290 620,330 Q590,380 570,430 Q560,480 540,530 L500,590 L430,620 L360,630 L300,600 L260,540 L230,460 L240,370 L265,280 L290,190 Z"
+          fill="none" stroke="#9a8a6a" stroke-width="2.6" stroke-linejoin="round"/>
+        <path d="M320,70 L420,60 L520,75 L610,95 L690,140 L720,200 L710,250 Q660,290 620,330 Q590,380 570,430 Q560,480 540,530 L500,590 L430,620 L360,630 L300,600 L260,540 L230,460 L240,370 L265,280 L290,190 Z"
+          fill="none" stroke="#fffdf7" stroke-width="1" stroke-dasharray="6 7" opacity=".7"/>
+
+        <!-- 滦河 -->
+        <path d="M560,100 Q590,160 620,220 Q640,270 645,310"
+          fill="none" stroke="url(#riverGrad)" stroke-width="3" stroke-linecap="round" opacity=".88"/>
+        <text x="658" y="200" class="geo-label" font-size="12">滦河</text>
+
+        <!-- 永定河（桑干河下游） -->
+        <path d="M305,235 Q370,255 440,270 Q510,285 570,305"
+          fill="none" stroke="url(#riverGrad)" stroke-width="3" stroke-linecap="round" opacity=".88"/>
+        <text x="395" y="265" class="geo-label" font-size="12">永定河</text>
+
+        <!-- 南运河 -->
+        <path d="M420,620 Q480,590 530,540 Q560,500 575,460"
+          fill="none" stroke="url(#riverGrad)" stroke-width="2.8" stroke-linecap="round" opacity=".85"/>
+        <text x="508" y="578" class="geo-label" font-size="11">南运河</text>
+
+        <!-- 渤海 -->
+        <text x="648" y="368" class="geo-label" font-size="13">渤　海</text>
+
+        <!-- 太行山 · 燕山 · 坝上高原 -->
+        <path d="M290,190 Q268,280 245,370 Q232,460 258,540"
+          fill="none" stroke="#8a9a72" stroke-width="4" opacity=".65" stroke-linecap="round"/>
+        <path d="M430,170 Q510,150 590,145 Q650,150 700,180"
+          fill="none" stroke="#8a9a72" stroke-width="3.2" opacity=".6" stroke-linecap="round"/>
+        <path d="M300,100 Q360,85 430,90"
+          fill="none" stroke="#b09c6b" stroke-width="2.8" opacity=".55" stroke-linecap="round"/>
+
+        <text x="205" y="380" class="geo-label" font-size="13">太行山</text>
+        <text x="545" y="126" class="geo-label" font-size="12">燕山</text>
+        <text x="372" y="62" class="geo-label" font-size="11">坝上高原</text>
+
+        <!-- 内外长城 -->
+        <path d="M705,245 Q620,220 540,215 Q460,205 390,195 Q340,200 305,230"
+          fill="none" stroke="var(--wall)" stroke-width="3" stroke-dasharray="11 6" opacity=".75"/>
+        <path d="M300,120 Q360,100 430,105 Q490,115 530,130"
+          fill="none" stroke="var(--wall)" stroke-width="2.6" stroke-dasharray="10 6" opacity=".65"/>
+        <text x="268" y="158" class="geo-label" font-size="11">内外长城</text>
+
+        <!-- 四带名称 -->
+        <text x="450" y="105" class="band-label" font-size="15">口北坝上</text>
+        <text x="625" y="175" class="band-label" font-size="15">燕山幽燕</text>
+        <text x="245" y="485" class="band-label" font-size="14">太行山地</text>
+        <text x="575" y="495" class="band-label">冀中南平原</text>
+
+        <!-- 京师（畿辅之核，静态标注） -->
+        <g class="marker" opacity=".85">
+          <circle cx="520" cy="240" r="7" fill="#fffdf7" stroke="#c0392b" stroke-width="1.8" stroke-dasharray="3 2.5"/>
+          <text x="545" y="216" font-weight="700" fill="#8c2f14">京师 · 顺天府</text>
+          <text x="520" y="268" font-size="10" fill="#9a8a6a">（明清都城 · 直隶因畿辅而设）</text>
+        </g>
+
+        <!-- 关塞 -->
+        <g class="marker" id="gates"></g>
+        <!-- 城邑 -->
+        <g id="states"></g>
+
+        <!-- 指北针 -->
+        <g transform="translate(760,90)" opacity=".9">
+          <circle cx="0" cy="2" r="26" fill="#fffdf7" opacity=".7" stroke="#dcccaa" stroke-width="1"/>
+          <path d="M0,-24 L6,-8 L-6,-8 Z" fill="#c0392b"/>
+          <line x1="0" y1="22" x2="0" y2="-6" stroke="#8c7d5a" stroke-width="1.8"/>
+          <line x1="-7" y1="22" x2="7" y2="22" stroke="#8c7d5a" stroke-width="1.8"/>
+          <text x="0" y="45" font-size="14" fill="#6d5f43" text-anchor="middle">北</text>
+        </g>
+      </svg>
+
+      <div class="title-block">
+        <h2>河北</h2>
+        <p>口北 · 燕山 · 太行 · 冀中南 四大地理带</p>
+        <span class="title-rule"></span>
+      </div>
+    </div>
+
+    <aside aria-live="polite">
+      <div id="panel-default"><p class="default-tip">点击（或 Tab + 回车）地图上的圆点<br>看这座城邑在同时期的角色</p></div>
+      <div id="panel-detail" hidden>
+        <div class="stagger">
+          <h3 id="d-name"></h3>
+          <div class="today" id="d-today"></div>
+          <ul id="d-points"></ul>
+          <div class="fate" id="d-fate"></div>
+        </div>
+        <button class="xlink" id="d-link" hidden></button>
+      </div>
+      <div class="legend" aria-label="图例">
+        <div><i style="background:linear-gradient(90deg,transparent,#e6d3a8,transparent);border-radius:2px"></i>口北坝上</div>
+        <div><i style="background:linear-gradient(90deg,transparent,#a9c9b8,transparent);border-radius:2px"></i>燕山幽燕</div>
+        <div><i style="background:linear-gradient(90deg,transparent,#b9cf9f,transparent);border-radius:2px"></i>太行山地</div>
+        <div><i style="background:linear-gradient(90deg,transparent,#d9c79c,transparent);border-radius:2px"></i>冀中南平原</div>
+        <div><i style="height:4px;margin-top:3px;background:#4f92b0;border-radius:2px"></i>滦河 · 永定河 · 南运河</div>
+        <div><i style="height:4px;margin-top:3px;background:repeating-linear-gradient(90deg,#8a7a5c 0 7px,transparent 7px 12px)"></i>内外长城</div>
+        <div><i style="height:9px;margin-top:1px;background:linear-gradient(135deg,transparent 44%,#a2905f 44% 56%,transparent 56%)"></i>关塞（井陉 · 倒马 · 紫荆 · 古北口）</div>
+        <div><i style="height:9px;margin-top:1px;border:1.5px dashed #c0392b;border-radius:50%;width:9px"></i>京师 · 顺天府（畿辅之核）</div>
+      </div>
+      <p class="panel-foot">省界与山川为示意走势，非精确测绘；四带划分按地貌简化。史实以《史记》《汉书》《旧唐书》《辽史》《金史》为准，争议处标注「一说」。<br>
+        <a href="东北-历史演进.html">← 对照《东北-历史演进》，看山海关与辽西走廊如何衔接</a><br>
+        <a href="山西-历史演进.html">← 对照《山西-历史演进》，看太行八陉如何连起晋冀</a><br>
+        <a href="草原与丝路.html">← 对照《草原与丝路》，看张库大道与承德的草原政策</a><br>
+        <a href="河南-历史演进.html">← 对照《河南-历史演进》，看殷邺线上的殷墟与洛阳</a></p>
+    </aside>
+  </section>
+
+  <section id="view-time" role="tabpanel" aria-labelledby="tab-time" hidden>
+    <div class="time-inner">
+      <h2>河北历史演进</h2>
+      <p class="lead">从涿鹿传说到京张铁路——河北的历史是「畿辅」的历史：因都城而重，因都城而为兵家必争。与《山西》《东北》《草原与丝路》同构互链。点击卡片展开；按时代筛选可看某一阶段。</p>
+      <div class="toolbar" id="toolbar"></div>
+      <ol class="timeline" id="timeline"></ol>
+      <div class="rules" id="rules"></div>
+      <p class="caveat">说明：年代取通行说法。口北是长城前线，燕山是屏障，太行山东麓是南北大道，冀中南平原是腹地——四带节奏并不一致，时间轴以政权为纲，细节见各卡片。</p>
+    </div>
+  </section>
+
+  <section id="view-detail" role="tabpanel" aria-labelledby="tab-detail" hidden>
+    <div class="detail-inner">
+      <h2>详考</h2>
+      <p class="lead">年表、人物、地名沿革与关隘古道。年表按时代分组，可作前两页的注脚。</p>
+      <div id="detail-root"></div>
+      <p class="caveat">说明：大事年表取通行说法，部分年代学界有异说；人物生卒与任职年份多据正史本传，个别取约数。地名沿革一栏，「今地」按现行行政区划对应，古今辖境并不等同。</p>
+    </div>
+  </section>
+</main>
+<noscript>本页需要启用 JavaScript 才能显示地图与时间轴。</noscript>
+
+<script>
+const SVGNS = "http://www.w3.org/2000/svg";
+const el = (tag, attrs = {}, text) => {
+  const n = document.createElementNS(SVGNS, tag);
+  for (const k in attrs) n.setAttribute(k, attrs[k]);
+  if (text !== undefined) n.textContent = text;
+  return n;
+};
+const $ = id => document.getElementById(id);
+const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* ---------------- 地图数据 ---------------- */
+const GATES = [
+  { x: 305, y: 400, label: "井陉关", dy: 26 },
+  { x: 320, y: 255, label: "倒马关", dy: -22 },
+  { x: 335, y: 310, label: "紫荆关", dy: 26 },
+  { x: 500, y: 205, label: "古北口", dy: -22 }
+];
+
+const CITIES = [
+  { id: "baoDing", x: 395, y: 345, ly: 36, short: "保定", r: 10, band: "冀中", tag: "直隶",
+    name: "保定 / 清苑 / 保定府", today: "今 · 保定市",
+    points: [
+      "明设保定府，拱卫京师南门；清为直隶总督驻地——「总督署」规格冠于各省",
+      "「保定」之名取「保卫大都、安定天下」之意",
+      "清代直隶总督多兼北洋大臣：李鸿章、袁世凯皆驻此办洋务与新政",
+      "莲池书院为北方学术重镇，义和团与庚子之役中两度为战场"
+    ],
+    fate: "1968年河北省会迁石家庄；今为保定市，直隶总督署与莲池并存。" },
+  { id: "zhengDing", x: 360, y: 390, ly: -28, short: "正定", r: 10, band: "冀中", tag: "常山",
+    name: "正定 / 真定 / 常山", today: "今 · 石家庄市正定县",
+    points: [
+      "常山郡治所，「常山赵子龙」故里；三国故事与正定绑定千年",
+      "隆兴寺（龙藏寺）为北宋建筑与摩尼殿倒坐观音所在，梁思成赞为「京外名刹之首」",
+      "唐代成德军治所，河朔三镇之一的中心",
+      "正定古城墙与临济寺澄灵塔，唐宋以来佛教重镇"
+    ],
+    fate: "明清为真定府，后改正定；今为石家庄市正定县，古城文旅名城。" },
+  { id: "hanDan", x: 330, y: 540, ly: 28, short: "邯郸", r: 12, band: "冀南", tag: "赵都",
+    name: "邯郸 / 赵都", today: "今 · 邯郸市",
+    points: [
+      "赵敬侯迁都邯郸（前386前后），「邯郸」二字三千年未改——中国未改名最古城市之一",
+      "胡服骑射：赵武灵王在邯郸行军改，赵为战国七雄",
+      "「邯郸学步」「黄粱一梦」等典故皆出此地；丛台为赵武灵王点兵处",
+      "磁州窑为宋金北方民窑代表，磁州得名于此"
+    ],
+    fate: "明清为广平府属地；今为邯郸市，赵都遗址与响堂山石窟并存。",
+    link: { text: "看赵国之后的邺城霸府 →", target: "yeCheng" } },
+  { id: "yeCheng", x: 318, y: 510, ly: -26, short: "邺城", r: 8, band: "冀南", tag: "霸府",
+    name: "邺城 / 邺", today: "今 · 邯郸市临漳县",
+    points: [
+      "袁绍据冀州以邺为治；204年曹操破邺，自此以邺为霸府——「挟天子以令诸侯」的指挥中心",
+      "铜雀台、金虎台、冰井台筑于邺城西北，建安文学的舞台",
+      "北朝：东魏、北齐皆都邺，邺中佛寺甲于天下，邺城为中世纪北方第一大城",
+      "577年北周破邺，迁其民与工匠于关中——邺城自此湮灭，其规划影响了隋唐大兴城"
+    ],
+    fate: "唐属相州；宋以后邺城故地荒废，今存邺北城、邺南城遗址与三台村。" },
+  { id: "xingTai", x: 345, y: 470, ly: -28, short: "邢台", r: 9, band: "冀南", tag: "顺德",
+    name: "邢台 / 襄国 / 顺德府", today: "今 · 邢台市",
+    points: [
+      "殷商邢国故地，「邢」为河北最古老地名之一",
+      "郭守敬故里（邢台），元代大科学家，主持大都水利与授时历",
+      "邢窑为唐代白瓷名窑，「类银类雪」，与越窑青瓷并称「南青北白」",
+      "后赵石勒都襄国（邢台），十六国第一都"
+    ],
+    fate: "明清为顺德府；今为邢台市，郭守敬纪念馆与邢窑遗址并存。" },
+  { id: "daMing", x: 425, y: 560, ly: -28, short: "大名", r: 10, band: "冀南", tag: "北京",
+    name: "大名 / 魏州 / 北京大名府", today: "今 · 邯郸市大名县",
+    points: [
+      "魏州为后唐龙兴之地：李存勖于魏州称帝，五代更迭的风暴眼",
+      "北宋置大名府为北京，为宋辽战争的河北指挥中心；宗泽曾任大名留守",
+      "「大名府」在《水浒》《杨家将》中反复出现，民间记忆深厚",
+      "宋代大名府城五里三关，规模为河北之冠"
+    ],
+    fate: "明清为大名府，冀南政治中心；今为大名县，宋大名府遗址尚存。" },
+  { id: "dingZhou", x: 385, y: 305, ly: -28, short: "定州", r: 9, band: "冀中", tag: "中山",
+    name: "定州 / 中山", today: "今 · 定州市",
+    points: [
+      "中山国凭太行险要在冀中立国二百余年，中山王墓出土错金银四龙四凤铜方案为国宝",
+      "北魏中山郡，曲阳石雕与缂丝冠绝；静志寺塔基地宫出土定窑白瓷",
+      "定窑为宋代五大名窑之一，「定瓷」行销天下",
+      "韩琦知定州，苏轼书《醉翁亭记》刻石于定州雪浪石"
+    ],
+    fate: "明清为定州；今为定州市，定窑遗址与中山国文物并存。" },
+  { id: "anGuo", x: 445, y: 330, ly: 28, short: "安国", r: 8, band: "冀中", tag: "药都",
+    name: "安国 / 祁州", today: "今 · 保定市安国市",
+    points: [
+      "药王邳彤故里，安国药王庙为全国药商祭祀中心",
+      "明清以来「南有樟树，北有安国」——全国最大的中药材集散地",
+      "祁州药市带动冀中商帮，与山西票号金融网相连",
+      "「药不经安国不成药」，道地药材标准由此输出"
+    ],
+    fate: "明清为祁州；今为安国市，药市与药王庙文化延续。" },
+  { id: "zhaoXian", x: 425, y: 398, ly: 28, short: "赵县", r: 8, band: "冀中", tag: "赵州桥",
+    name: "赵县 / 赵州", today: "今 · 石家庄市赵县",
+    points: [
+      "赵州桥（安济桥）：隋匠李春所建，世界现存最早敞肩石拱桥，1400年不坠",
+      "柏林寺塔与「赵州茶」公案，禅宗史上「吃茶去」典出此地",
+      "古洨河与永济渠在此交汇，为冀中水陆枢纽"
+    ],
+    fate: "明清为赵州；今为赵县，赵州桥为全国重点文保与世界遗产预备要素。" },
+  { id: "cangZhou", x: 540, y: 420, ly: -28, short: "沧州", r: 9, band: "冀中南", tag: "铁狮子",
+    name: "沧州 / 景城", today: "今 · 沧州市",
+    points: [
+      "后周铸造的沧州铁狮子（953），高5.78米，为五代冶铁技术实证",
+      "「沧州铁狮」与「景州塔」「正定大佛」并称河北三宝",
+      "武术之乡：八极拳、劈挂掌发源，镖师文化与京杭运河商路共生",
+      "京杭大运河纵贯，南运河码头为漕运要冲"
+    ],
+    fate: "明清为沧州直隶州；今为沧州市，铁狮子与武术文化名城。" },
+  { id: "shanHaiGuan", x: 705, y: 245, ly: 28, short: "山海关", r: 9, band: "燕山", tag: "关城",
+    name: "山海关 / 榆关", today: "今 · 秦皇岛市山海关区",
+    points: [
+      "明洪武十四年（1381）建关设卫，「两京锁钥无双地，万里长城第一关」",
+      "辽西走廊东端起点：关内为河北，关外即东北——与《东北》页的走廊一线相连",
+      "1644年吴三桂引清兵入关，中国历史在此转弯",
+      "老龙头入海处，长城与渤海相接"
+    ],
+    fate: "清代为临榆县；今为秦皇岛市山海关区，天下第一关景区。" },
+  { id: "xuanHua", x: 350, y: 175, ly: -28, short: "宣化", r: 10, band: "口北", tag: "宣府",
+    name: "宣化 / 宣府", today: "今 · 张家口市宣化区",
+    points: [
+      "明九边重镇宣府镇治所，京师北门，「宣府不守，京师震动」",
+      "辽为宣化州，金为宣德州，元为宣德府——口北政治中心两千年",
+      "宣化葡萄酒自明代种植，为「中国葡萄之酒故乡」之一",
+      "宣化城楼与拱极楼，明代边城规制完整"
+    ],
+    fate: "清为宣化府；今为张家口市宣化区，古城与钟鼓楼并存。" },
+  { id: "chengDe", x: 560, y: 150, ly: -28, short: "承德", r: 10, band: "口北", tag: "避暑山庄",
+    name: "承德 / 热河 / 承德府", today: "今 · 承德市",
+    points: [
+      "清康熙四十二年（1703）始建避暑山庄，「移天缩地在君怀」，清代第二政治中心",
+      "外八庙环列：普陀宗乘之庙仿布达拉宫，普宁寺有世界最大木佛",
+      "康熙、乾隆经承德北巡木兰围场、接见蒙古王公——与《草原与丝路》的草原政策相接",
+      "热河行宫「热河」之名，为清帝处理蒙古、西藏事务的舞台"
+    ],
+    fate: "嘉庆皇帝卒于避暑山庄；民国为热河省会，1955年撤省入河北。今为承德市，避暑山庄为世界文化遗产。" },
+  { id: "yuXian", x: 310, y: 220, ly: -28, short: "蔚县", r: 8, band: "口北", tag: "蔚州",
+    name: "蔚县 / 蔚州", today: "今 · 张家口市蔚县",
+    points: [
+      "蔚州为口南要冲，明设蔚州卫，与宣府互为犄角",
+      "蔚县剪纸为全国非遗代表，「三分刀工七分染」",
+      "暖泉古镇打树花：铁水泼向城墙溅开如树，为千年民俗",
+      "玉皇阁、南安寺塔为辽金遗构"
+    ],
+    fate: "明清为蔚州；今为蔚县，剪纸与古镇文旅名县。" },
+  { id: "zhuoLu", x: 420, y: 200, ly: 26, short: "涿鹿", r: 8, band: "口北", tag: "阪泉",
+    name: "涿鹿 / 阪泉", today: "今 · 张家口市涿鹿县",
+    points: [
+      "「黄帝与蚩尤战于涿鹿之野」——华夏文明源头记忆锚点之一",
+      "阪泉之战：黄帝战炎帝，合符釜山，涿鹿为「三祖故里」",
+      "黄羊山与桑干河上游，为冀北山地门户"
+    ],
+    fate: "汉置涿鹿县；今为涿鹿县，三祖文化与黄帝城遗址为地方标识。" },
+  { id: "zhuoZhou", x: 470, y: 270, ly: 26, short: "涿州", r: 8, band: "燕山", tag: "涿郡",
+    name: "涿州 / 涿郡 / 范阳", today: "今 · 保定市涿州市",
+    points: [
+      "燕国蓟城南翼，秦置涿郡；隋开永济渠，涿郡为运河北端终点",
+      "征高句丽：隋炀帝、唐太宗皆以涿郡为集结地——与《东北》页的征辽线相连",
+      "张飞故里（涿州），三义庙祭祀绵延",
+      "范阳卢氏为唐代天下著姓，「涿郡范阳」为卢氏郡望"
+    ],
+    fate: "明清为涿州；今为涿州市，京南门户与影视城。" },
+  { id: "jiZhou", x: 440, y: 500, ly: -28, short: "冀州", r: 8, band: "冀南", tag: "信都",
+    name: "冀州 / 信都", today: "今 · 衡水市冀州区",
+    points: [
+      "「冀」之得名：《禹贡》九州之首，古冀州含今河北大部",
+      "汉信都国、冀州治所，为河北南部政治中心",
+      "北魏信都为冀州州治，经学与佛教并盛",
+      "衡水湖在其侧，古冀州「信都」之名存续千年"
+    ],
+    fate: "明清为冀州直隶州；今为衡水市冀州区，「冀」字源头之地。" }
+];
+
+/* ---------------- 时间轴数据 ---------------- */
+const ERAS = ["全部", "先秦", "秦汉", "魏晋北朝", "隋唐", "辽金元", "明清"];
+const POLITIES = [
+  { id: "youYan", name: "涿鹿传说与幽燕始封", years: "先秦", era: "先秦", tag: "幽燕肇基",
+    points: [
+      "「黄帝与蚩尤战于涿鹿之野」——华夏源头记忆锚点在冀北",
+      "周封召公奭于燕，都蓟（今北京西南）；邢为周公之子封国",
+      "中山国凭太行险要在冀中立国二百余年，青铜错金银器冠绝"
+    ],
+    out: "前221年秦灭燕赵，设广阳、邯郸、巨鹿诸郡——河北纳入郡县体系。" },
+  { id: "zhaoDu", name: "战国赵都与秦汉巨鹿", years: "前386—前206", era: "先秦", tag: "赵都邯郸",
+    points: [
+      "赵敬侯迁都邯郸，胡服骑射，邯郸为「富冠海内」的东方大都会",
+      "廉颇、蔺相如将相和，邯郸为赵国政治舞台",
+      "前207年巨鹿之战，项羽破釜沉舟——河北为秦亡主战场"
+    ],
+    out: "汉设冀州，信都为州治；光武帝经营河北，冀州户口殷盛成为东汉根基。" },
+  { id: "yeFu", name: "袁绍与曹操的邺城霸府", years: "190—220", era: "秦汉", tag: "邺为霸府",
+    points: [
+      "袁绍据冀州四州之地，官渡败于曹操——河北易主",
+      "曹操取邺为霸府，「挟天子以令诸侯」，邺中七子与建安文学",
+      "铜雀台、金虎台筑于邺，河北为曹操统一北方的根基"
+    ],
+    out: "曹丕代汉，邺仍为五都之一；随后十六国与北朝，邺城反复为都。" },
+  { id: "beiChao", name: "北朝邺都与定州", years: "386—577", era: "魏晋北朝", tag: "邺都繁盛",
+    points: [
+      "398年北魏道武帝破后燕中山（今定州），河北入魏",
+      "东魏、北齐皆都邺，邺中佛寺甲于天下；响堂山石窟为其遗存",
+      "定州缂丝与曲阳石雕冠绝；六镇之乱后河北成为高欢与尔朱荣的战场"
+    ],
+    out: "577年北周破邺，迁其民于关中——邺城自此衰落，河北政治中心北移幽州。" },
+  { id: "suiTang", name: "隋唐涿郡与河朔三镇", years: "581—907", era: "隋唐", tag: "藩镇割据",
+    points: [
+      "隋开永济渠，涿郡为运河北端，征高句丽的集结地",
+      "唐置河北道；安史之乱后成德、魏博、卢龙三镇割据，「河朔三镇」不禀朝命",
+      "恒州（真定）、魏州（大名）为藩镇治所，河北近二百年半独立"
+    ],
+    out: "五代梁唐晋汉皆起于河朔；河北的割据传统延续到宋初才被削弱。" },
+  { id: "wuDai", name: "五代魏州与龙兴之地", years: "907—960", era: "辽金元", tag: "魏州龙兴",
+    points: [
+      "魏州（大名）为后唐龙兴之地，李存勖于此称帝",
+      "后晋、后汉、后周皆以河北为根基，五代更迭的风暴眼",
+      "后周世宗整饬河北水利与边防，为北宋留下遗产"
+    ],
+    out: "960年赵匡胤陈桥兵变建宋；河北的五代遗产是大名府与一支强悍的边军传统。" },
+  { id: "songLiao", name: "北宋大名与澶渊之盟", years: "960—1127", era: "辽金元", tag: "宋辽前线",
+    points: [
+      "北宋置大名府为北京，设河北四路抗辽；塘泊防线与雄州榷场并举",
+      "1004年澶渊之盟，宋辽以白沟河（今大清河一线）为界，百年和平",
+      "宗泽知磁州、守大名，河北抗金前哨"
+    ],
+    out: "1122年宋金夹击灭辽，燕云短暂归宋；1127年靖康之变，河北尽入金。" },
+  { id: "liaoJin", name: "辽南京与金中都", years: "938—1215", era: "辽金元", tag: "燕京崛起",
+    points: [
+      "石敬瑭割燕云十六州，辽升幽州为南京析津府——辽五京之一",
+      "1153年金海陵王迁都中都（今北京）：北京首次成为王朝首都",
+      "中都仿汴京规划，卢沟桥建成（1189—1192），燕京取代邺城成为北方中心"
+    ],
+    out: "1215年蒙古取中都；忽必烈在此建大都，北京从辽南京一路升格为帝都。" },
+  { id: "yuan", name: "元大都与漕运走廊", years: "1271—1368", era: "辽金元", tag: "大都",
+    points: [
+      "1267年忽必烈营建大都，刘秉忠规划，「左祖右社、面朝后市」",
+      "京杭大运河全线贯通，漕粮北上，河北为漕运走廊",
+      "元设中书省腹里，河北为畿辅；郭守敬主持大都水利"
+    ],
+    out: "1368年明军取大都改北平；河北的畿辅地位随都城在此而定格。" },
+  { id: "ming", name: "明 · 靖难与九边蓟宣", years: "1368—1644", era: "明清", tag: "蓟镇宣府",
+    points: [
+      "靖难之役（1399—1402）起于北平，朱棣夺位后迁都北京——河北再次成为京畿",
+      "九边：蓟镇、宣府为京师北门，戚继光整蓟镇长城与车营",
+      "1381年山海关筑城，「万里长城第一关」，辽西走廊东端锁钥"
+    ],
+    out: "明末后金绕道蒙古入关，吴三桂引清兵于山海关；1644年清入关定鼎北京。" },
+  { id: "qing", name: "清 · 京畿直隶与避暑山庄", years: "1644—1840", era: "明清", tag: "畿辅直隶",
+    points: [
+      "清设直隶省，总督驻保定，「直隶」由布政使司之名定为省名",
+      "承德避暑山庄（1703—1792）与外八庙，清帝北巡、木兰秋狝——与草原页的蒙古政策相接",
+      "张库大道：晋商经张家口赴恰克图，与《山西》页万里茶道相连"
+    ],
+    out: "清末直隶成为洋务与新政的前沿，也最先承受列强冲击。" },
+  { id: "wanQing", name: "清末直隶与北洋", years: "1840—1911", era: "明清", tag: "北洋重镇",
+    points: [
+      "洋务运动：开平矿务局、天津机器局、唐胥铁路（1881，中国自建第一条标准轨铁路）",
+      "1900年庚子之变，天津、保定两度沦陷；《辛丑条约》后天津租界林立",
+      "1909年京张铁路通车，詹天佑主持，中国人自建的第一条干线铁路",
+      "1928年直隶改河北省——「河北」之名首次为省名"
+    ],
+    out: "民国河北迭经战乱；1949年后河北省会数迁，今驻石家庄。" }
+];
+
+const RULES = [
+  { title: "为什么是畿辅",
+    items: [
+      "燕山—渤海—太行三面环抱华北平原北端，形胜天然",
+      "都城在此，则河北为直隶总督辖地，「直隶」因京师而设省",
+      "山海关—居庸关—古北口—倒马关，锁钥层层",
+      "都城东移（幽州—中都—大都—北京），河北随之成为畿辅两千年"
+    ] },
+  { title: "太行山东麓",
+    items: [
+      "井陉、滏口、轵关等陉道穿太行，晋冀豫交通命脉",
+      "邯郸—邺—邢襄—真定—保定，古都与重镇沿山麓南北串珠",
+      "与《山西》表里相依：山西的盐与铁，经陉道东出河北",
+      "山前大道即南北战场：官渡、淝水的河北侧、澶渊皆在此线附近"
+    ] },
+  { title: "辽宋金的拉锯线",
+    items: [
+      "燕云十六州：石敬瑭一卖，河北为前线近二百年",
+      "澶渊之盟以白沟为界，榷场互市，和平与战争交替",
+      "从幽州到北京：边疆重镇一路升格为帝都",
+      "山海关—辽西走廊连接《东北》页，张库大道连接《草原与丝路》页"
+    ] }
+];
+
+/* ---------------- 渲染地图 ---------------- */
+const gatesG = $("gates");
+GATES.forEach(g => {
+  gatesG.appendChild(el("rect", { x: g.x - 6.5, y: g.y - 6.5, width: 13, height: 13, fill: "#8a6f45", transform: `rotate(45 ${g.x} ${g.y})` }));
+  gatesG.appendChild(el("text", { x: g.x, y: g.y + g.dy }, g.label));
+});
+
+const statesG = $("states");
+const stateNodes = {};
+CITIES.forEach(s => {
+  const g = el("g", { class: "state", tabindex: 0, role: "button", "aria-label": `${s.name}，${s.today}，${s.band}`, "aria-pressed": "false", "data-id": s.id });
+  g.appendChild(el("title", {}, `${s.name}（${s.today}）`));
+  g.appendChild(el("circle", { class: "hit", cx: s.x, cy: s.y, r: 30 }));
+  g.appendChild(el("circle", { class: "halo", cx: s.x, cy: s.y, r: s.r + 7 }));
+  g.appendChild(el("circle", { class: "ring", cx: s.x, cy: s.y, r: s.r + 7 }));
+  g.appendChild(el("circle", { class: "dot", cx: s.x, cy: s.y, r: s.r }));
+  g.appendChild(el("text", { x: s.x, y: s.y + s.ly }, s.short));
+  g.addEventListener("click", () => selectCity(s.id));
+  g.addEventListener("keydown", e => {
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); selectCity(s.id); }
+  });
+  statesG.appendChild(g);
+  stateNodes[s.id] = g;
+});
+/* 移动端横滑提示 */
+const mwHint = document.createElement("div");
+mwHint.className = "pan-hint";
+mwHint.textContent = "\u25c2 \u53ef\u5de6\u53f3\u6ed1\u52a8\u67e5\u770b\u5168\u56fe \u25b8";
+document.querySelector(".map-wrap").appendChild(mwHint);
+document.querySelector(".map-wrap").addEventListener("scroll", () => { mwHint.style.opacity = "0"; }, { once: true });
+
+
+const panelDefault = $("panel-default"), panelDetail = $("panel-detail");
+
+function selectCity(id) {
+  const s = CITIES.find(x => x.id === id);
+  if (!s) return;
+  Object.values(stateNodes).forEach(n => { n.classList.remove("selected"); n.setAttribute("aria-pressed", "false"); });
+  stateNodes[id].classList.add("selected");
+  stateNodes[id].setAttribute("aria-pressed", "true");
+  $("d-name").textContent = s.name;
+  $("d-today").textContent = s.today;
+  const ul = $("d-points");
+  ul.replaceChildren(...s.points.map(p => { const li = document.createElement("li"); li.textContent = p; return li; }));
+  const fate = $("d-fate");
+  const b = document.createElement("b");
+  b.textContent = "结局：";
+  fate.replaceChildren(b, document.createTextNode(s.fate));
+  const xl = $("d-link");
+  if (s.link) { xl.textContent = s.link.text + " →"; xl.hidden = false; xl.onclick = () => selectCity(s.link.target); }
+  else { xl.hidden = true; xl.onclick = null; }
+  panelDefault.hidden = true;
+  panelDetail.hidden = false;
+  const st = panelDetail.querySelector(".stagger");
+  st.classList.remove("stagger");
+  void st.offsetHeight;
+  st.classList.add("stagger");
+  document.querySelector("aside").scrollTop = 0;
+  history.replaceState(null, "", "#map:" + id);
+  stateNodes[id].scrollIntoView({ block: "nearest", inline: "nearest", behavior: REDUCED ? "auto" : "smooth" });
+}
+
+/* ---------------- 渲染时间轴 ---------------- */
+const timeline = $("timeline");
+const cards = {};
+POLITIES.forEach((p, i) => {
+  const li = document.createElement("li");
+  li.className = "card";
+  li.dataset.id = p.id;
+  li.style.setProperty("--i", i);
+  const det = document.createElement("details");
+  const sum = document.createElement("summary");
+  const name = document.createElement("span"); name.className = "name"; name.textContent = p.name;
+  const yrs = document.createElement("span"); yrs.className = "years"; yrs.textContent = p.years;
+  const tag = document.createElement("span"); tag.className = "lang"; tag.textContent = p.tag;
+  sum.append(name, yrs, tag);
+  const body = document.createElement("div"); body.className = "body";
+  const ul = document.createElement("ul");
+  p.points.forEach(t => { const x = document.createElement("li"); x.textContent = t; ul.appendChild(x); });
+  const out = document.createElement("div"); out.className = "out";
+  const ob = document.createElement("b"); ob.textContent = "此后：";
+  out.append(ob, document.createTextNode(p.out));
+  body.append(ul, out);
+  det.append(sum, body);
+  li.appendChild(det);
+  sum.addEventListener("click", () => {
+    if (!det.open) history.replaceState(null, "", "#time:" + p.id);
+  });
+  timeline.appendChild(li);
+  cards[p.id] = { li, det };
+});
+
+const toolbar = $("toolbar");
+toolbar.appendChild(Object.assign(document.createElement("span"), { textContent: "按时代筛选：" }));
+const chips = ERAS.map(e => {
+  const b = document.createElement("button");
+  b.className = "chip"; b.textContent = e;
+  b.setAttribute("aria-pressed", e === "全部" ? "true" : "false");
+  b.addEventListener("click", () => applyFilter(e));
+  toolbar.appendChild(b);
+  return b;
+});
+const toggleAll = document.createElement("button");
+toggleAll.className = "tool"; toggleAll.textContent = "全部展开";
+let allOpen = false;
+toggleAll.addEventListener("click", () => {
+  allOpen = !allOpen;
+  Object.values(cards).forEach(c => { c.det.open = allOpen; });
+  toggleAll.textContent = allOpen ? "全部收起" : "全部展开";
+});
+toolbar.appendChild(toggleAll);
+
+function applyFilter(e) {
+  chips.forEach(c => c.setAttribute("aria-pressed", String(c.textContent === e)));
+  POLITIES.forEach(p => cards[p.id].li.classList.toggle("dim", e !== "全部" && p.era !== e));
+}
+
+const rulesEl = $("rules");
+RULES.forEach((r, i) => {
+  const box = document.createElement("div");
+  box.className = "rule";
+  box.style.setProperty("--i", i);
+  const h = document.createElement("h3"); h.textContent = r.title;
+  const ul = document.createElement("ul");
+  r.items.forEach(t => { const li = document.createElement("li"); li.textContent = t; ul.appendChild(li); });
+  box.append(h, ul);
+  rulesEl.appendChild(box);
+});
+
+/* ---------------- 详考数据 + 渲染 ---------------- */
+const CHRONO = [
+  ["传说时代", "涿鹿之战：黄帝与蚩尤战于涿鹿之野"],
+  ["前1045前后", "周封召公奭于燕，都蓟"],
+  ["前386前后", "赵敬侯迁都邯郸"],
+  ["前307", "赵武灵王胡服骑射"],
+  ["前221", "秦统一，设邯郸郡、巨鹿郡、广阳郡"],
+  ["前207", "巨鹿之战，项羽破釜沉舟"],
+  ["200", "官渡之战，曹操破袁绍取冀州"],
+  ["204", "曹操取邺为霸府"],
+  ["398", "北魏破后燕中山（今定州）"],
+  ["534", "东魏建都邺，北齐因之"],
+  ["577", "北周破邺，迁邺民于关中"],
+  ["608", "隋开永济渠，涿郡为运河北端"],
+  ["755", "安史之乱爆发，河北成藩镇割据之始"],
+  ["763", "河朔三镇（成德·魏博·卢龙）确立"],
+  ["923", "李存勖于魏州称帝建后唐"],
+  ["1004", "澶渊之盟，宋辽以白沟为界"],
+  ["1042", "宋置大名府为北京"],
+  ["1122", "宋金夹击灭辽，燕云短暂归宋"],
+  ["1127", "靖康之变，河北尽入金"],
+  ["1153", "金海陵王迁都中都——北京首次为王朝首都"],
+  ["1189—1192", "卢沟桥建成"],
+  ["1267", "忽必烈营建大都"],
+  ["1368", "明军取大都，改北平"],
+  ["1399—1402", "靖难之役，朱棣自北平入继大统"],
+  ["1421", "明迁都北京，河北为京畿"],
+  ["1567", "戚继光整蓟镇长城，练兵车营"],
+  ["1644", "清军入关，定鼎北京"],
+  ["1703", "承德避暑山庄始建"],
+  ["1881", "唐胥铁路通车，中国自建第一条标准轨铁路"],
+  ["1909", "京张铁路通车，詹天佑主持"],
+  ["1928", "直隶改河北省——「河北」首为省名"]
+].map(([y, t]) => ({ y, t }));
+const PEOPLE = [
+  ["黄帝", "传说时代", "涿鹿之战败蚩尤，华夏共祖的记忆锚点系于冀北。"],
+  ["赵武灵王", "?—前295", "都邯郸行胡服骑射，赵为战国七雄。"],
+  ["廉颇", "约前327—前243", "赵国名将，「负荆请罪」与蔺相如同传千古。"],
+  ["蔺相如", "战国赵", "完璧归赵、渑池之会，「将相和」典出邯郸。"],
+  ["项羽", "前232—前202", "巨鹿之战破釜沉舟，河北为秦亡战场。"],
+  ["曹操", "155—220", "据邺为霸府，统一北方，建安文学领袖。"],
+  ["袁绍", "?—200", "据四州之地，官渡败于曹操，河北易主。"],
+  ["拓跋珪", "371—409", "破后燕取中山，北魏经略河北之始。"],
+  ["高欢", "496—547", "据邺建霸府，北齐基业由此。"],
+  ["窦建德", "573—621", "起兵河北建夏，都乐寿（今献县）。"],
+  ["魏征", "580—643", "巨鹿人（一说馆陶），唐名相，「兼听则明」。"],
+  ["安禄山", "?—757", "营州杂胡，据范阳起兵，安史之乱祸首。"],
+  ["郭威", "904—954", "魏州尧山人，后周开国皇帝，起于行伍。"],
+  ["寇准", "961—1023", "澶渊之盟主议者，力劝真宗亲征澶州。"],
+  ["郭守敬", "1231—1316", "邢台人，元代大科学家，主持大都水利与授时历。"],
+  ["于谦", "1398—1457", "土木堡之变后守北京，「粉骨碎身浑不怕」。"],
+  ["戚继光", "1528—1588", "整蓟镇长城与车营，北御俺答，南平倭寇。"],
+  ["李鸿章", "1823—1901", "任直隶总督兼北洋大臣近三十年，主持洋务与北洋海军，晚清外交核心。"],
+  ["詹天佑", "1861—1919", "京张铁路总工程师，「人」字形铁路，中国铁路之父。"],
+  ["董存瑞", "1929—1948", "隆化人，舍身炸碉堡，冀北英烈代表。（近现代附录）"]
+];
+const PLACES = [
+  ["保定", "清苑 / 保州 / 保定府", "直隶总督署所在地，京畿南大门。"],
+  ["邯郸", "邯郸 / 赵都 / 磁州", "战国赵都，三千年未改名。"],
+  ["石家庄", "真定 / 常山 / 正定", "常山赵子龙故里，今河北省会。"],
+  ["邢台", "襄国 / 顺德府", "郭守敬故里，邢窑白瓷名窑。"],
+  ["大名", "魏州 / 大名府 / 北京", "五代龙兴之地，宋北京大名府。"],
+  ["定州", "中山 / 定州", "中山国故地，定窑与缂丝。"],
+  ["赵县", "赵州 / 栾州", "赵州桥（安济桥）所在。"],
+  ["沧州", "景城 / 沧州", "铁狮子与武术之乡。"],
+  ["山海关", "榆关 / 山海关", "「万里长城第一关」，辽西走廊东端。"],
+  ["宣化", "宣府 / 宣化府", "明九边宣府镇，京师北门。"],
+  ["承德", "热河 / 承德府", "避暑山庄与外八庙所在。"],
+  ["蔚县", "蔚州", "剪纸与暖泉古镇，口北要冲。"],
+  ["涿州", "涿郡 / 范阳", "张飞故里，大运河北端。"],
+  ["冀州", "信都 / 冀州", "「冀」之得名，九州之首。"]
+];
+const ROUTES = [
+  ["太行八陉之井陉", "娘子关—井陉陉道，晋冀咽喉，韩信「背水一战」之地。"],
+  ["永济渠—大运河", "涿郡至洛阳的漕运干线，征高句丽与漕粮北上的命脉。"],
+  ["张库大道", "张家口—库伦（乌兰巴托）—恰克图，晋商驼道与草原丝路相接。"],
+  ["辽西走廊", "山海关—锦州—沈阳，河北与东北的唯一陆上坦途。"],
+  ["京张道", "北京—张家口的官道与铁路，詹天佑铁路即沿此线。"],
+  ["木兰围场御道", "北京—承德—木兰围场，清帝北巡秋狝与蒙古会盟之路。"]
+];
+
+const detailRoot = $("detail-root");
+(function renderDetail() {
+  const wrap = detailRoot;
+  const sec = (h, sub, inner) => {
+    const s = document.createElement("section");
+    s.className = "sec";
+    const h3 = document.createElement("h3");
+    h3.textContent = h;
+    if (sub) h3.appendChild(Object.assign(document.createElement("span"), { textContent: sub }));
+    s.appendChild(h3);
+    const box = document.createElement("div");
+    box.innerHTML = inner;
+    s.appendChild(box);
+    wrap.appendChild(s);
+  };
+  sec("大事年表", "从涿鹿传说到京张铁路 · 选择性列举大事",
+    '<ul class="chrono">' + CHRONO.map(c => `<li><span class="y">${c.y}</span><span>${c.t}</span></li>`).join("") + "</ul>");
+  sec("人物志", "与河北有关的人物 · 简考",
+    '<div class="people">' + PEOPLE.map(p => `<div class="person"><b>${p[0]}</b><span class="d">${p[1]}</span><p>${p[2]}</p></div>`).join("") + "</div>");
+  sec("地名沿革", "古今对照",
+    '<div class="two-col"><table class="plain"><thead><tr><th>今地</th><th>古名</th><th>说明</th></tr></thead><tbody>'
+    + PLACES.map(p => `<tr><td>${p[0]}</td><td>${p[1]}</td><td>${p[2]}</td></tr>`).join("") + "</tbody></table></div>");
+  sec("关隘与古道", "长城关陉 · 漕运与商路",
+    '<div class="two-col"><table class="plain"><thead><tr><th>古道 / 关隘</th><th>走向及故事</th></tr></thead><tbody>'
+    + ROUTES.map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join("") + "</tbody></table></div>");
+})();
+
+/* ---------------- 视图切换 ---------------- */
+function openCard(id) {
+  const c = cards[id];
+  if (!c) return;
+  c.det.open = true;
+  history.replaceState(null, "", "#time:" + id);
+  c.li.scrollIntoView({ behavior: REDUCED ? "auto" : "smooth", block: "center" });
+  c.det.querySelector("summary").focus({ preventScroll: true });
+}
+
+const tabs = { map: $("tab-map"), time: $("tab-time"), detail: $("tab-detail") };
+const views = { map: $("view-map"), time: $("view-time"), detail: $("view-detail") };
+const pill = document.querySelector("nav .pill");
+
+function movePill() {
+  const active = Object.values(tabs).find(t => t.getAttribute("aria-selected") === "true");
+  if (!active || !pill) return;
+  pill.style.width = active.offsetWidth + "px";
+  pill.style.transform = `translateX(${active.offsetLeft}px)`;
+}
+function showView(name) {
+  Object.keys(tabs).forEach(k => {
+    const on = k === name;
+    tabs[k].setAttribute("aria-selected", String(on));
+    tabs[k].tabIndex = on ? 0 : -1;
+    views[k].hidden = !on;
+    views[k].style.animation = "none";
+    void views[k].offsetHeight;
+    views[k].style.animation = "";
+  });
+  movePill();
+  history.replaceState(null, "", "#" + name);
+}
+const tabKeys = Object.keys(tabs);
+tabKeys.forEach(k => tabs[k].addEventListener("click", () => showView(k)));
+addEventListener("keydown", e => {
+  const i = tabKeys.findIndex(k => tabs[k] === document.activeElement);
+  if (i < 0) return;
+  const j = e.key === "ArrowRight" ? i + 1 : e.key === "ArrowLeft" ? i - 1
+    : e.key === "Home" ? 0 : e.key === "End" ? tabKeys.length - 1 : -1;
+  if (j < 0) return;
+  e.preventDefault();
+  const k = tabKeys[(j + tabKeys.length) % tabKeys.length];
+  tabs[k].focus();
+  showView(k);
+});
+addEventListener("resize", movePill);
+addEventListener("load", movePill);
+addEventListener("beforeprint", () => Object.values(cards).forEach(c => { c.det.open = true; }));
+function initFromHash() {
+  const [v, id] = location.hash.slice(1).split(":");
+  showView(["time", "detail"].includes(v) ? v : "map");
+  if (id) {
+    if (v === "map") selectCity(id);
+    else if (v === "time") openCard(id);
+  }
+}
+initFromHash();
+addEventListener("hashchange", initFromHash);
+requestAnimationFrame(movePill);
+</script>
+</body>
+</html>
